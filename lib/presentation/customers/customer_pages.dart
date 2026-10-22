@@ -5,7 +5,9 @@ import '../../data/models/customer_model.dart';
 import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 import '../billing/widgets/upi_qr_widget.dart';
+import 'customer_due_collection_dialog.dart';
 import 'customer_form.dart';
+import 'customer_ledger_dialog.dart';
 
 enum _CustomerFilter { all, hasDue, hasAdvance, settled }
 
@@ -979,9 +981,40 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
                           ),
                         ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
+                          if (hasDue && controller.canCollectDue()) ...[
+                            FilledButton.icon(
+                              onPressed: () => _openCollectDueDialog(customer),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF059669),
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                              ),
+                              icon: const Icon(Icons.payments_outlined, size: 16),
+                              label: const Text('Collect Due'),
+                            ),
+                          ],
+                          if (controller.canViewCustomerLedger()) ...[
+                            OutlinedButton.icon(
+                              onPressed: () => _openCustomerLedgerDialog(customer),
+                              style: OutlinedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                              ),
+                              icon: const Icon(Icons.receipt_long_outlined, size: 16),
+                              label: const Text('Ledger'),
+                            ),
+                          ],
                           if (hasDue) ...[
                             FilledButton.tonalIcon(
                               onPressed: () => showUpiPaymentDialog(
@@ -1003,7 +1036,6 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
                               ),
                               label: Text(l10n?.upiCollect ?? 'UPI Collect'),
                             ),
-                            const SizedBox(width: 6),
                           ],
                           IconButton.outlined(
                             tooltip: l10n?.editCustomer ?? 'Edit customer',
@@ -1042,6 +1074,33 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
                         ? const Color(0xFFD1FAE5)
                         : Colors.grey.shade100,
                   ),
+                  if (hasDue && controller.canCollectDue())
+                    FilledButton.icon(
+                      onPressed: () => _openCollectDueDialog(customer),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF059669),
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                      ),
+                      icon: const Icon(Icons.payments_outlined, size: 16),
+                      label: const Text('Collect'),
+                    ),
+                  if (controller.canViewCustomerLedger())
+                    OutlinedButton.icon(
+                      onPressed: () => _openCustomerLedgerDialog(customer),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                      ),
+                      icon: const Icon(Icons.receipt_long_outlined, size: 16),
+                      label: const Text('Ledger'),
+                    ),
                   if (hasDue)
                     FilledButton.tonalIcon(
                       onPressed: () => showUpiPaymentDialog(
@@ -1225,6 +1284,27 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
           style: FilledButton.styleFrom(backgroundColor: Colors.red),
           child: const Text('Retry'),
         ),
+      ),
+    );
+  }
+
+  void _openCollectDueDialog(CustomerModel customer) {
+    showDialog(
+      context: context,
+      builder: (_) => CustomerDueCollectionDialog(
+        controller: widget.controller,
+        customer: customer,
+        onPaymentCompleted: _loadCustomers,
+      ),
+    );
+  }
+
+  void _openCustomerLedgerDialog(CustomerModel customer) {
+    showDialog(
+      context: context,
+      builder: (_) => CustomerLedgerDialog(
+        controller: widget.controller,
+        customer: customer,
       ),
     );
   }

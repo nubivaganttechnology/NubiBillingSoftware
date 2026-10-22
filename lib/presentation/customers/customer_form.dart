@@ -91,6 +91,41 @@ class _CustomerFormState extends State<CustomerForm> {
     super.dispose();
   }
 
+  Future<void> _handleGstRegistrationChange(bool isRegistered) async {
+    if (isRegistered == _isGstRegistered) return;
+    if (!isRegistered && _gstin.text.trim().isNotEmpty) {
+      final shouldClear = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Clear Saved GSTIN?'),
+          content: Text(
+            'This customer currently has GSTIN "${_gstin.text.trim()}". Switching to Unregistered requires confirmation before clearing it.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton.tonal(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Clear & Set Unregistered'),
+            ),
+          ],
+        ),
+      );
+      if (shouldClear == true) {
+        setState(() {
+          _isGstRegistered = false;
+          _gstin.clear();
+        });
+      }
+      return;
+    }
+    setState(() {
+      _isGstRegistered = isRegistered;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -240,12 +275,7 @@ class _CustomerFormState extends State<CustomerForm> {
                 ],
                 selected: {_isGstRegistered},
                 onSelectionChanged: (selected) {
-                  setState(() {
-                    _isGstRegistered = selected.first;
-                    if (!_isGstRegistered) {
-                      _gstin.clear();
-                    }
-                  });
+                  _handleGstRegistrationChange(selected.first);
                 },
               ),
             ],
@@ -540,8 +570,9 @@ class _CustomerFormState extends State<CustomerForm> {
         }
       }
 
-      final effectiveGstin = _isGstRegistered && _gstin.text.trim().isNotEmpty
-          ? CustomerValidators.normalizeGstin(_gstin.text)
+      final trimmedGstin = _gstin.text.trim();
+      final effectiveGstin = trimmedGstin.isNotEmpty
+          ? CustomerValidators.normalizeGstin(trimmedGstin)
           : null;
 
       final customer = widget.initialCustomer == null

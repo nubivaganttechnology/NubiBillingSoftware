@@ -1461,6 +1461,53 @@ class AppController extends ChangeNotifier {
             PermissionCatalog.allows('SALARY_PAY', context.permissions));
   }
 
+  bool canViewCustomers() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('CUSTOMER_VIEW', context.permissions) ||
+            PermissionCatalog.allows('customers', context.permissions));
+  }
+
+  bool canEditCustomers() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('CUSTOMER_EDIT', context.permissions) ||
+            PermissionCatalog.allows('customers', context.permissions));
+  }
+
+  bool canViewCustomerLedger() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('CUSTOMER_LEDGER_VIEW', context.permissions) ||
+            PermissionCatalog.allows('customers', context.permissions));
+  }
+
+  bool canViewCustomerDue() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('DUE_VIEW', context.permissions) ||
+            PermissionCatalog.allows('customers', context.permissions));
+  }
+
+  bool canCollectDue() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('DUE_COLLECT', context.permissions) ||
+            PermissionCatalog.allows('billing', context.permissions));
+  }
+
+  bool canCollectCrossOutletDue() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('CROSS_OUTLET_DUE_COLLECT', context.permissions));
+  }
+
   bool canViewStorage() {
     final context = appContext;
     return context != null &&

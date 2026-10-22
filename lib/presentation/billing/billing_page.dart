@@ -163,8 +163,9 @@ class _BillingPageState extends State<BillingPage> {
       final repo = widget.controller.settingsRepository;
       final appContext = widget.controller.appContext;
       final token = widget.controller.idToken;
-      if (repo == null || appContext?.businessId == null || token == null)
+      if (repo == null || appContext?.businessId == null || token == null) {
         return;
+      }
       final s = await repo.loadSettings(
         businessId: appContext!.businessId!,
         tenantId: appContext.ownerUid,

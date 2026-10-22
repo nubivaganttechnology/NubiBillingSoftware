@@ -39,6 +39,17 @@ class PermissionCatalog {
     'inventory.approve_adjustment',
   ];
 
+  static const customerPermissions = <String>[
+    'CUSTOMER_VIEW',
+    'CUSTOMER_EDIT',
+    'CUSTOMER_LEDGER_VIEW',
+    'DUE_VIEW',
+    'DUE_COLLECT',
+    'CROSS_OUTLET_DUE_COLLECT',
+    'PAYMENT_ADJUST',
+    'PAYMENT_REVERSE',
+  ];
+
   static const modules = <AdminModule>[
     AdminModule(
       'dashboard',

@@ -61,10 +61,21 @@ class BillingRepository {
         'duePaise': customerDue - applied,
         'advancePaise': customerAdvance + excess,
       }, updateTime: customer.updateTime);
-      tx.create(FirebaseConstants.payments, IdGenerator.create('PAY'), {
+      final paymentId = IdGenerator.create('PAY');
+      final ledgerId = IdGenerator.create('LED');
+      final bid = invoice.fields['businessId'] as String? ?? '';
+      final tid = invoice.fields['tenantId'] as String? ?? '';
+      final oid = invoice.fields['outletId'] as String? ?? '';
+      tx.create(FirebaseConstants.payments, paymentId, {
+        'paymentId': paymentId,
         'invoiceId': invoiceId,
         'customerId': customerId,
+        'businessId': bid,
+        'tenantId': tid,
+        'outletId': oid,
+        'collectedAtOutletId': oid,
         'mode': mode,
+        'paymentMethod': mode,
         'amountPaise': amountPaise,
         'appliedPaise': applied,
         'excessAdvancePaise': excess,
@@ -73,14 +84,22 @@ class BillingRepository {
       });
       tx.create(
         FirebaseConstants.customerLedgerEntries,
-        IdGenerator.create('LED'),
+        ledgerId,
         {
+          'transactionId': ledgerId,
+          'businessId': bid,
+          'tenantId': tid,
+          'outletId': oid,
           'invoiceId': invoiceId,
           'customerId': customerId,
+          'transactionType': 'PAYMENT',
+          'amountPaise': amountPaise,
           'debitPaise': 0,
           'creditPaise': applied,
           'advanceCreditPaise': excess,
+          'paymentId': paymentId,
           'createdAt': paymentAt.toUtc().toIso8601String(),
+          'status': 'POSTED',
           'immutable': true,
         },
       );
@@ -236,16 +255,25 @@ class BillingRepository {
           );
         }
         if (duePaise > 0 || advancePaise > 0) {
+          final ledgerId = IdGenerator.create('LED');
           tx.create(
             FirebaseConstants.customerLedgerEntries,
-            IdGenerator.create('LED'),
+            ledgerId,
             {
+              'transactionId': ledgerId,
+              'businessId': businessId,
+              'tenantId': tenantId,
+              'outletId': outletId,
               'customerId': customerId,
               'invoiceId': invoiceId,
+              'transactionType': 'ADJUSTMENT',
+              'amountPaise': duePaise + advancePaise,
               'debitPaise': advancePaise,
               'creditPaise': duePaise,
               'entryType': 'CANCELLATION_REVERSAL',
               'createdAt': DateTime.now().toUtc().toIso8601String(),
+              'createdBy': actorUid,
+              'status': 'POSTED',
               'immutable': true,
             },
           );
@@ -548,16 +576,25 @@ class BillingRepository {
             ...values,
           });
         }
+        final ledgerEntryId = IdGenerator.create('LED');
         tx.create(
           FirebaseConstants.customerLedgerEntries,
-          IdGenerator.create('LED'),
+          ledgerEntryId,
           {
+            'transactionId': ledgerEntryId,
+            'businessId': request.businessId,
+            'tenantId': request.tenantId,
+            'outletId': request.outletId,
             'customerId': request.customerId,
             'invoiceId': invoiceId,
+            'transactionType': 'CREDIT_SALE',
+            'amountPaise': request.duePaise,
             'debitPaise': request.duePaise,
             'creditPaise': request.advancePaise + excessPaise,
             if (excessPaise > 0) 'entryType': 'OVERPAYMENT_ADVANCE',
             'createdAt': request.createdAt.toUtc().toIso8601String(),
+            'createdBy': request.cashierUid,
+            'status': 'POSTED',
             'immutable': true,
           },
         );
@@ -744,16 +781,25 @@ class BillingRepository {
             'duePaise': nextDue,
           }, updateTime: balance!.updateTime);
         }
+        final ledgerId = IdGenerator.create('LED');
         tx.create(
           FirebaseConstants.customerLedgerEntries,
-          IdGenerator.create('LED'),
+          ledgerId,
           {
+            'transactionId': ledgerId,
+            'businessId': businessId,
+            'tenantId': tenantId,
+            'outletId': outletId,
             'customerId': customerId,
             'invoiceId': invoiceId,
+            'transactionType': 'ADJUSTMENT',
+            'amountPaise': dueDelta.abs(),
             'debitPaise': dueDelta > 0 ? dueDelta : 0,
             'creditPaise': dueDelta < 0 ? -dueDelta : 0,
             'entryType': 'INVOICE_EDIT_ADJUSTMENT',
             'createdAt': DateTime.now().toUtc().toIso8601String(),
+            'createdBy': cashierUid,
+            'status': 'POSTED',
             'immutable': true,
           },
         );

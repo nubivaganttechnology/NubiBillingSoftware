@@ -17,6 +17,8 @@ class CustomerModel {
     this.duePaise = 0,
     this.advancePaise = 0,
     this.status = 'ACTIVE',
+    this.updatedAt,
+    this.syncMutationId,
   });
 
   static const String typeIndividual = 'INDIVIDUAL';
@@ -44,6 +46,8 @@ class CustomerModel {
   final int duePaise;
   final int advancePaise;
   final String status;
+  final String? updatedAt;
+  final String? syncMutationId;
 
   bool get isBusiness => customerType == typeBusiness;
   bool get isIndividual => customerType == typeIndividual;
@@ -91,6 +95,8 @@ class CustomerModel {
       duePaise: (data['duePaise'] as num?)?.toInt() ?? 0,
       advancePaise: (data['advancePaise'] as num?)?.toInt() ?? 0,
       status: data['status'] as String? ?? 'ACTIVE',
+      updatedAt: data['updatedAt'] as String?,
+      syncMutationId: data['_syncMutationId'] as String? ?? data['syncMutationId'] as String?,
     );
   }
 
@@ -110,6 +116,8 @@ class CustomerModel {
     'duePaise': duePaise,
     'advancePaise': advancePaise,
     'status': status,
+    if (updatedAt != null) 'updatedAt': updatedAt,
+    if (syncMutationId != null) '_syncMutationId': syncMutationId,
   };
 
   CustomerModel copyWith({
@@ -128,6 +136,8 @@ class CustomerModel {
     int? duePaise,
     int? advancePaise,
     String? status,
+    String? updatedAt,
+    String? syncMutationId,
   }) =>
       CustomerModel(
         customerId: customerId ?? this.customerId,
@@ -145,5 +155,7 @@ class CustomerModel {
         duePaise: duePaise ?? this.duePaise,
         advancePaise: advancePaise ?? this.advancePaise,
         status: status ?? this.status,
+        updatedAt: updatedAt ?? this.updatedAt,
+        syncMutationId: syncMutationId ?? this.syncMutationId,
       );
 }

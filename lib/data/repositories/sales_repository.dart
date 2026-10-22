@@ -591,8 +591,9 @@ class SalesRepository {
         outletStateDoc.fields['gstin'],
       );
       var customerState = outletState;
+      FirestoreTransactionDocument? customerDoc;
       if (customerId != null) {
-        final customerDoc = await tx.get(
+        customerDoc = await tx.get(
           FirebaseConstants.customers,
           customerId,
         );
@@ -601,11 +602,9 @@ class SalesRepository {
             customerDoc.fields['businessId'] != businessId ||
             customerDoc.fields['isActive'] == false ||
             (customerDoc.fields['status'] != null &&
-                customerDoc.fields['status'] != 'ACTIVE') ||
-            (customerDoc.fields['outletId'] != null &&
-                customerDoc.fields['outletId'] != outletId)) {
+                customerDoc.fields['status'] != 'ACTIVE')) {
           throw const AppException(
-            'The selected customer is no longer available in this Outlet.',
+            'The selected customer is no longer available in this Business.',
           );
         }
         customerState = _stateCode(
@@ -669,6 +668,31 @@ class SalesRepository {
         'updatedAt': now,
       };
       tx.create(FirebaseConstants.invoices, invoiceId, invoice);
+      if (customerId != null && customerDoc != null) {
+        final currentDue = _int(customerDoc.fields['duePaise']);
+        tx.update(FirebaseConstants.customers, customerId, {
+          'duePaise': currentDue + grandTotal,
+          'updatedAt': now.toUtc().toIso8601String(),
+        }, updateTime: customerDoc.updateTime);
+        final ledgerTransactionId = 'LED_SALE_$invoiceId';
+        tx.create(FirebaseConstants.customerLedgerEntries, ledgerTransactionId, {
+          'transactionId': ledgerTransactionId,
+          'businessId': businessId,
+          'tenantId': tenantId,
+          'customerId': customerId,
+          'outletId': outletId,
+          'invoiceId': invoiceId,
+          'transactionType': 'CREDIT_SALE',
+          'amountPaise': grandTotal,
+          'debitPaise': grandTotal,
+          'creditPaise': 0,
+          'advanceCreditPaise': 0,
+          'createdAt': now.toUtc().toIso8601String(),
+          'createdBy': actorUid,
+          'status': 'POSTED',
+          'immutable': true,
+        });
+      }
       if (chargeToEmployeeId != null) {
         final purchaseId = 'SKH-POS-$invoiceId';
         tx.create(FirebaseConstants.staffKhataTransactions, purchaseId, {

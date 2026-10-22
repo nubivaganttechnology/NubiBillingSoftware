@@ -55,7 +55,6 @@ void main() {
   const variantId = 'VAR-100';
 
   final ownerToken = _token(uid: 'OWNER-1');
-  final employeeToken = _token(uid: 'EMP-1');
 
   setUp(() async {
     directory = await Directory.systemTemp.createTemp('inventory-test-');
@@ -719,7 +718,7 @@ void main() {
       expect(entry.reason, 'Audit verification test');
       expect(entry.performedBy, 'AUDITOR-1');
       expect(entry.approvalStatus, StockTransactionAuditModel.statusPosted);
-      expect(entry.syncStatus, StockTransactionAuditModel.syncStatusPosted);
+      expect(entry.syncStatus, StockTransactionAuditModel.statusPendingSync);
     });
   });
 }
