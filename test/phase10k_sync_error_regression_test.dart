@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -260,4 +261,127 @@ void main() {
     expect(prodFields['isDeleted'], isFalse);
     expect(prodFields['name'], 'Master Product 1');
   });
+
+  test('stale failed attendance approval already approved remotely is resolved idempotently', () async {
+    final src = await local();
+
+    // 1. Seed attendance locally with morning check-in
+    await seedLocal('staff_attendance', 'ATT-IDEMPOTENT-1', {
+      'tenantId': 'T',
+      'businessId': 'B',
+      'outletId': 'O',
+      'employeeId': 'EMP-1',
+      'attendanceStatus': 'PRESENT',
+      'approvalStatus': 'PENDING',
+      'checkInAt': '2026-10-21T06:49:07.581022Z',
+      'workedMinutes': 0,
+      'approvedOvertimeMinutes': 0,
+    });
+
+    // 2. Remotely, the employee checked out and the record was approved
+    remote.seed('staff_attendance', 'ATT-IDEMPOTENT-1', {
+      'tenantId': 'T',
+      'businessId': 'B',
+      'outletId': 'O',
+      'employeeId': 'EMP-1',
+      'attendanceStatus': 'PRESENT',
+      'approvalStatus': 'APPROVED',
+      'approvedBy': 'manager-uid',
+      'approvedAt': '2026-10-21T14:55:59.833891Z',
+      'checkInAt': '2026-10-21T06:49:07.581022Z',
+      'checkOutAt': '2026-10-21T14:55:39.328262Z',
+      'workedMinutes': 486,
+      'approvedOvertimeMinutes': 6,
+    });
+
+    // 3. Local offline mutation tries to approve
+    connectivity.available = false;
+    await service.updateDocument('staff_attendance', 'ATT-IDEMPOTENT-1', {
+      'approvalStatus': 'APPROVED',
+      'approvedBy': 'manager-uid',
+      'approvedAt': '2026-10-22T05:03:40.447284Z',
+      'approvedOvertimeMinutes': 0,
+      'workedMinutes': 0,
+    }, idToken: token('U'));
+
+    // 4. Mark outbox row as FAILED with remote version changed
+    await src.db.update('sync_outbox', {
+      'status': 'FAILED',
+      'attemptCount': 5,
+      'lastError': 'Remote version changed for staff_attendance/ATT-IDEMPOTENT-1. Local data retained.',
+    }, where: "documentId = 'ATT-IDEMPOTENT-1'");
+
+    // 5. Reconnect and sync
+    connectivity.available = true;
+    await sync.sync();
+
+    // Outbox should be cleanly resolved as already satisfied
+    expect(await SyncOutboxRepository(src).pendingCount(), 0);
+    expect(sync.error, isNull);
+    expect(sync.state, SyncState.synced);
+
+    // Local SQLite database should be updated to match remote approved document
+    final localRow = await src.row('staff_attendance', 'ATT-IDEMPOTENT-1');
+    expect(localRow, isNotNull);
+    expect(localRow!['syncStatus'], 'SYNCED');
+    expect(localRow['syncError'], isNull);
+    final localFields = FirestoreRestService.decodeFields(
+      jsonDecode(localRow['payloadJson'] as String) as Map<String, dynamic>,
+    );
+    expect(localFields['approvalStatus'], 'APPROVED');
+    expect(localFields['workedMinutes'], 486);
+    expect(localFields['approvedOvertimeMinutes'], 6);
+  });
+
+  test('resolveConflictedOutbox discards failed conflict and reconciles to remote document', () async {
+    final src = await local();
+
+    // 1. Seed document locally and remotely
+    await seedLocal('customers', 'CUST-CONFLICT-1', {
+      'tenantId': 'T',
+      'businessId': 'B',
+      'name': 'Original Name',
+      'phone': '1234567890',
+    });
+
+    // 2. Remotely update the document
+    remote.seed('customers', 'CUST-CONFLICT-1', {
+      'tenantId': 'T',
+      'businessId': 'B',
+      'name': 'Remote Updated Name',
+      'phone': '1234567890',
+    });
+
+    // 3. Offline local update
+    connectivity.available = false;
+    await service.updateDocument('customers', 'CUST-CONFLICT-1', {
+      'name': 'Local Conflicted Name',
+    }, idToken: token('U'));
+
+    // 4. Mark as FAILED conflict
+    await src.db.update('sync_outbox', {
+      'status': 'FAILED',
+      'attemptCount': 5,
+      'lastError': 'Remote version changed for customers/CUST-CONFLICT-1. Local data retained.',
+    }, where: "documentId = 'CUST-CONFLICT-1'");
+
+    expect(await SyncOutboxRepository(src).pendingCount(), 1);
+
+    // 5. User accepts remote data to resolve conflict
+    connectivity.available = true;
+    await sync.resolveConflictedOutbox();
+
+    expect(await SyncOutboxRepository(src).pendingCount(), 0);
+    expect(sync.error, isNull);
+    expect(sync.state, SyncState.synced);
+
+    final localRow = await src.row('customers', 'CUST-CONFLICT-1');
+    expect(localRow, isNotNull);
+    expect(localRow!['syncStatus'], 'SYNCED');
+    final localFields = FirestoreRestService.decodeFields(
+      jsonDecode(localRow['payloadJson'] as String) as Map<String, dynamic>,
+    );
+    expect(localFields['name'], 'Remote Updated Name');
+  });
 }
+

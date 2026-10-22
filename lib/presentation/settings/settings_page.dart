@@ -883,27 +883,68 @@ class _SettingsPageState extends State<SettingsPage>
                 ),
               ],
               const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: () async {
-                  await controller.sync?.retry();
-                  controller.sync?.schedule(
-                    pull: true,
-                    reason: 'MANUAL_FORCE_SYNC',
-                  );
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Triggered remote synchronization retry & sync'),
+              Wrap(
+                spacing: 12,
+                runSpacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () async {
+                      await controller.sync?.retry();
+                      controller.sync?.schedule(
+                        pull: true,
+                        reason: 'MANUAL_FORCE_SYNC',
+                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Triggered remote synchronization retry & sync'),
+                          ),
+                        );
+                        setState(() {});
+                      }
+                    },
+                    icon: const Icon(Icons.sync),
+                    label: const Text('Force Remote Sync Now'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF10263D),
+                    ),
+                  ),
+                  if (sync?.error case final err?
+                      when err.contains('Remote version changed') ||
+                          err.contains('sync-conflict')) ...[
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        try {
+                          await controller.sync?.resolveConflictedOutbox();
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Accepted remote data and resolved sync conflict.'),
+                              ),
+                            );
+                            setState(() {});
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to resolve conflict: $e'),
+                                backgroundColor: Colors.red.shade700,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      icon: const Icon(Icons.check_circle_outline, color: Colors.teal),
+                      label: const Text('Accept Remote & Clear Conflict'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.teal.shade800,
+                        side: BorderSide(color: Colors.teal.shade600),
                       ),
-                    );
-                    setState(() {});
-                  }
-                },
-                icon: const Icon(Icons.sync),
-                label: const Text('Force Remote Sync Now'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF10263D),
-                ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),

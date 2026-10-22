@@ -227,51 +227,107 @@ class _Sidebar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 16, 20),
-            child: Row(
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD9A441),
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  child: const Icon(
-                    Icons.storefront_rounded,
-                    color: Color(0xFF10263D),
-                  ),
+            padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1E3A56), Color(0xFF10243A)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
-                const SizedBox(width: 11),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _safeBusinessName(controller),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Text(
-                        controller.currentOutlet?.outletName.toUpperCase() ??
-                            'BUSINESS ERP',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white60,
-                          fontSize: 9,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  width: 1,
                 ),
-              ],
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x40000000),
+                    offset: Offset(0, 3),
+                    blurRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFBBF24), Color(0xFFD97706), Color(0xFF92400E)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFFDE68A).withValues(alpha: 0.7),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withValues(alpha: 0.35),
+                          offset: const Offset(0, -1),
+                          blurRadius: 1,
+                        ),
+                        const BoxShadow(
+                          color: Color(0xFF78350F),
+                          offset: Offset(0, 2.5),
+                          blurRadius: 0,
+                        ),
+                        BoxShadow(
+                          color: const Color(0xFFD97706).withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.storefront_rounded,
+                      color: Color(0xFF0F172A),
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _safeBusinessName(controller),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          controller.currentOutlet?.outletName.toUpperCase() ??
+                              'BUSINESS ERP',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFFF0C36D),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Padding(
@@ -295,56 +351,89 @@ class _Sidebar extends StatelessWidget {
                 final active = module.id == selectedId;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Material(
-                    color: active
-                        ? const Color(0xFF243D56)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10),
-                    child: ListTile(
-                      dense: true,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      leading: Icon(
-                        module.icon,
-                        size: 20,
-                        color: active
-                            ? const Color(0xFFF0C36D)
-                            : Colors.white70,
-                      ),
-                      title: Text(
-                        _localizedModuleLabel(context, module.id, module.label),
-                        style: TextStyle(
-                          color: active ? Colors.white : Colors.white70,
-                          fontSize: 13,
-                          fontWeight: active
-                              ? FontWeight.w600
-                              : FontWeight.w400,
+                  child: Container(
+                    decoration: active
+                        ? BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF26476B), Color(0xFF19324C)],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFFF0C36D).withValues(alpha: 0.4),
+                              width: 1,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x66000000),
+                                offset: Offset(0, 2),
+                                blurRadius: 0,
+                              ),
+                              BoxShadow(
+                                color: Color(0x26000000),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          )
+                        : null,
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      child: ListTile(
+                        dense: true,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ),
-                      trailing: module.id == 'attendance' &&
-                              controller.pendingAttendanceCount > 0
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEA580C),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '${controller.pendingAttendanceCount}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
+                        leading: Icon(
+                          module.icon,
+                          size: 20,
+                          color: active
+                              ? const Color(0xFFF0C36D)
+                              : Colors.white70,
+                        ),
+                        title: Text(
+                          _localizedModuleLabel(context, module.id, module.label),
+                          style: TextStyle(
+                            color: active ? Colors.white : Colors.white70,
+                            fontSize: 13,
+                            fontWeight: active
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                        trailing: module.id == 'attendance' &&
+                                controller.pendingAttendanceCount > 0
+                            ? Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                  vertical: 2,
                                 ),
-                              ),
-                            )
-                          : null,
-                      selected: active,
-                      onTap: () => onSelect(module),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEA580C),
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x33000000),
+                                      offset: Offset(0, 1.5),
+                                      blurRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  '${controller.pendingAttendanceCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            : null,
+                        selected: active,
+                        onTap: () => onSelect(module),
+                      ),
                     ),
                   ),
                 );
@@ -352,49 +441,159 @@ class _Sidebar extends StatelessWidget {
             ),
           ),
           const Divider(color: Colors.white12, height: 1),
-          ListTile(
-            leading: const CircleAvatar(
-              radius: 17,
-              child: Icon(Icons.person_outline, size: 19),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF183049), Color(0xFF102235)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x40000000),
+                  offset: Offset(0, 2.5),
+                  blurRadius: 0,
+                ),
+                BoxShadow(
+                  color: Color(0x26000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
-            title: Text(
-              controller.user?.name ?? 'Account',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-            ),
-            subtitle: Text(
-              controller.appContext?.accountType == 'owner'
-                  ? 'Owner account'
-                  : controller.role?.roleName ?? 'Employee account',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white54, fontSize: 11),
-            ),
-            trailing: IconButton(
-              tooltip: 'Log out',
-              onPressed: () => showLogoutConfirmationDialog(context, controller),
-              icon: const Icon(Icons.logout, color: Colors.white70, size: 18),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 1.2,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0xFF0F172A),
+                        offset: Offset(0, 2),
+                        blurRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.person_outline, size: 20, color: Colors.white),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        controller.user?.name ?? 'Account',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        controller.appContext?.accountType == 'owner'
+                            ? 'Owner account'
+                            : controller.role?.roleName ?? 'Employee account',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white54, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2C1515), Color(0xFF1A0B0B)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0xFF000000),
+                        offset: Offset(0, 1.5),
+                        blurRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    tooltip: 'Log out',
+                    onPressed: () => showLogoutConfirmationDialog(context, controller),
+                    icon: const Icon(Icons.logout, color: Color(0xFFFCA5A5), size: 16),
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: InkWell(
                     onTap: () => showAboutNubiBillDialog(context, controller),
-                    borderRadius: BorderRadius.circular(6),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF22364E), Color(0xFF152435)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFF0C36D).withValues(alpha: 0.5),
+                          width: 1,
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0xFF08121B),
+                            offset: Offset(0, 2),
+                            blurRadius: 0,
+                          ),
+                          BoxShadow(
+                            color: Color(0x33D97706),
+                            blurRadius: 6,
+                            offset: Offset(0, 1),
+                          ),
+                        ],
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.info_outline,
+                            Icons.auto_awesome,
                             size: 13,
-                            color: Colors.white38,
+                            color: Color(0xFFFBBF24),
                           ),
                           const SizedBox(width: 5),
                           Flexible(
@@ -403,9 +602,17 @@ class _Sidebar extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                color: Colors.white38,
-                                fontSize: 10,
+                                color: Color(0xFFFDE68A),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
                                 letterSpacing: 0.2,
+                                shadows: [
+                                  Shadow(
+                                    color: Color(0x80F59E0B),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 1),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -913,11 +1120,30 @@ class _SidebarLanguageSelector extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       color: const Color(0xFF1E3A56),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.white12),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF223E5B), Color(0xFF14273A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.15),
+            width: 1,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFF091420),
+              offset: Offset(0, 2),
+              blurRadius: 0,
+            ),
+            BoxShadow(
+              color: Color(0x20000000),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -925,19 +1151,19 @@ class _SidebarLanguageSelector extends StatelessWidget {
             const Icon(
               Icons.translate_rounded,
               color: Color(0xFFF0C36D),
-              size: 12,
+              size: 13,
             ),
             const SizedBox(width: 4),
             Text(
               currentLabel,
               style: const TextStyle(
-                color: Colors.white70,
+                color: Colors.white,
                 fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(Icons.arrow_drop_down, color: Colors.white38, size: 14),
+            const Icon(Icons.arrow_drop_down, color: Colors.white70, size: 14),
           ],
         ),
       ),

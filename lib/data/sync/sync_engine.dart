@@ -54,6 +54,11 @@ class SyncEngine extends ChangeNotifier {
         normalized.contains('resource_exhausted');
   }
 
+  static bool isTombstone(Map<String, dynamic>? doc) {
+    final fields = FirestoreRestService.decodeFields(doc?['fields']);
+    return fields['isDeleted'] == true || fields['status'] == 'DELETED';
+  }
+
   String get customerFriendlyError =>
       ErrorAnalyticsService.sanitizeForCustomer(rawDiagnosticError ?? error);
   final changes = StreamController<void>.broadcast();
@@ -162,6 +167,112 @@ class SyncEngine extends ChangeNotifier {
     await sync();
   }
 
+  /// Resolves conflicted or failed outbox writes by accepting the remote
+  /// Firestore document, updating local storage to match, and removing the
+  /// conflicting outbox entry so synchronization can resume cleanly.
+  Future<void> resolveConflictedOutbox({String? batchId}) async {
+    final source = local, uid = accountUid;
+    if (source == null || uid == null) return;
+    final session = await sessionProvider();
+    if (session == null || session.uid != uid) {
+      throw const AppException(
+        'Connect and sign in to synchronize.',
+        code: 'unauthenticated',
+      );
+    }
+
+    final outbox = SyncOutboxRepository(source);
+    if (!await outbox.acquire(owner)) return;
+
+    try {
+      final whereClause = batchId != null
+          ? "status='FAILED' AND batchId=?"
+          : "status='FAILED'";
+      final whereArgs = batchId != null ? [batchId] : null;
+      final failedRows = await source.db.query(
+        'sync_outbox',
+        where: whereClause,
+        whereArgs: whereArgs,
+      );
+      if (failedRows.isEmpty) return;
+
+      final batches = <String>{};
+      for (final row in failedRows) {
+        final bId = row['batchId'] as String;
+        batches.add(bId);
+        final collection = row['entityType'] as String;
+        final id = row['documentId'] as String;
+
+        Map<String, dynamic>? remoteDoc;
+        try {
+          remoteDoc = await remote.getDocument(
+            collection,
+            id,
+            idToken: session.idToken,
+          );
+        } on AppException catch (e) {
+          if (e.code != 'not-found') rethrow;
+          remoteDoc = null;
+        }
+
+        await source.db.transaction((tx) async {
+          if (remoteDoc != null) {
+            final fields = FirestoreRestService.decodeFields(remoteDoc['fields']);
+            await tx.update(
+              LocalDataSource.table(collection),
+              {
+                'payloadJson': jsonEncode(remoteDoc['fields']),
+                ...LocalDataSource.scopeColumns(fields),
+                'syncStatus': 'SYNCED',
+                'syncError': null,
+                'remoteUpdateTime': remoteDoc['updateTime'],
+                'remoteUpdatedAt': fields['updatedAt']?.toString(),
+                'lastSyncedAt': LocalDataSource.now(),
+                'isDeleted': isTombstone(remoteDoc) ? 1 : 0,
+                'acknowledgedRevision': row['localRevision'],
+              },
+              where: 'remoteId=?',
+              whereArgs: [id],
+            );
+          } else {
+            await tx.update(
+              LocalDataSource.table(collection),
+              {
+                'syncStatus': 'SYNCED',
+                'syncError': null,
+                'isDeleted': 1,
+                'lastSyncedAt': LocalDataSource.now(),
+                'acknowledgedRevision': row['localRevision'],
+              },
+              where: 'remoteId=?',
+              whereArgs: [id],
+            );
+          }
+        });
+      }
+
+      for (final b in batches) {
+        await source.db.delete('sync_outbox', where: 'batchId=?', whereArgs: [b]);
+        await source.db.update(
+          'sync_conflicts',
+          {'resolved': 1},
+          where: 'batchId=?',
+          whereArgs: [b],
+        );
+      }
+
+      error = null;
+      rawDiagnosticError = null;
+      pendingCount = await outbox.pendingCount();
+      state = pendingCount > 0 ? SyncState.pending : SyncState.synced;
+      notifyListeners();
+    } finally {
+      await outbox.release(owner);
+    }
+
+    schedule(pull: true, reason: 'MANUAL_REFRESH');
+  }
+
   /// Catalogue checks explicitly exclude Product/business PUSH work.
   Future<void> checkCatalogue({bool forceCheck = false}) => sync(
     pull: true,
@@ -266,12 +377,13 @@ class SyncEngine extends ChangeNotifier {
         );
       }
       if (push) {
-        // Sequence conflicts are resolved by rebasing the batch (see
-        // _rebaseSequenceWrites), so those batches are safe to retry.
+        // Sequence and attendance conflicts are resolved by rebasing/reconciliation,
+        // so those batches are safe to retry automatically.
         await source.db.update(
           'sync_outbox',
           {'status': 'PENDING', 'lastError': null},
-          where: "status='FAILED' AND lastError LIKE 'Remote version changed for document_sequences/%'",
+          where:
+              "status='FAILED' AND (lastError LIKE 'Remote version changed for document_sequences/%' OR lastError LIKE 'Remote version changed for staff_attendance/%')",
         );
       }
       var uploaded = 0;
@@ -969,10 +1081,7 @@ class SyncEngine extends ChangeNotifier {
         jsonDecode(row['payloadJson'] as String) as Map<String, dynamic>,
     ];
     final remoteDocs = <String, Map<String, dynamic>?>{};
-    bool tombstone(Map<String, dynamic>? doc) {
-      final fields = FirestoreRestService.decodeFields(doc?['fields']);
-      return fields['isDeleted'] == true || fields['status'] == 'DELETED';
-    }
+    bool tombstone(Map<String, dynamic>? doc) => isTombstone(doc);
 
     Future<Map<String, dynamic>?> get(String collection, String id) async {
       final key = '$collection/$id';
@@ -1011,6 +1120,14 @@ class SyncEngine extends ChangeNotifier {
       for (final w in writes) {
         final doc = await get(w['collection'] as String, w['id'] as String);
         final fields = doc?['fields'] as Map?;
+        final isAttendanceApproval = w['collection'] == 'staff_attendance' &&
+            fields != null &&
+            FirestoreRestService.decodeValue(
+                  (w['fields'] as Map)['approvalStatus'],
+                ) ==
+                'APPROVED' &&
+            FirestoreRestService.decodeValue(fields['approvalStatus']) ==
+                'APPROVED';
         if (w['operation'] == 'DELETE') {
           if (doc != null &&
               !(fields?['_syncMutationId'] is Map &&
@@ -1022,11 +1139,14 @@ class SyncEngine extends ChangeNotifier {
                       true)) {
             alreadyApplied = false;
           }
+        } else if (isAttendanceApproval) {
+          // Attendance is already approved remotely; local approval intent is satisfied.
         } else if (fields == null ||
             w['operation'] == 'CREATE' && tombstone(doc) ||
             !(w['fields'] as Map).entries.every((e) {
               if (e.key == 'updatedAt' ||
                   e.key == 'updatedBy' ||
+                  e.key == 'approvedAt' ||
                   e.key == '_syncMutationId') {
                 return true;
               }

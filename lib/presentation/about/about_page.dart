@@ -14,7 +14,12 @@ Future<void> showAboutNubiBillDialog(
   return showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 16,
+      shadowColor: Colors.black54,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.5),
+      ),
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 620, maxHeight: 720),
@@ -115,22 +120,25 @@ class AboutPageContent extends StatelessWidget {
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(16),
-                      border: const Border(
-                        top: BorderSide(color: Color(0x99FFFFFF), width: 1.5),
-                        bottom: BorderSide(color: Color(0x66000000), width: 2.5),
-                        left: BorderSide(color: Color(0x33FFFFFF)),
-                        right: BorderSide(color: Color(0x33000000)),
+                      border: Border.all(
+                        color: const Color(0xFFFDE68A).withValues(alpha: 0.7),
+                        width: 1.5,
                       ),
                       boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          offset: const Offset(0, -1),
+                          blurRadius: 1,
+                        ),
+                        const BoxShadow(
+                          color: Color(0xFF78350F),
+                          offset: Offset(0, 3.5),
+                          blurRadius: 0,
+                        ),
                         BoxShadow(
                           color: const Color(0xFFD97706).withValues(alpha: 0.5),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
-                        ),
-                        const BoxShadow(
-                          color: Color(0x4D000000),
-                          blurRadius: 6,
-                          offset: Offset(0, 2),
                         ),
                       ],
                     ),
@@ -173,15 +181,20 @@ class AboutPageContent extends StatelessWidget {
                               colors: [Color(0xFF2E2211), Color(0xFF1A1308)],
                             ),
                             borderRadius: BorderRadius.circular(8),
-                            border: const Border(
-                              top: BorderSide(color: Color(0x80F59E0B), width: 1),
-                              bottom: BorderSide(color: Color(0x66000000), width: 1.5),
+                            border: Border.all(
+                              color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                              width: 1,
                             ),
                             boxShadow: const [
                               BoxShadow(
+                                color: Color(0xFF000000),
+                                offset: Offset(0, 2),
+                                blurRadius: 0,
+                              ),
+                              BoxShadow(
                                 color: Color(0x33000000),
                                 blurRadius: 4,
-                                offset: Offset(0, 2),
+                                offset: Offset(0, 3),
                               ),
                             ],
                           ),
@@ -232,22 +245,25 @@ class AboutPageContent extends StatelessWidget {
                       end: Alignment.bottomCenter,
                     ),
                     borderRadius: BorderRadius.circular(14),
-                    border: const Border(
-                      top: BorderSide(color: Colors.white, width: 2),
-                      bottom: BorderSide(color: Color(0xFFCBD5E1), width: 3),
-                      left: BorderSide(color: Color(0xFFE2E8F0)),
-                      right: BorderSide(color: Color(0xFFE2E8F0)),
+                    border: Border.all(
+                      color: const Color(0xFFE2E8F0),
+                      width: 1.5,
                     ),
                     boxShadow: const [
                       BoxShadow(
-                        color: Color(0x0F000000),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
+                        color: Colors.white,
+                        offset: Offset(0, -1),
+                        blurRadius: 1,
                       ),
                       BoxShadow(
-                        color: Color(0x08000000),
-                        blurRadius: 2,
-                        offset: Offset(0, 1),
+                        color: Color(0xFFCBD5E1),
+                        offset: Offset(0, 3),
+                        blurRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: Color(0x0F000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 5),
                       ),
                     ],
                   ),
@@ -262,15 +278,20 @@ class AboutPageContent extends StatelessWidget {
                             end: Alignment.bottomCenter,
                           ),
                           borderRadius: BorderRadius.circular(10),
-                          border: const Border(
-                            top: BorderSide(color: Color(0x4DFFFFFF), width: 1),
-                            bottom: BorderSide(color: Color(0x66000000), width: 2),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            width: 1,
                           ),
                           boxShadow: const [
                             BoxShadow(
+                              color: Color(0xFF020617),
+                              offset: Offset(0, 2),
+                              blurRadius: 0,
+                            ),
+                            BoxShadow(
                               color: Color(0x1F000000),
                               blurRadius: 4,
-                              offset: Offset(0, 2),
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
@@ -316,15 +337,20 @@ class AboutPageContent extends StatelessWidget {
                             end: Alignment.bottomCenter,
                           ),
                           borderRadius: BorderRadius.circular(8),
-                          border: const Border(
-                            top: BorderSide(color: Colors.white, width: 1),
-                            bottom: BorderSide(color: Color(0xFF86EFAC), width: 2),
+                          border: Border.all(
+                            color: const Color(0xFF86EFAC),
+                            width: 1,
                           ),
                           boxShadow: const [
                             BoxShadow(
+                              color: Color(0xFF4ADE80),
+                              offset: Offset(0, 2),
+                              blurRadius: 0,
+                            ),
+                            BoxShadow(
                               color: Color(0x1416A34A),
                               blurRadius: 4,
-                              offset: Offset(0, 2),
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
@@ -452,23 +478,77 @@ class AboutPageContent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
+              color: Color(0xFFF1F5F9),
               border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
             ),
             child: Row(
               children: [
-                OutlinedButton.icon(
-                  onPressed: () => _openUrl(context, 'https://nubibill.com'),
-                  icon: const Icon(Icons.open_in_new, size: 16),
-                  label: const Text('Visit Website'),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFCBD5E1),
+                      width: 1,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.white,
+                        offset: Offset(0, -1),
+                        blurRadius: 1,
+                      ),
+                      BoxShadow(
+                        color: Color(0xFF94A3B8),
+                        offset: Offset(0, 2.5),
+                        blurRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: Color(0x0F000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF0F172A),
+                      side: BorderSide.none,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () => _openUrl(context, 'https://nubibill.com'),
+                    icon: const Icon(Icons.open_in_new, size: 16, color: Color(0xFF2563EB)),
+                    label: const Text('Visit Website', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
                 ),
                 const Spacer(),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F172A),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF334155),
+                      width: 1,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0xFF020617),
+                        offset: Offset(0, 3),
+                        blurRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: Color(0x33000000),
+                        blurRadius: 6,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: const Text('Close'),
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('Close', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
                 ),
               ],
             ),
@@ -481,10 +561,11 @@ class AboutPageContent extends StatelessWidget {
     }
 
     return Card(
-      elevation: 0,
+      elevation: 4,
+      shadowColor: Colors.black12,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         side: const BorderSide(color: Color(0xFFE2E8F0)),
       ),
       child: content,
@@ -507,44 +588,99 @@ class _FeatureRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 18, color: color),
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Colors.white, Color(0xFFFBFDFF)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                    height: 1.3,
-                  ),
-                ),
-              ],
-            ),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFFE2E8F0),
+            width: 1.2,
           ),
-        ],
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.white,
+              offset: Offset(0, -1),
+              blurRadius: 1,
+            ),
+            BoxShadow(
+              color: Color(0xFFCBD5E1),
+              offset: Offset(0, 2.5),
+              blurRadius: 0,
+            ),
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 6,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    color.withValues(alpha: 0.18),
+                    color.withValues(alpha: 0.08),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.25),
+                    offset: const Offset(0, 2),
+                    blurRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.12),
+                    blurRadius: 4,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Icon(icon, size: 19, color: color),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -565,50 +701,130 @@ class _LinkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0F000000),
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            ),
+          ],
         ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Row(
-              children: [
-                Icon(icon, size: 18, color: const Color(0xFF2563EB)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                      Text(
-                        value,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
+        child: Material(
+          color: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Colors.white, Color(0xFFF9FAFB)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFFE2E8F0),
+                  width: 1.2,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.white,
+                    offset: Offset(0, -1),
+                    blurRadius: 1,
                   ),
-                ),
-                const Icon(
-                  Icons.arrow_outward_rounded,
-                  size: 16,
-                  color: Color(0xFF94A3B8),
-                ),
-              ],
+                  BoxShadow(
+                    color: Color(0xFFCBD5E1),
+                    offset: Offset(0, 3),
+                    blurRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: Color(0x0F000000),
+                    blurRadius: 6,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFEEF2FF), Color(0xFFE0E7FF)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFFC7D2FE),
+                        width: 1,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0xFFA5B4FC),
+                          offset: Offset(0, 1.5),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: Icon(icon, size: 18, color: const Color(0xFF3B82F6)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        Text(
+                          value,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: const Color(0xFFCBD5E1),
+                        width: 1,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0xFF94A3B8),
+                          offset: Offset(0, 1.5),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.arrow_outward_rounded,
+                      size: 14,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
