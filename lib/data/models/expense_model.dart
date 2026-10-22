@@ -45,15 +45,19 @@ class ExpenseModel {
         title: data['title'] as String? ?? '',
         category: data['category'] as String? ?? 'Miscellaneous',
         amountPaise: (data['amountPaise'] as num?)?.toInt() ?? 0,
-        expenseDate: DateTime.tryParse(data['expenseDate'] as String? ?? '') ??
-            DateTime.now(),
+        expenseDate: data['expenseDate'] is DateTime
+            ? data['expenseDate'] as DateTime
+            : DateTime.tryParse(data['expenseDate']?.toString() ?? '') ??
+                DateTime.now(),
         paymentMode: data['paymentMode'] as String? ?? 'CASH',
         payeeName: data['payeeName'] as String?,
         referenceNumber: data['referenceNumber'] as String?,
         notes: data['notes'] as String?,
         status: data['status'] as String? ?? 'ACTIVE',
-        createdAt: DateTime.tryParse(data['createdAt'] as String? ?? '') ??
-            DateTime.now(),
+        createdAt: data['createdAt'] is DateTime
+            ? data['createdAt'] as DateTime
+            : DateTime.tryParse(data['createdAt']?.toString() ?? '') ??
+                DateTime.now(),
         createdBy: data['createdBy'] as String?,
       );
 

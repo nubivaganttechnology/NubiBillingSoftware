@@ -562,6 +562,22 @@ void main() {
     test('Scenario 11: Duplicate offline sync posts transaction only once', () async {
       const fixedTxId = 'TX_OFFLINE_IDEMPOTENT_001';
 
+      // Product must be initialized first (opening stock or purchase receipt)
+      await inventoryRepository.addOpeningStock(
+        tenantId: tenantId,
+        businessId: businessId,
+        outletId: outlet1,
+        productId: productId,
+        variantId: variantId,
+        quantity: 10,
+        reason: 'Initial physical count baseline',
+        userId: 'OWNER-1',
+        token: ownerToken,
+        permissions: ['inventory.opening_stock'],
+        isOwner: true,
+        unitCostPaise: 50000,
+      );
+
       // First sync posting
       final firstResult = await inventoryRepository.requestOrApplyAdjustment(
         tenantId: tenantId,
@@ -580,7 +596,7 @@ void main() {
         transactionId: fixedTxId,
       );
 
-      expect(firstResult.newQuantity, 8);
+      expect(firstResult.newQuantity, 18);
 
       final stock1 = await inventoryRepository.getAvailableStock(
         tenantId: tenantId,
@@ -588,7 +604,7 @@ void main() {
         variantId: variantId,
         token: ownerToken,
       );
-      expect(stock1, 8);
+      expect(stock1, 18);
 
       // Replay identical transaction (duplicate offline sync attempt)
       final duplicateResult = await inventoryRepository.requestOrApplyAdjustment(
@@ -617,7 +633,7 @@ void main() {
         variantId: variantId,
         token: ownerToken,
       );
-      expect(stock2, 8, reason: 'Duplicate sync must not increment balance a second time');
+      expect(stock2, 18, reason: 'Duplicate sync must not increment balance a second time');
     });
 
     test('Scenario 12: Same product in different outlets maintains completely independent stock', () async {

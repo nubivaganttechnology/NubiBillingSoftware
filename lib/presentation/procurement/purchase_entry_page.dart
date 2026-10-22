@@ -995,8 +995,8 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
     ('Barcode', 120),
     ('Internal Batch No', 160),
     ('Supplier Lot', 130),
-    ('Mfg Date', 120),
-    ('Expiry Date', 120),
+    ('Mfg Date', 130),
+    ('Expiry Date', 130),
     ('Qty', 80),
     ('Unit', 90),
     ('Purchase Price', 130),
@@ -1154,26 +1154,29 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
             colIndex: 3,
           ),
           _cell(
-            _input(
+            _dateInput(
               row.manufacturingDate,
               rowIndex: index,
               gridColumn: 4,
-              hintText: 'YYYY-MM-DD',
+              label: 'Mfg Date',
+              isExpiry: false,
               onChanged: (_) => _markDirty(),
             ),
-            120,
+            130,
             rowIndex: index,
             colIndex: 4,
           ),
           _cell(
-            _input(
+            _dateInput(
               row.expiryDate,
               rowIndex: index,
               gridColumn: 5,
-              hintText: 'YYYY-MM-DD',
+              label: 'Expiry Date',
+              isExpiry: true,
+              mfgDate: DateTime.tryParse(row.manufacturingDate.text.trim()),
               onChanged: (_) => _markDirty(),
             ),
-            120,
+            130,
             rowIndex: index,
             colIndex: 5,
           ),
@@ -2113,6 +2116,110 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
       'Pasted ${matrix.length} spreadsheet row(s). Review unmatched products and locations.',
     );
   }
+
+  Future<void> _pickGridDate({
+    required TextEditingController controller,
+    required int rowIndex,
+    required int gridColumn,
+    required bool isExpiry,
+    DateTime? mfgDate,
+  }) async {
+    _setActiveGridCell(rowIndex, gridColumn);
+
+    final now = DateTime.now();
+    final DateTime firstDate;
+    final DateTime lastDate;
+
+    if (isExpiry) {
+      firstDate = mfgDate ?? DateTime(2000);
+      lastDate = DateTime(2100, 12, 31);
+    } else {
+      firstDate = DateTime(1990);
+      lastDate = now.add(const Duration(days: 365));
+    }
+
+    final parsed = DateTime.tryParse(controller.text.trim());
+    DateTime initial =
+        parsed ?? (isExpiry && mfgDate != null && mfgDate.isAfter(now) ? mfgDate : now);
+
+    if (initial.isBefore(firstDate)) initial = firstDate;
+    if (initial.isAfter(lastDate)) initial = lastDate;
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+
+    if (picked != null) {
+      final formatted =
+          '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      controller.text = formatted;
+      _markDirty();
+    }
+  }
+
+  Widget _dateInput(
+    TextEditingController controller, {
+    required int rowIndex,
+    required int gridColumn,
+    required String label,
+    required bool isExpiry,
+    DateTime? mfgDate,
+    ValueChanged<String>? onChanged,
+  }) =>
+      Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              textAlign: TextAlign.start,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF0F172A),
+              ),
+              onTap: () => _setActiveGridCell(rowIndex, gridColumn),
+              keyboardType: TextInputType.datetime,
+              onChanged: onChanged,
+              cursorColor: const Color(0xFF107C41),
+              decoration: const InputDecoration(
+                isDense: true,
+                hintText: 'YYYY-MM-DD',
+                hintStyle: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                filled: false,
+                contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              ),
+            ),
+          ),
+          Tooltip(
+            message: 'Choose $label',
+            child: InkWell(
+              borderRadius: BorderRadius.circular(4),
+              onTap: () => _pickGridDate(
+                controller: controller,
+                rowIndex: rowIndex,
+                gridColumn: gridColumn,
+                isExpiry: isExpiry,
+                mfgDate: mfgDate,
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Icon(
+                  Icons.calendar_month_outlined,
+                  size: 16,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
 
   Widget _input(
     TextEditingController c, {

@@ -2417,6 +2417,11 @@ class AppController extends ChangeNotifier {
     );
   }
 
+  /// Alias for verifying whether a variant has had its stock initialized.
+  Future<bool> isStockInitialized(String variantId) async {
+    return hasOpeningStockBeenInitialized(variantId);
+  }
+
   /// Offline-only eligibility check used by Barcode label actions.
   Future<bool> barcodeVariantWasReceived(ProductVariantModel variant) async {
     final context = appContext;

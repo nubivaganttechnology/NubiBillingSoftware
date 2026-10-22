@@ -2296,6 +2296,8 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
   Future<void> _showStockActions(_InventoryRow row) async {
     final l10n = AppLocalizations.of(context);
     final c = widget.controller;
+    final isInitialized = await c.hasOpeningStockBeenInitialized(row.variant.variantId) || row.stock > 0;
+    if (!mounted) return;
     final isZeroStock = row.stock <= 0;
     final cleanUnit = _formatUnit(
       row.variant.baseUnitId,
@@ -2376,37 +2378,51 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isZeroStock
-                          ? const Color(0xFFDC2626).withValues(alpha: 0.1)
-                          : const Color(0xFF16A34A).withValues(alpha: 0.1),
+                      color: !isInitialized
+                          ? const Color(0xFFD97706).withValues(alpha: 0.1)
+                          : (isZeroStock
+                              ? const Color(0xFFDC2626).withValues(alpha: 0.1)
+                              : const Color(0xFF16A34A).withValues(alpha: 0.1)),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isZeroStock
-                            ? const Color(0xFFDC2626).withValues(alpha: 0.3)
-                            : const Color(0xFF16A34A).withValues(alpha: 0.3),
+                        color: !isInitialized
+                            ? const Color(0xFFD97706).withValues(alpha: 0.3)
+                            : (isZeroStock
+                                ? const Color(0xFFDC2626).withValues(alpha: 0.3)
+                                : const Color(0xFF16A34A).withValues(alpha: 0.3)),
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          isZeroStock ? '0' : _formatStock(row.stock),
+                          !isInitialized
+                              ? '0'
+                              : (isZeroStock ? '0' : _formatStock(row.stock)),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: isZeroStock
-                                ? const Color(0xFFDC2626)
-                                : const Color(0xFF16A34A),
+                            color: !isInitialized
+                                ? const Color(0xFFD97706)
+                                : (isZeroStock
+                                    ? const Color(0xFFDC2626)
+                                    : const Color(0xFF16A34A)),
                           ),
                         ),
                         Text(
-                          isZeroStock ? 'Out of Stock' : (l10n?.inStock ?? 'In Stock'),
+                          !isInitialized
+                              ? 'Stock Not Initialized'
+                              : (isZeroStock
+                                  ? (l10n?.stockStatusOut ?? 'Out of Stock')
+                                  : (l10n?.inStock ?? 'In Stock')),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: isZeroStock
-                                ? const Color(0xFFDC2626)
-                                : const Color(0xFF16A34A),
+                            color: !isInitialized
+                                ? const Color(0xFFD97706)
+                                : (isZeroStock
+                                    ? const Color(0xFFDC2626)
+                                    : const Color(0xFF16A34A)),
                           ),
                         ),
                       ],
@@ -2447,7 +2463,7 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
                   },
                 ),
 
-              if (canOpening)
+              if (canOpening && !isInitialized)
                 ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(8),
@@ -2481,26 +2497,56 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD97706).withValues(alpha: 0.1),
+                      color: isInitialized
+                          ? const Color(0xFFD97706).withValues(alpha: 0.1)
+                          : Colors.grey.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.tune_rounded,
-                      color: Color(0xFFD97706),
+                      color: isInitialized
+                          ? const Color(0xFFD97706)
+                          : Colors.grey,
                       size: 20,
                     ),
                   ),
-                  title: const Text(
+                  title: Text(
                     'Stock Adjustment',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: isInitialized ? null : Colors.grey,
+                    ),
                   ),
-                  subtitle: const Text(
-                    'Physical corrections, breakage, damage, or counts.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  subtitle: Text(
+                    isInitialized
+                        ? 'Physical corrections, breakage, damage, or counts.'
+                        : 'Blocked: Requires purchase or opening stock first.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isInitialized
+                          ? const Color(0xFF64748B)
+                          : Colors.grey,
+                    ),
                   ),
-                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  trailing: Icon(
+                    isInitialized ? Icons.chevron_right : Icons.lock_outline,
+                    size: 20,
+                    color: isInitialized ? null : Colors.grey,
+                  ),
                   onTap: () {
                     Navigator.pop(sheetContext);
+                    if (!isInitialized) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'This product has no received purchase or opening stock. Please receive a purchase or register existing inventory through Opening Stock.',
+                          ),
+                          backgroundColor: Color(0xFFDC2626),
+                        ),
+                      );
+                      return;
+                    }
                     _showStockAdjustmentDialog(row);
                   },
                 ),
@@ -2562,7 +2608,6 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
     );
     if (!mounted) return;
     if (alreadyInit || row.stock > 0) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -2574,218 +2619,21 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
       return;
     }
 
-    final l10n = AppLocalizations.of(context);
-    final quantity = TextEditingController();
-    final cost = TextEditingController();
-    final reason = TextEditingController(text: 'Initial setup opening inventory');
-    var saving = false;
     final cleanUnit = _formatUnit(
       row.variant.baseUnitId,
       row.variant.commercialUnitName,
     );
 
-    if (!mounted) return;
-    final saved = await showDialog<bool>(
+    final audit = await showDialog<StockTransactionAuditModel>(
       context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final qtyVal = _parseStockQuantity(quantity.text) ?? 0;
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0D9488).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.playlist_add_check_circle_outlined,
-                    color: Color(0xFF0D9488),
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Register Opening Stock',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        '${row.product.name} • ${row.variant.name}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF64748B),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            content: SizedBox(
-              width: 480,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Current Stock:',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
-                          ),
-                          Text(
-                            _formatStock(row.stock),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: quantity,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        labelText: cleanUnit.isNotEmpty
-                            ? 'Opening Quantity ($cleanUnit)'
-                            : 'Opening Quantity',
-                        hintText: 'e.g. 10 or 25',
-                      ),
-                      onChanged: (_) => setDialogState(() {}),
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: cost,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Unit Cost (₹)',
-                        hintText: 'e.g. 150.00',
-                        prefixText: '₹ ',
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: reason,
-                      decoration: const InputDecoration(
-                        labelText: 'Reason / Setup Note *',
-                        hintText: 'Required for opening stock audit provenance',
-                      ),
-                    ),
-                    if (qtyVal > 0) ...[
-                      const SizedBox(height: 14),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF16A34A).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xFF16A34A).withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          'New Available Stock: ${_formatStock(qtyVal)}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF16A34A),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: saving ? null : () => Navigator.pop(dialogCtx, false),
-                child: Text(l10n?.cancel ?? 'Cancel'),
-              ),
-              FilledButton(
-                onPressed: saving
-                    ? null
-                    : () async {
-                        final qty = _parseStockQuantity(quantity.text);
-                        final unitCost = _parseRupeesToPaise(cost.text);
-                        if (qty == null || qty <= 0) {
-                          ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                            const SnackBar(
-                              content: Text('Enter a quantity greater than zero.'),
-                              backgroundColor: Color(0xFFDC2626),
-                            ),
-                          );
-                          return;
-                        }
-                        if (reason.text.trim().isEmpty) {
-                          ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                            const SnackBar(
-                              content: Text('A reason is required for opening stock.'),
-                              backgroundColor: Color(0xFFDC2626),
-                            ),
-                          );
-                          return;
-                        }
-                        setDialogState(() => saving = true);
-                        try {
-                          await widget.controller.addOpeningStock(
-                            productId: row.product.productId,
-                            variantId: row.variant.variantId,
-                            quantity: qty,
-                            reason: reason.text.trim(),
-                            unitCostPaise: unitCost,
-                            unit: cleanUnit,
-                          );
-                          if (dialogCtx.mounted) {
-                            Navigator.pop(dialogCtx, true);
-                          }
-                        } catch (e) {
-                          setDialogState(() => saving = false);
-                          if (dialogCtx.mounted) {
-                            ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                              SnackBar(
-                                content: Text('$e'),
-                                backgroundColor: const Color(0xFFDC2626),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                child: Text(saving ? 'Saving...' : 'Confirm Opening Stock'),
-              ),
-            ],
-          );
-        },
+      builder: (dialogCtx) => _OpeningStockDialog(
+        controller: widget.controller,
+        row: row,
+        cleanUnit: cleanUnit,
       ),
     );
 
-    quantity.dispose();
-    cost.dispose();
-    reason.dispose();
-
-    if (saved == true && mounted) {
+    if (audit != null && mounted) {
       await widget.controller.loadProducts();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2798,292 +2646,54 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
   }
 
   Future<void> _showStockAdjustmentDialog(_InventoryRow row) async {
-    final l10n = AppLocalizations.of(context);
-    final quantity = TextEditingController();
-    final cost = TextEditingController();
-    final reason = TextEditingController();
-    var transactionType = StockTransactionAuditModel.typeAdjustmentIn;
-    var saving = false;
+    final isInitialized = await widget.controller.hasOpeningStockBeenInitialized(
+      row.variant.variantId,
+    ) || row.stock > 0;
+    if (!mounted) return;
+    if (!isInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'This product has no received purchase or opening stock. Please receive a purchase or register existing inventory through Opening Stock.',
+          ),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
     final cleanUnit = _formatUnit(
       row.variant.baseUnitId,
       row.variant.commercialUnitName,
     );
 
-    final saved = await showDialog<bool>(
+    final result = await showDialog<StockTransactionAuditModel>(
       context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final isIncrease = transactionType == StockTransactionAuditModel.typeAdjustmentIn ||
-              transactionType == StockTransactionAuditModel.typeCountCorrection;
-          final qtyVal = _parseStockQuantity(quantity.text) ?? 0;
-          final projected = isIncrease ? row.stock + qtyVal : row.stock - qtyVal;
-          final isNegative = projected < 0;
-
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD97706).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.tune_rounded,
-                    color: Color(0xFFD97706),
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Stock Adjustment',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        '${row.product.name} • ${row.variant.name}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF64748B),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            content: SizedBox(
-              width: 500,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Current Available Stock:',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
-                          ),
-                          Text(
-                            _formatStock(row.stock),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    DropdownButtonFormField<String>(
-                      initialValue: transactionType,
-                      decoration: const InputDecoration(
-                        labelText: 'Adjustment Reason Type',
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: StockTransactionAuditModel.typeAdjustmentIn,
-                          child: Text('Positive Adjustment (Found / Unrecorded Stock)'),
-                        ),
-                        DropdownMenuItem(
-                          value: StockTransactionAuditModel.typeCountCorrection,
-                          child: Text('Physical Stock Count Correction'),
-                        ),
-                        DropdownMenuItem(
-                          value: StockTransactionAuditModel.typeAdjustmentOut,
-                          child: Text('Negative Adjustment (Store Consumption / Sample)'),
-                        ),
-                        DropdownMenuItem(
-                          value: StockTransactionAuditModel.typeDamageLoss,
-                          child: Text('Damage / Breakage / Expiry Loss'),
-                        ),
-                      ],
-                      onChanged: saving
-                          ? null
-                          : (value) => setDialogState(() => transactionType = value!),
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: quantity,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        labelText: cleanUnit.isNotEmpty
-                            ? 'Quantity ($cleanUnit)'
-                            : 'Quantity',
-                        hintText: 'e.g. 5 or 12.5',
-                      ),
-                      onChanged: (_) => setDialogState(() {}),
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: reason,
-                      maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Reason for Adjustment *',
-                        hintText: 'Required for stock adjustment audit trail',
-                      ),
-                    ),
-                    if (qtyVal > 0) ...[
-                      const SizedBox(height: 14),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: isNegative
-                              ? const Color(0xFFDC2626).withValues(alpha: 0.1)
-                              : const Color(0xFF16A34A).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isNegative
-                                ? const Color(0xFFDC2626).withValues(alpha: 0.3)
-                                : const Color(0xFF16A34A).withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          isNegative
-                              ? 'Warning: Resulting balance cannot become negative (${_formatStock(projected)})'
-                              : 'Projected Available Stock: ${_formatStock(projected)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isNegative
-                                ? const Color(0xFFDC2626)
-                                : const Color(0xFF16A34A),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: saving ? null : () => Navigator.pop(dialogCtx, false),
-                child: Text(l10n?.cancel ?? 'Cancel'),
-              ),
-              FilledButton(
-                onPressed: saving
-                    ? null
-                    : () async {
-                        final qty = _parseStockQuantity(quantity.text);
-                        final unitCost = _parseRupeesToPaise(cost.text);
-                        if (qty == null || qty <= 0) {
-                          ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                            const SnackBar(
-                              content: Text('Enter a quantity greater than zero.'),
-                              backgroundColor: Color(0xFFDC2626),
-                            ),
-                          );
-                          return;
-                        }
-
-                        if (!isIncrease) {
-                          if (row.stock <= 0) {
-                            ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                              const SnackBar(
-                                content: Text('Stock cannot be reduced because the available quantity is 0.'),
-                                backgroundColor: Color(0xFFDC2626),
-                              ),
-                            );
-                            return;
-                          }
-                          if (qty > row.stock) {
-                            ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                              const SnackBar(
-                                content: Text('Insufficient available stock. Please check the quantity.'),
-                                backgroundColor: Color(0xFFDC2626),
-                              ),
-                            );
-                            return;
-                          }
-                        }
-
-                        if (reason.text.trim().isEmpty) {
-                          ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                            const SnackBar(
-                              content: Text('A reason is required for every stock movement.'),
-                              backgroundColor: Color(0xFFDC2626),
-                            ),
-                          );
-                          return;
-                        }
-
-                        setDialogState(() => saving = true);
-                        try {
-                          final result = await widget.controller.requestOrApplyAdjustment(
-                            productId: row.product.productId,
-                            variantId: row.variant.variantId,
-                            quantity: qty,
-                            isIncrease: isIncrease,
-                            transactionType: transactionType,
-                            reason: reason.text.trim(),
-                            unit: cleanUnit,
-                            unitCostPaise: unitCost,
-                          );
-
-                          if (dialogCtx.mounted) {
-                            Navigator.pop(dialogCtx, true);
-                            if (result.isPendingApproval) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Stock adjustment is awaiting approval.'),
-                                  backgroundColor: Color(0xFFD97706),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Stock adjustment applied successfully.'),
-                                  backgroundColor: Color(0xFF16A34A),
-                                ),
-                              );
-                            }
-                          }
-                        } catch (e) {
-                          setDialogState(() => saving = false);
-                          if (dialogCtx.mounted) {
-                            ScaffoldMessenger.of(dialogCtx).showSnackBar(
-                              SnackBar(
-                                content: Text('$e'),
-                                backgroundColor: const Color(0xFFDC2626),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                child: Text(saving ? 'Saving...' : 'Submit Adjustment'),
-              ),
-            ],
-          );
-        },
+      builder: (dialogCtx) => _StockAdjustmentDialog(
+        controller: widget.controller,
+        row: row,
+        cleanUnit: cleanUnit,
       ),
     );
 
-    quantity.dispose();
-    cost.dispose();
-    reason.dispose();
-
-    if (saved == true && mounted) {
+    if (result != null && mounted) {
       await widget.controller.loadProducts();
+      if (!mounted) return;
+      if (result.isPendingApproval) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Stock adjustment is awaiting approval.'),
+            backgroundColor: Color(0xFFD97706),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Stock adjustment applied successfully.'),
+            backgroundColor: Color(0xFF16A34A),
+          ),
+        );
+      }
     }
   }
 
@@ -3092,205 +2702,20 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
       row.variant.baseUnitId,
       row.variant.commercialUnitName,
     );
-    final canApprove = widget.controller.canApproveAdjustment();
 
-    await showDialog<void>(
+    final changed = await showDialog<bool>(
       context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return FutureBuilder<List<StockTransactionAuditModel>>(
-            future: widget.controller.getStockHistory(variantId: row.variant.variantId),
-            builder: (context, snapshot) {
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                title: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF132B45).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.history_rounded,
-                        color: Color(0xFF132B45),
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Stock Movement Audit History',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          Text(
-                            '${row.product.name} • ${row.variant.name} (${_formatStock(row.stock)} $cleanUnit)',
-                            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                content: SizedBox(
-                  width: 750,
-                  height: 450,
-                  child: snapshot.connectionState == ConnectionState.waiting
-                      ? const Center(child: CircularProgressIndicator())
-                      : snapshot.hasError
-                          ? Center(child: Text('Error: ${snapshot.error}'))
-                          : (snapshot.data?.isEmpty ?? true)
-                              ? const Center(
-                                  child: Text('No stock movement transactions recorded yet.'),
-                                )
-                              : ListView.separated(
-                                  itemCount: snapshot.data!.length,
-                                  separatorBuilder: (_, _) => const Divider(height: 1),
-                                  itemBuilder: (context, index) {
-                                    final tx = snapshot.data![index];
-                                    final isIncrease = tx.newQuantity >= tx.previousQuantity;
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            isIncrease
-                                                ? Icons.arrow_downward_rounded
-                                                : Icons.arrow_upward_rounded,
-                                            color: isIncrease
-                                                ? const Color(0xFF16A34A)
-                                                : const Color(0xFFDC2626),
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      tx.transactionType,
-                                                      style: const TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 13,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 2,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        color: tx.isApproved
-                                                            ? const Color(0xFF16A34A).withValues(alpha: 0.1)
-                                                            : tx.isPendingApproval
-                                                                ? const Color(0xFFD97706).withValues(alpha: 0.1)
-                                                                : const Color(0xFFDC2626).withValues(alpha: 0.1),
-                                                        borderRadius: BorderRadius.circular(4),
-                                                      ),
-                                                      child: Text(
-                                                        tx.approvalStatus,
-                                                        style: TextStyle(
-                                                          fontSize: 10,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: tx.isApproved
-                                                              ? const Color(0xFF16A34A)
-                                                              : tx.isPendingApproval
-                                                                  ? const Color(0xFFD97706)
-                                                                  : const Color(0xFFDC2626),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Text(
-                                                  '${tx.createdAt.toLocal().toString().split('.').first} • Reason: ${tx.reason}',
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    color: Color(0xFF64748B),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                '${isIncrease ? "+" : "-"}${_formatStock(tx.changedQuantity)}',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13,
-                                                  color: isIncrease
-                                                      ? const Color(0xFF16A34A)
-                                                      : const Color(0xFFDC2626),
-                                                ),
-                                              ),
-                                              Text(
-                                                'Balance: ${_formatStock(tx.newQuantity)}',
-                                                style: const TextStyle(
-                                                  fontSize: 11,
-                                                  color: Color(0xFF64748B),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          if (tx.isPendingApproval && canApprove) ...[
-                                            const SizedBox(width: 10),
-                                            IconButton(
-                                              tooltip: 'Approve Adjustment',
-                                              icon: const Icon(
-                                                Icons.check_circle_outline,
-                                                color: Color(0xFF16A34A),
-                                                size: 20,
-                                              ),
-                                              onPressed: () async {
-                                                await widget.controller.approveAdjustment(tx.transactionId);
-                                                setDialogState(() {});
-                                              },
-                                            ),
-                                            IconButton(
-                                              tooltip: 'Reject Adjustment',
-                                              icon: const Icon(
-                                                Icons.cancel_outlined,
-                                                color: Color(0xFFDC2626),
-                                                size: 20,
-                                              ),
-                                              onPressed: () async {
-                                                await widget.controller.rejectAdjustment(tx.transactionId);
-                                                setDialogState(() {});
-                                              },
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogCtx),
-                    child: const Text('Close'),
-                  ),
-                ],
-              );
-            },
-          );
-        },
+      builder: (dialogCtx) => _StockHistoryDialog(
+        controller: widget.controller,
+        row: row,
+        cleanUnit: cleanUnit,
       ),
     );
-  }
 
+    if (changed == true && mounted) {
+      await widget.controller.loadProducts();
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // HELPERS, PARSERS & CALCULATIONS
@@ -3371,31 +2796,6 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
     }
   }
 
-  int? _parseRupeesToPaise(String value) {
-    final normalized = value.trim().replaceAll(',', '');
-    final match = RegExp(r'^\d+(?:\.\d{1,2})?$').firstMatch(normalized);
-    if (match == null) return null;
-    final parts = normalized.split('.');
-    final rupees = int.tryParse(parts.first);
-    if (rupees == null) return null;
-    final paise = parts.length == 1
-        ? 0
-        : int.tryParse(parts[1].padRight(2, '0'));
-    if (paise == null) return null;
-    return rupees * 100 + paise;
-  }
-
-  int? _parseStockQuantity(String value) {
-    final normalized = value.trim().replaceAll(',', '');
-    if (!RegExp(r'^\d+(?:\.\d{1,3})?$').hasMatch(normalized)) return null;
-    final parts = normalized.split('.');
-    final whole = int.tryParse(parts.first);
-    if (whole == null) return null;
-    final fraction = parts.length == 1
-        ? 0
-        : int.parse(parts[1].padRight(3, '0'));
-    return whole * 1000 + fraction;
-  }
 
   Color _statusColor(String status) {
     return switch (status) {
@@ -3633,4 +3033,896 @@ String _formatUnit(String? baseUnitId, [String? commercialUnitName]) {
         .join(' ');
   }
   return trimmed;
+}
+
+
+// -----------------------------------------------------------------------------
+// STOCK & CURRENCY PARSERS
+// -----------------------------------------------------------------------------
+
+int? _parseRupeesToPaise(String value) {
+  final normalized = value.trim().replaceAll(',', '');
+  final match = RegExp(r'^\d+(?:\.\d{1,2})?$').firstMatch(normalized);
+  if (match == null) return null;
+  final parts = normalized.split('.');
+  final rupees = int.tryParse(parts.first);
+  if (rupees == null) return null;
+  final paise = parts.length == 1
+      ? 0
+      : int.tryParse(parts[1].padRight(2, '0'));
+  if (paise == null) return null;
+  return rupees * 100 + paise;
+}
+
+int? _parseStockQuantity(String value) {
+  final normalized = value.trim().replaceAll(',', '');
+  if (!RegExp(r'^\d+(?:\.\d{1,3})?$').hasMatch(normalized)) return null;
+  final parts = normalized.split('.');
+  final whole = int.tryParse(parts.first);
+  if (whole == null) return null;
+  final fraction = parts.length == 1
+      ? 0
+      : int.parse(parts[1].padRight(3, '0'));
+  return whole * 1000 + fraction;
+}
+
+// -----------------------------------------------------------------------------
+// DEDICATED STATEFUL DIALOG WIDGETS (SAFELY ENCAPSULATED CONTROLLER LIFECYCLE)
+// -----------------------------------------------------------------------------
+
+class _OpeningStockDialog extends StatefulWidget {
+  const _OpeningStockDialog({
+    required this.controller,
+    required this.row,
+    required this.cleanUnit,
+  });
+
+  final AppController controller;
+  final _InventoryRow row;
+  final String cleanUnit;
+
+  @override
+  State<_OpeningStockDialog> createState() => _OpeningStockDialogState();
+}
+
+class _OpeningStockDialogState extends State<_OpeningStockDialog> {
+  late final TextEditingController _quantity;
+  late final TextEditingController _cost;
+  late final TextEditingController _reason;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _quantity = TextEditingController();
+    _cost = TextEditingController();
+    _reason = TextEditingController(text: 'Initial setup opening inventory');
+  }
+
+  @override
+  void dispose() {
+    _quantity.dispose();
+    _cost.dispose();
+    _reason.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_saving) return; // Prevent duplicate rapid submission
+    final l10n = AppLocalizations.of(context);
+    final qty = _parseStockQuantity(_quantity.text);
+    final unitCost = _parseRupeesToPaise(_cost.text);
+
+    if (qty == null || qty <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.enterQuantityError ?? 'Enter a quantity greater than zero.',
+          ),
+          backgroundColor: const Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    if (unitCost == null || unitCost <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unit purchase cost is required for opening stock.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    if (_reason.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('A reason is required for opening stock.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (confirmCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text('Confirm Opening Stock Registration'),
+        content: Text(
+          'You are registering   at ₹ per unit (Total Valuation: ₹).\n\nOpening stock permanently establishes the starting physical inventory baseline and cannot be re-entered. Do you want to proceed?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(confirmCtx).pop(false),
+            child: Text(l10n?.cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(confirmCtx).pop(true),
+            child: const Text('Confirm & Post'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    setState(() => _saving = true);
+    try {
+      final audit = await widget.controller.addOpeningStock(
+        productId: widget.row.product.productId,
+        variantId: widget.row.variant.variantId,
+        quantity: qty,
+        reason: _reason.text.trim(),
+        unitCostPaise: unitCost,
+        unit: widget.cleanUnit,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop(audit);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$e'),
+          backgroundColor: const Color(0xFFDC2626),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final qtyVal = _parseStockQuantity(_quantity.text) ?? 0;
+    final costVal = _parseRupeesToPaise(_cost.text) ?? 0;
+    final totalValuationRupees =
+        (qtyVal > 0 && costVal > 0) ? (qtyVal * costVal) / 100000.0 : 0.0;
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D9488).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.playlist_add_check_circle_outlined,
+              color: Color(0xFF0D9488),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Register Opening Stock',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  '${widget.row.product.name} • ${widget.row.variant.name}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 480,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Current Stock:',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                    ),
+                    Text(
+                      _formatStock(widget.row.stock),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _quantity,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: widget.cleanUnit.isNotEmpty
+                      ? 'Opening Quantity (${widget.cleanUnit})'
+                      : 'Opening Quantity',
+                  hintText: 'e.g. 10 or 25',
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _cost,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Unit Purchase Cost (₹) *',
+                  hintText: 'e.g. 150.00',
+                  prefixText: '₹ ',
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _reason,
+                decoration: const InputDecoration(
+                  labelText: 'Reason / Setup Note *',
+                  hintText: 'Required for opening stock audit provenance',
+                ),
+              ),
+              if (qtyVal > 0) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFFCBD5E1),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'New Available Stock:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF475569),
+                            ),
+                          ),
+                          Text(
+                            _formatStock(qtyVal),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF16A34A),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (costVal > 0) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total Inventory Valuation:',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF475569),
+                              ),
+                            ),
+                            Text(
+                              '₹${totalValuationRupees.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF132B45),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.of(context).pop(),
+          child: Text(l10n?.cancel ?? 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: _saving ? null : _submit,
+          child: Text(_saving ? (l10n?.saving ?? 'Saving...') : 'Confirm Opening Stock'),
+        ),
+      ],
+    );
+  }
+}
+
+class _StockAdjustmentDialog extends StatefulWidget {
+  const _StockAdjustmentDialog({
+    required this.controller,
+    required this.row,
+    required this.cleanUnit,
+  });
+
+  final AppController controller;
+  final _InventoryRow row;
+  final String cleanUnit;
+
+  @override
+  State<_StockAdjustmentDialog> createState() => _StockAdjustmentDialogState();
+}
+
+class _StockAdjustmentDialogState extends State<_StockAdjustmentDialog> {
+  late final TextEditingController _quantity;
+  late final TextEditingController _cost;
+  late final TextEditingController _reason;
+  late String _transactionType;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _quantity = TextEditingController();
+    _cost = TextEditingController();
+    _reason = TextEditingController();
+    _transactionType = StockTransactionAuditModel.typeAdjustmentIn;
+  }
+
+  @override
+  void dispose() {
+    _quantity.dispose();
+    _cost.dispose();
+    _reason.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_saving) return; // Prevent duplicate rapid submission
+    final l10n = AppLocalizations.of(context);
+    final isIncrease = _transactionType == StockTransactionAuditModel.typeAdjustmentIn ||
+        _transactionType == StockTransactionAuditModel.typeCountCorrection;
+    final qty = _parseStockQuantity(_quantity.text);
+    final unitCost = _parseRupeesToPaise(_cost.text);
+
+    if (qty == null || qty <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.enterQuantityError ?? 'Enter a quantity greater than zero.',
+          ),
+          backgroundColor: const Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    if (!isIncrease) {
+      if (widget.row.stock <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Stock cannot be reduced because the available quantity is 0.'),
+            backgroundColor: Color(0xFFDC2626),
+          ),
+        );
+        return;
+      }
+      if (qty > widget.row.stock) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Insufficient available stock. Please check the quantity.'),
+            backgroundColor: Color(0xFFDC2626),
+          ),
+        );
+        return;
+      }
+    }
+
+    if (_reason.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('A reason is required for every stock movement.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _saving = true);
+    try {
+      final result = await widget.controller.requestOrApplyAdjustment(
+        productId: widget.row.product.productId,
+        variantId: widget.row.variant.variantId,
+        quantity: qty,
+        isIncrease: isIncrease,
+        transactionType: _transactionType,
+        reason: _reason.text.trim(),
+        unit: widget.cleanUnit,
+        unitCostPaise: unitCost,
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pop(result);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$e'),
+          backgroundColor: const Color(0xFFDC2626),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isIncrease = _transactionType == StockTransactionAuditModel.typeAdjustmentIn ||
+        _transactionType == StockTransactionAuditModel.typeCountCorrection;
+    final qtyVal = _parseStockQuantity(_quantity.text) ?? 0;
+    final projected = isIncrease ? widget.row.stock + qtyVal : widget.row.stock - qtyVal;
+    final isNegative = projected < 0;
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD97706).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.tune_rounded,
+              color: Color(0xFFD97706),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Stock Adjustment',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  '${widget.row.product.name} • ${widget.row.variant.name}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 500,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Current Available Stock:',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                    ),
+                    Text(
+                      _formatStock(widget.row.stock),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                initialValue: _transactionType,
+                decoration: const InputDecoration(
+                  labelText: 'Adjustment Reason Type',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: StockTransactionAuditModel.typeAdjustmentIn,
+                    child: Text('Positive Adjustment (Found / Unrecorded Stock)'),
+                  ),
+                  DropdownMenuItem(
+                    value: StockTransactionAuditModel.typeCountCorrection,
+                    child: Text('Physical Stock Count Correction'),
+                  ),
+                  DropdownMenuItem(
+                    value: StockTransactionAuditModel.typeAdjustmentOut,
+                    child: Text('Negative Adjustment (Store Consumption / Sample)'),
+                  ),
+                  DropdownMenuItem(
+                    value: StockTransactionAuditModel.typeDamageLoss,
+                    child: Text('Damage / Breakage / Expiry Loss'),
+                  ),
+                ],
+                onChanged: _saving
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() => _transactionType = value);
+                        }
+                      },
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _quantity,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: widget.cleanUnit.isNotEmpty
+                      ? 'Quantity (${widget.cleanUnit})'
+                      : 'Quantity',
+                  hintText: 'e.g. 5 or 12.5',
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _reason,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Reason for Adjustment *',
+                  hintText: 'Required for stock adjustment audit trail',
+                ),
+              ),
+              if (qtyVal > 0) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isNegative
+                        ? const Color(0xFFDC2626).withValues(alpha: 0.1)
+                        : const Color(0xFF16A34A).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isNegative
+                          ? const Color(0xFFDC2626).withValues(alpha: 0.3)
+                          : const Color(0xFF16A34A).withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    isNegative
+                        ? 'Warning: Resulting balance cannot become negative (${_formatStock(projected)})'
+                        : 'Projected Available Stock: ${_formatStock(projected)}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isNegative
+                          ? const Color(0xFFDC2626)
+                          : const Color(0xFF16A34A),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.of(context).pop(),
+          child: Text(l10n?.cancel ?? 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: _saving ? null : _submit,
+          child: Text(_saving ? (l10n?.saving ?? 'Saving...') : 'Submit Adjustment'),
+        ),
+      ],
+    );
+  }
+}
+
+class _StockHistoryDialog extends StatefulWidget {
+  const _StockHistoryDialog({
+    required this.controller,
+    required this.row,
+    required this.cleanUnit,
+  });
+
+  final AppController controller;
+  final _InventoryRow row;
+  final String cleanUnit;
+
+  @override
+  State<_StockHistoryDialog> createState() => _StockHistoryDialogState();
+}
+
+class _StockHistoryDialogState extends State<_StockHistoryDialog> {
+  bool _hasChanges = false;
+  late Future<List<StockTransactionAuditModel>> _historyFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  void _loadHistory() {
+    _historyFuture = widget.controller.getStockHistory(
+      variantId: widget.row.variant.variantId,
+    );
+  }
+
+  Future<void> _approve(String txId) async {
+    await widget.controller.approveAdjustment(txId);
+    _hasChanges = true;
+    if (mounted) {
+      setState(() => _loadHistory());
+    }
+  }
+
+  Future<void> _reject(String txId) async {
+    await widget.controller.rejectAdjustment(txId);
+    _hasChanges = true;
+    if (mounted) {
+      setState(() => _loadHistory());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canApprove = widget.controller.canApproveAdjustment();
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF132B45).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.history_rounded,
+              color: Color(0xFF132B45),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Stock Movement Audit History',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  '${widget.row.product.name} • ${widget.row.variant.name} (${_formatStock(widget.row.stock)} ${widget.cleanUnit})',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 750,
+        height: 450,
+        child: FutureBuilder<List<StockTransactionAuditModel>>(
+          future: _historyFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
+            final list = snapshot.data ?? [];
+            if (list.isEmpty) {
+              return const Center(
+                child: Text('No stock movement transactions recorded yet.'),
+              );
+            }
+            return ListView.separated(
+              itemCount: list.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final tx = list[index];
+                final isIncrease = tx.newQuantity >= tx.previousQuantity;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isIncrease
+                            ? Icons.arrow_downward_rounded
+                            : Icons.arrow_upward_rounded,
+                        color: isIncrease
+                            ? const Color(0xFF16A34A)
+                            : const Color(0xFFDC2626),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  tx.transactionType,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: tx.isApproved
+                                        ? const Color(0xFF16A34A).withValues(alpha: 0.1)
+                                        : tx.isPendingApproval
+                                            ? const Color(0xFFD97706).withValues(alpha: 0.1)
+                                            : const Color(0xFFDC2626).withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    tx.approvalStatus,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: tx.isApproved
+                                          ? const Color(0xFF16A34A)
+                                          : tx.isPendingApproval
+                                              ? const Color(0xFFD97706)
+                                              : const Color(0xFFDC2626),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '${tx.createdAt.toLocal().toString().split('.').first} • Reason: ${tx.reason}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${isIncrease ? "+" : "-"}${_formatStock(tx.changedQuantity)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isIncrease
+                                  ? const Color(0xFF16A34A)
+                                  : const Color(0xFFDC2626),
+                            ),
+                          ),
+                          Text(
+                            'Balance: ${_formatStock(tx.newQuantity)}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (tx.isPendingApproval && canApprove) ...[
+                        const SizedBox(width: 10),
+                        IconButton(
+                          tooltip: 'Approve Adjustment',
+                          icon: const Icon(
+                            Icons.check_circle_outline,
+                            color: Color(0xFF16A34A),
+                            size: 20,
+                          ),
+                          onPressed: () => _approve(tx.transactionId),
+                        ),
+                        IconButton(
+                          tooltip: 'Reject Adjustment',
+                          icon: const Icon(
+                            Icons.cancel_outlined,
+                            color: Color(0xFFDC2626),
+                            size: 20,
+                          ),
+                          onPressed: () => _reject(tx.transactionId),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_hasChanges),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
 }

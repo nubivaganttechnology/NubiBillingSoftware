@@ -89,7 +89,9 @@ class BusinessSettingsModel {
         autoGenerateBarcode: data['autoGenerateBarcode'] as bool? ?? true,
         roundOffPaise: data['roundOffPaise'] as bool? ?? true,
         emailReceipts: data['emailReceipts'] as bool? ?? false,
-        updatedAt: DateTime.tryParse(data['updatedAt'] as String? ?? ''),
+        updatedAt: data['updatedAt'] is DateTime
+            ? data['updatedAt'] as DateTime
+            : DateTime.tryParse(data['updatedAt']?.toString() ?? ''),
       );
 
   Map<String, dynamic> toMap() => {

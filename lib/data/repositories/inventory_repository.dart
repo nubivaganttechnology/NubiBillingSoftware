@@ -98,6 +98,23 @@ class InventoryRepository {
     return false;
   }
 
+  /// Verifies if a product variant has had its stock initialized via opening stock or purchase receipt.
+  Future<bool> isStockInitialized({
+    required String tenantId,
+    required String businessId,
+    required String outletId,
+    required String variantId,
+    required String token,
+  }) async {
+    return hasOpeningStockBeenInitialized(
+      tenantId: tenantId,
+      businessId: businessId,
+      outletId: outletId,
+      variantId: variantId,
+      token: token,
+    );
+  }
+
   /// Registers physical inventory opening stock during initial setup.
   Future<StockTransactionAuditModel> addOpeningStock({
     required String tenantId,
@@ -130,6 +147,9 @@ class InventoryRepository {
     }
     if (quantity <= 0) {
       throw const AppException('Stock quantity must be greater than zero.');
+    }
+    if (unitCostPaise != null && unitCostPaise < 0) {
+      throw const AppException('Unit purchase cost cannot be negative.');
     }
 
     final alreadyInitialized = await hasOpeningStockBeenInitialized(
@@ -196,6 +216,7 @@ class InventoryRepository {
         'internalBatchNo': 'BAT-OP-${IdGenerator.create('B')}',
         'receivedQty': quantity,
         'availableQty': quantity,
+        'unitCost': cost,
         'receivedDate': now,
         'status': 'AVAILABLE',
         'isDeleted': false,
@@ -350,6 +371,9 @@ class InventoryRepository {
     if (quantity <= 0) {
       throw const AppException('Stock quantity must be greater than zero.');
     }
+    if (unitCostPaise != null && unitCostPaise < 0) {
+      throw const AppException('Unit purchase cost cannot be negative.');
+    }
 
     // Direct quantity increase without authorized method safeguard
     if (isIncrease &&
@@ -380,6 +404,29 @@ class InventoryRepository {
       if (quantity > currentAvailable) {
         throw const AppException(
           'Insufficient available stock. Please check the quantity.',
+        );
+      }
+    }
+
+    // Purchase-first enforcement: Manual adjustments cannot be made before the stock has been initialized
+    // with a valid opening stock or confirmed purchase receipt.
+    final isManualAdjustment = transactionType == StockTransactionAuditModel.typeAdjustmentIn ||
+        transactionType == StockTransactionAuditModel.typeAdjustmentOut ||
+        transactionType == StockTransactionAuditModel.typeCountCorrection ||
+        transactionType == StockTransactionAuditModel.typeDamageLoss;
+
+    if (isManualAdjustment) {
+      final isInitialized = await hasOpeningStockBeenInitialized(
+        tenantId: tenantId,
+        businessId: businessId,
+        outletId: outletId,
+        variantId: variantId,
+        token: token,
+      );
+      if (!isInitialized) {
+        throw const AppException(
+          'This product has no received purchase or opening stock. Please receive a purchase or register existing inventory through Opening Stock.',
+          code: 'uninitialized-stock',
         );
       }
     }
