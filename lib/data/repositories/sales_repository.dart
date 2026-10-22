@@ -196,7 +196,9 @@ class SalesRepository {
         .toString();
     final now = DateTime.now().toUtc();
     late String invoiceNumber;
-    await offline.runAtomicOperation((tx) async {
+    final isFinancialCreditSale = customerId != null || chargeToEmployeeId != null;
+    final runner = isFinancialCreditSale ? offline.serverTransactions : offline;
+    await runner.runAtomicOperation((tx) async {
       final existingInvoice = await tx.get(
         FirebaseConstants.invoices,
         invoiceId,

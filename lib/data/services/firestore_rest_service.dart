@@ -19,6 +19,32 @@ class FirestoreRestService
       '${FirebaseConstants.firestore}/${EnvironmentConfig.projectId}/databases/(default)/documents';
   Uri _uri(String c, String id) =>
       Uri.parse('$_documents/$c/${Uri.encodeComponent(id)}');
+
+  /// Checks whether the remote Firestore server is actively reachable.
+  /// Does not accept device Wi-Fi presence alone; verifies with a real authenticated ping.
+  Future<bool> checkServerAvailability({String? idToken}) async {
+    try {
+      await api.get(
+        Uri.parse('$_documents/${FirebaseConstants.appConfig}/global'),
+        token: idToken,
+      );
+      return true;
+    } on AppException catch (e) {
+      if (e.code == 'not-found' ||
+          e.code == '404' ||
+          e.code == '403' ||
+          e.code == 'permission-denied' ||
+          e.code == '401' ||
+          e.code == 'unauthenticated') {
+        // The server answered the HTTP request, meaning server is reachable.
+        return true;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   Future<Map<String, dynamic>> getDocument(
     String c,
@@ -655,10 +681,27 @@ class _RestFirestoreTransaction implements FirestoreTransactionContext {
   Future<List<FirestoreTransactionDocument>> query(
     String collection,
     List<FirestoreFilter> filters,
-  ) => throw const AppException(
-    'This operation requires the local offline transaction service.',
-    code: 'local-transaction-required',
-  );
+  ) async {
+    final docs = await _firestore.queryDocuments(
+      collection: collection,
+      filters: filters,
+      idToken: _idToken,
+    );
+    return docs.map((doc) {
+      final name = doc['name'] as String? ?? '';
+      final docId = name.split('/').last;
+      final updateTime = doc['updateTime'] as String?;
+      final key = _key(collection, docId);
+      if (updateTime != null) {
+        _readUpdateTimes[key] = updateTime;
+      }
+      return FirestoreTransactionDocument(
+        exists: true,
+        fields: FirestoreRestService.decodeFields(doc['fields']),
+        updateTime: updateTime,
+      );
+    }).toList();
+  }
 
   @override
   void create(String collection, String id, Map<String, dynamic> fields) {

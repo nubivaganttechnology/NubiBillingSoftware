@@ -306,6 +306,21 @@ void main() {
       expect(roundTrip.isGstRegistered, isTrue);
       expect(roundTrip.duePaise, equals(125000));
     });
+
+    test('8b. fromData safely handles DateTime for updatedAt (Firestore timestamp decoding)', () {
+      final now = DateTime.now();
+      final dataWithTimestamp = {
+        'customerId': 'CUS-TS-1',
+        'businessId': 'BUS-1',
+        'name': 'Timestamp Customer',
+        'phone': '9876543218',
+        'updatedAt': now,
+      };
+
+      final model = CustomerModel.fromData('CUS-TS-1', dataWithTimestamp);
+      expect(model.name, equals('Timestamp Customer'));
+      expect(model.updatedAt, equals(now.toIso8601String()));
+    });
   });
 
   group('CustomerValidators GSTIN Structure, State Code & Checksum', () {

@@ -1,10 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/errors/app_exception.dart';
 import '../../data/models/customer_model.dart';
 import '../../data/models/customer_payment_model.dart';
+import '../../data/sync/sync_engine.dart';
 import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
+
+enum PaymentSubmissionState {
+  idle,
+  validating,
+  submitting,
+  confirmed,
+  failed,
+  unknownRequiresStatusCheck,
+}
 
 class CustomerDueCollectionDialog extends StatefulWidget {
   const CustomerDueCollectionDialog({
@@ -30,9 +42,11 @@ class _CustomerDueCollectionDialogState
   final _notesController = TextEditingController();
 
   bool _loading = true;
-  bool _submitting = false;
+  PaymentSubmissionState _state = PaymentSubmissionState.idle;
   String? _error;
   List<Map<String, dynamic>> _invoices = const [];
+  CustomerPaymentRecord? _confirmedPayment;
+  String? _currentIdempotencyKey;
 
   String _paymentMode = 'CASH';
   bool _isManualAllocation = false;
@@ -182,8 +196,39 @@ class _CustomerDueCollectionDialogState
       }
     }
 
+    // Retain stable idempotency key on retries, or create a new one for fresh submission
+    _currentIdempotencyKey ??=
+        'IDEM_${DateTime.now().millisecondsSinceEpoch}_${widget.customer.customerId}';
+
     setState(() {
-      _submitting = true;
+      _state = PaymentSubmissionState.validating;
+      _error = null;
+    });
+
+    // Connectivity & reachability check
+    final offline = widget.controller.offline;
+    if (offline != null) {
+      try {
+        final reachable = await offline.remote.checkServerAvailability(idToken: token);
+        if (!reachable) {
+          setState(() {
+            _state = PaymentSubmissionState.failed;
+            _error =
+                'Server is unreachable. Payment collection requires an active, confirmed server connection.';
+          });
+          return;
+        }
+      } catch (e) {
+        setState(() {
+          _state = PaymentSubmissionState.failed;
+          _error = 'Unable to verify server reachability: $e';
+        });
+        return;
+      }
+    }
+
+    setState(() {
+      _state = PaymentSubmissionState.submitting;
     });
 
     try {
@@ -199,6 +244,7 @@ class _CustomerDueCollectionDialogState
         employeePermissions: appContext.permissions,
         manualAllocations: manualAllocations,
         allowAdvance: _allowAdvance,
+        idempotencyKey: _currentIdempotencyKey,
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
@@ -207,26 +253,80 @@ class _CustomerDueCollectionDialogState
       );
 
       if (mounted) {
-        Navigator.pop(context);
+        setState(() {
+          _state = PaymentSubmissionState.confirmed;
+          _confirmedPayment = paymentRecord;
+        });
         widget.onPaymentCompleted();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF059669),
-            content: Text(
-              'Payment of ₹${_money(paymentRecord.amountPaise)} posted successfully. ${paymentRecord.allocations.length} invoice(s) settled.',
-            ),
-          ),
-        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().toLowerCase();
+      final isTimeoutOrNetworkLoss = msg.contains('timeout') ||
+          msg.contains('socket') ||
+          msg.contains('network') ||
+          msg.contains('connection closed') ||
+          msg.contains('client exception');
+
+      if (isTimeoutOrNetworkLoss) {
+        setState(() {
+          _state = PaymentSubmissionState.unknownRequiresStatusCheck;
+          _error =
+              'Connection interrupted while waiting for server confirmation. Do not re-submit a new payment to avoid double charges. Verify transaction status below.';
+        });
+      } else {
+        setState(() {
+          _state = PaymentSubmissionState.failed;
+          _error = e is AppException ? e.message : '$e';
+          // Clear idempotency key on deterministic client validation errors
+          if (e is AppException &&
+              (e.code == 'validation' || e.code == 'permission-denied')) {
+            _currentIdempotencyKey = null;
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> _verifyStatus() async {
+    final token = widget.controller.idToken;
+    final repo = widget.controller.customerRepository;
+    final key = _currentIdempotencyKey;
+    if (token == null || repo == null || key == null) return;
+
+    setState(() {
+      _state = PaymentSubmissionState.validating;
+      _error = 'Checking status with server...';
+    });
+
+    try {
+      final record = await repo.checkPaymentStatus(
+        paymentId: 'PAY_$key',
+        token: token,
+      );
+      if (mounted) {
+        if (record != null) {
+          setState(() {
+            _state = PaymentSubmissionState.confirmed;
+            _confirmedPayment = record;
+            _error = null;
+          });
+          widget.onPaymentCompleted();
+        } else {
+          setState(() {
+            _state = PaymentSubmissionState.failed;
+            _error =
+                'Server confirmed payment was NOT posted. You can safely retry submission with the same idempotency key.';
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _submitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red.shade700,
-            content: Text(e is AppException ? e.message : '$e'),
-          ),
-        );
+        setState(() {
+          _state = PaymentSubmissionState.unknownRequiresStatusCheck;
+          _error =
+              'Server remains unreachable. Please restore internet connectivity and recheck status: $e';
+        });
       }
     }
   }
@@ -252,7 +352,9 @@ class _CustomerDueCollectionDialogState
                   height: 200,
                   child: Center(child: CircularProgressIndicator()),
                 )
-              : _error != null
+              : _state == PaymentSubmissionState.confirmed && _confirmedPayment != null
+              ? _buildConfirmedReceiptView(theme)
+              : _error != null && _invoices.isEmpty
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -312,7 +414,97 @@ class _CustomerDueCollectionDialogState
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
+
+                      // Offline Stale Data Warning Banner
+                      if (widget.controller.sync?.state == SyncState.offline)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.amber.shade300),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.cloud_off, size: 18, color: Color(0xFFB45309)),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Offline Mode: Showing cached balances. Server confirmation is required to collect dues.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF92400E),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Ambiguous / Interrupted Status Warning
+                      if (_state == PaymentSubmissionState.unknownRequiresStatusCheck)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFFBEB),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFFCD34D)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Transaction Outcome Unconfirmed',
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF92400E)),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _error ?? 'Network connection was interrupted during payment submission.',
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF78350F)),
+                              ),
+                              const SizedBox(height: 8),
+                              FilledButton.tonalIcon(
+                                onPressed: _verifyStatus,
+                                icon: const Icon(Icons.refresh, size: 16),
+                                label: const Text('Verify Payment Status on Server'),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Failed Submission Alert
+                      if (_state == PaymentSubmissionState.failed && _error != null)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF2F2),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFFECACA)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _error!,
+                                  style: const TextStyle(fontSize: 12, color: Color(0xFF991B1B)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
                       // Balance Overview Card
                       Container(
@@ -716,16 +908,23 @@ class _CustomerDueCollectionDialogState
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
-                            onPressed: _submitting ? null : () => Navigator.pop(context),
+                            onPressed: (_state == PaymentSubmissionState.validating ||
+                                    _state == PaymentSubmissionState.submitting)
+                                ? null
+                                : () => Navigator.pop(context),
                             child: Text(l10n?.cancel ?? 'Cancel'),
                           ),
                           const SizedBox(width: 12),
                           FilledButton.icon(
-                            onPressed: _submitting ? null : _submit,
+                            onPressed: (_state == PaymentSubmissionState.validating ||
+                                    _state == PaymentSubmissionState.submitting)
+                                ? null
+                                : _submit,
                             style: FilledButton.styleFrom(
                               backgroundColor: const Color(0xFF059669),
                             ),
-                            icon: _submitting
+                            icon: (_state == PaymentSubmissionState.validating ||
+                                    _state == PaymentSubmissionState.submitting)
                                 ? const SizedBox(
                                     width: 18,
                                     height: 18,
@@ -736,9 +935,11 @@ class _CustomerDueCollectionDialogState
                                   )
                                 : const Icon(Icons.check_circle_outline, size: 18),
                             label: Text(
-                              _submitting
-                                  ? 'Posting Payment...'
-                                  : 'Collect ₹${_money(amountPaise)}',
+                              _state == PaymentSubmissionState.validating
+                                  ? 'Checking Server...'
+                                  : _state == PaymentSubmissionState.submitting
+                                      ? 'Posting Payment...'
+                                      : 'Collect ₹${_money(amountPaise)}',
                             ),
                           ),
                         ],
@@ -748,6 +949,97 @@ class _CustomerDueCollectionDialogState
                 ),
         ),
       ),
+    );
+  }
+
+  Widget _buildConfirmedReceiptView(ThemeData theme) {
+    final payment = _confirmedPayment!;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Icon(Icons.check_circle_rounded, size: 56, color: Color(0xFF059669)),
+        const SizedBox(height: 12),
+        const Text(
+          'Payment Confirmed by Server',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF065F46),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Payment ID: ${payment.paymentId}',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+            fontFamily: 'monospace',
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFECFDF5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFA7F3D0)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Amount Collected:', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    '₹${_money(payment.amountPaise)}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF059669),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Payment Mode:'),
+                  Text(payment.paymentMethod, style: const TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Settled Invoices:'),
+                  Text('${payment.allocations.length} invoice(s)', style: const TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              ),
+              if (payment.excessAdvancePaise > 0) ...[
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Saved as Advance Credit:'),
+                    Text(
+                      '₹${_money(payment.excessAdvancePaise)}',
+                      style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        FilledButton(
+          onPressed: () => Navigator.pop(context),
+          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF059669)),
+          child: const Text('Done'),
+        ),
+      ],
     );
   }
 

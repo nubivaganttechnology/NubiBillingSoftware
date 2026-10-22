@@ -6,6 +6,7 @@ import '../../domain/billing/billing_models.dart';
 import '../../domain/billing/invoice_number.dart';
 import '../models/invoice_model.dart';
 import '../services/firestore_transaction_service.dart';
+import '../services/offline_firestore_service.dart';
 
 String _dateOnly(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-'
@@ -15,6 +16,14 @@ String _dateOnly(DateTime date) =>
 class BillingRepository {
   BillingRepository(this.transactions);
   final FirestoreTransactionService transactions;
+
+  /// Authoritative server transaction runner for online-only financial operations.
+  FirestoreTransactionService get serverTransactions {
+    if (transactions is OfflineFirestoreService) {
+      return (transactions as OfflineFirestoreService).serverTransactions;
+    }
+    return transactions;
+  }
 
   Future<void> settle({
     required String invoiceId,
@@ -26,7 +35,7 @@ class BillingRepository {
     required String token,
   }) async {
     if (amountPaise <= 0) throw const AppException('Enter a payment amount.');
-    await transactions.runAtomicOperation((tx) async {
+    await serverTransactions.runAtomicOperation((tx) async {
       final invoice = await tx.get(FirebaseConstants.invoices, invoiceId);
       final customer = await tx.get(FirebaseConstants.customers, customerId);
       if (!invoice.exists || !customer.exists) {
@@ -133,7 +142,7 @@ class BillingRepository {
     if (trimmedReason.isEmpty) {
       throw const AppException('Enter a cancellation reason.');
     }
-    await transactions.runAtomicOperation((tx) async {
+    await serverTransactions.runAtomicOperation((tx) async {
       final invoice = await tx.get(FirebaseConstants.invoices, invoiceId);
       if (!invoice.exists) throw const AppException('Bill no longer exists.');
       final status = invoice.fields['status'] as String? ?? '';
@@ -307,7 +316,9 @@ class BillingRepository {
       taxStructure: request.taxStructure,
     );
     final invoiceId = 'REQ_${request.requestId}';
-    return transactions.runAtomicOperation((tx) async {
+    final isCreditOrAdvance = request.duePaise > 0 || request.advancePaise > 0;
+    final runner = isCreditOrAdvance ? serverTransactions : transactions;
+    return runner.runAtomicOperation((tx) async {
       final existing = await tx.get(FirebaseConstants.invoices, invoiceId);
       if (existing.exists) {
         return FinalizeBillResult(

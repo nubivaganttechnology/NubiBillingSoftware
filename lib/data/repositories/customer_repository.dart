@@ -1,14 +1,18 @@
+import 'dart:convert';
+
 import '../../core/constants/firebase_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/permissions/permission_catalog.dart';
 import '../../core/utils/id_generator.dart';
 import '../../domain/customers/customer_validators.dart';
+import '../local/local_data_source.dart';
 import '../models/customer_ledger_entry_model.dart';
 import '../models/customer_model.dart';
 import '../models/customer_payment_model.dart';
 import '../services/firestore_data_service.dart';
 import '../services/firestore_rest_service.dart';
 import '../services/firestore_transaction_service.dart';
+import '../services/offline_firestore_service.dart';
 
 class CustomerRepository {
   CustomerRepository(this.firestore, {FirestoreTransactionService? transactions})
@@ -26,6 +30,19 @@ class CustomerRepository {
       throw const AppException('Atomic transaction service is unavailable.');
     }
     return tx;
+  }
+
+  /// Authoritative server transaction service for online-only financial operations.
+  FirestoreTransactionService get serverTransactions {
+    final tx = _transactions;
+    if (tx != null) return tx;
+    if (firestore is OfflineFirestoreService) {
+      return (firestore as OfflineFirestoreService).serverTransactions;
+    }
+    if (firestore is FirestoreTransactionService) {
+      return firestore as FirestoreTransactionService;
+    }
+    throw const AppException('Server transaction service is unavailable.');
   }
 
   Future<List<CustomerModel>> search({
@@ -438,7 +455,13 @@ class CustomerRepository {
         ? 'PAY_${idempotencyKey.trim()}'
         : IdGenerator.create('PAY');
 
-    return transactions.runAtomicOperation((tx) async {
+    final nowIso = DateTime.now().toUtc().toIso8601String();
+    late int finalNextDue;
+    late int finalNextAdvance;
+    late Map<String, dynamic> finalCustomerFields;
+    late List<Map<String, dynamic>> finalSettledInvoices;
+
+    final paymentRecord = await serverTransactions.runAtomicOperation((tx) async {
       // 1. Check idempotency: If payment already recorded, return it without duplicate writes
       final existingPayment =
           await tx.get(FirebaseConstants.payments, paymentId);
@@ -671,6 +694,26 @@ class CustomerRepository {
       final nextDue = (currentCustomerDue - totalAllocated).clamp(0, 1 << 50);
       final nextAdvance = currentCustomerAdvance + excessAdvance;
 
+      finalNextDue = nextDue;
+      finalNextAdvance = nextAdvance;
+      finalCustomerFields = Map<String, dynamic>.from(customerDoc.fields);
+      finalSettledInvoices = allocationsToPost.map((alloc) {
+        final invDoc = outstandingInvoices
+            .firstWhere((doc) => doc.fields['invoiceId'] == alloc.invoiceId);
+        final oldDue = _int(invDoc.fields['dueAmount']);
+        final oldPaid = _int(invDoc.fields['paidPaise']);
+        final newDue = oldDue - alloc.allocatedPaise;
+        final newPaid = oldPaid + alloc.allocatedPaise;
+        final newStatus = newDue == 0 ? 'PAID' : 'PARTIALLY_PAID';
+        return {
+          'invoiceId': alloc.invoiceId,
+          'dueAmount': newDue,
+          'paidPaise': newPaid,
+          'status': newStatus,
+          'base': invDoc.fields,
+        };
+      }).toList();
+
       tx.update(
         FirebaseConstants.customers,
         customerId,
@@ -726,6 +769,77 @@ class CustomerRepository {
 
       return paymentRecord;
     }, idToken: token);
+
+    // Update local read-only cache if available (as SYNCED, zero outbox enqueue)
+    if (firestore is OfflineFirestoreService) {
+      final local = (firestore as OfflineFirestoreService).localDataSource;
+      if (local != null) {
+        try {
+          await local.db.transaction((localTx) async {
+            await LocalDataSource.put(localTx, FirebaseConstants.customers, {
+              'remoteId': customerId,
+              'payloadJson': jsonEncode({
+                ...finalCustomerFields,
+                'duePaise': finalNextDue,
+                'advancePaise': finalNextAdvance,
+                'updatedAt': nowIso,
+              }),
+              'syncStatus': 'SYNCED',
+              'localUpdatedAt': LocalDataSource.now(),
+              'isDeleted': 0,
+            });
+            await LocalDataSource.put(localTx, FirebaseConstants.payments, {
+              'remoteId': paymentId,
+              'payloadJson': jsonEncode(paymentRecord.toData()),
+              'syncStatus': 'SYNCED',
+              'localUpdatedAt': LocalDataSource.now(),
+              'isDeleted': 0,
+            });
+            for (final inv in finalSettledInvoices) {
+              await LocalDataSource.put(localTx, FirebaseConstants.invoices, {
+                'remoteId': inv['invoiceId'],
+                'payloadJson': jsonEncode({
+                  ...inv['base'] as Map<String, dynamic>,
+                  'dueAmount': inv['dueAmount'],
+                  'paidPaise': inv['paidPaise'],
+                  'status': inv['status'],
+                  'paymentStatus': inv['status'],
+                  'updatedAt': nowIso,
+                }),
+                'syncStatus': 'SYNCED',
+                'localUpdatedAt': LocalDataSource.now(),
+                'isDeleted': 0,
+              });
+            }
+          });
+        } catch (_) {}
+      }
+    }
+
+    return paymentRecord;
+  }
+
+  /// Authoritatively queries the server for payment with [paymentId].
+  /// Returns [CustomerPaymentRecord] if confirmed, null if not found (404),
+  /// or throws network exception if the server cannot be reached.
+  Future<CustomerPaymentRecord?> checkPaymentStatus({
+    required String paymentId,
+    required String token,
+  }) async {
+    try {
+      final doc = await firestore.getDocument(
+        FirebaseConstants.payments,
+        paymentId,
+        idToken: token,
+      );
+      final fields = FirestoreRestService.decodeFields(doc['fields']);
+      return CustomerPaymentRecord.fromData(paymentId, fields);
+    } on AppException catch (e) {
+      if (e.code == 'not-found' || e.code == '404') {
+        return null;
+      }
+      rethrow;
+    }
   }
 
   static int _int(dynamic value) =>

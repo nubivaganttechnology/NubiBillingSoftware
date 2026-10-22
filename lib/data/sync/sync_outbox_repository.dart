@@ -12,9 +12,23 @@ import '../services/firestore_transaction_service.dart';
 class SyncOutboxRepository {
   SyncOutboxRepository(this.local);
   final LocalDataSource local;
+
+  /// Authoritative financial collections that must never be created or modified
+  /// via offline synchronization queues.
+  static const financialCollections = {
+    'payments',
+    'payment_allocations',
+    'customer_ledger_entries',
+    'financial_transactions',
+    'supplier_payments',
+    'supplier_credits',
+    'supplier_ledger_entries',
+    'supplier_refunds',
+  };
+
   Future<int> pendingCount() async =>
       Sqflite.firstIntValue(
-        await local.db.rawQuery('SELECT COUNT(*) FROM sync_outbox'),
+        await local.db.rawQuery("SELECT COUNT(*) FROM sync_outbox WHERE status='PENDING'"),
       ) ??
       0;
   Future<void> enqueue(
@@ -26,6 +40,14 @@ class SyncOutboxRepository {
     final collection = write['collection'] as String,
         id = write['id'] as String;
     final operation = write['operation'] as String;
+
+    // Hard boundary: Prohibit offline financial balance changes
+    if (financialCollections.contains(collection)) {
+      throw const AppException(
+        'Offline financial operations are prohibited. Financial transactions must be confirmed directly by the server.',
+        code: 'offline-financial-prohibited',
+      );
+    }
     if ({
           'purchase_corrections',
           'inventory_batch_movements',
@@ -66,6 +88,46 @@ class SyncOutboxRepository {
     if (fields['scopeType'] == 'SYSTEM') {
       throw const AppException('System records are read-only.');
     }
+
+    // Authoritative balance modifications require online server confirmation
+    if (collection == 'customers' || collection == 'customer_balances') {
+      final prevFields = existing == null
+          ? <String, dynamic>{}
+          : FirestoreRestService.decodeFields(
+              jsonDecode(existing['payloadJson'] as String) as Map<String, dynamic>,
+            );
+      final newDue = (fields['duePaise'] as num?)?.toInt() ?? 0;
+      final oldDue = (prevFields['duePaise'] as num?)?.toInt() ?? 0;
+      final newAdv = (fields['advancePaise'] as num?)?.toInt() ?? 0;
+      final oldAdv = (prevFields['advancePaise'] as num?)?.toInt() ?? 0;
+      if (newDue != oldDue || newAdv != oldAdv) {
+        throw const AppException(
+          'Authoritative customer financial balances cannot be modified offline. Server confirmation is required.',
+          code: 'offline-balance-prohibited',
+        );
+      }
+    }
+
+    if (collection == 'invoices') {
+      final prevFields = existing == null
+          ? <String, dynamic>{}
+          : FirestoreRestService.decodeFields(
+              jsonDecode(existing['payloadJson'] as String) as Map<String, dynamic>,
+            );
+      final newDue = (fields['dueAmount'] as num?)?.toInt() ?? 0;
+      final oldDue = (prevFields['dueAmount'] as num?)?.toInt() ?? 0;
+      final newPaid = (fields['paidPaise'] as num?)?.toInt() ?? 0;
+      final oldPaid = (prevFields['paidPaise'] as num?)?.toInt() ?? 0;
+      final newStatus = fields['status']?.toString() ?? '';
+      final oldStatus = prevFields['status']?.toString() ?? '';
+      if (newDue != oldDue || newPaid != oldPaid || (newStatus == 'PAID' && oldStatus != 'PAID')) {
+        throw const AppException(
+          'Authoritative invoice settlements cannot be performed offline. Server confirmation is required.',
+          code: 'offline-settlement-prohibited',
+        );
+      }
+    }
+
     final revision = ((existing?['localRevision'] as int?) ?? 0) + 1;
     final status = operation == 'DELETE'
         ? 'PENDING_DELETE'
@@ -141,6 +203,25 @@ class SyncOutboxRepository {
         whereArgs: [candidate['batchId']],
         orderBy: 'id',
       );
+
+      // Quarantine legacy batches containing financial collections
+      final hasFinancialRow = rows.any(
+        (r) => financialCollections.contains(r['entityType'] as String?),
+      );
+      if (hasFinancialRow) {
+        await local.db.update(
+          'sync_outbox',
+          {
+            'status': 'FAILED',
+            'lastError':
+                'RECONCILIATION_REQUIRED: Legacy financial operation quarantined. Online reconciliation required.',
+          },
+          where: 'batchId=?',
+          whereArgs: [candidate['batchId']],
+        );
+        continue;
+      }
+
       bool blocked = false;
       for (final row in rows) {
         final preceding = await local.db.query(
@@ -179,10 +260,37 @@ class SyncOutboxRepository {
     return [];
   }
 
+  /// Identifies legacy or unconfirmed financial sync entries in the outbox
+  /// for administrative audit and reconciliation.
+  Future<List<Map<String, dynamic>>> getPendingFinancialEntries() async {
+    return local.db.query(
+      'sync_outbox',
+      where:
+          "lastError LIKE 'RECONCILIATION_REQUIRED%' OR entityType IN ('payments', 'payment_allocations', 'customer_ledger_entries', 'financial_transactions')",
+      orderBy: 'id ASC',
+    );
+  }
+
+  /// Resolves a quarantined legacy financial batch safely without losing audit trail.
+  Future<void> reconcileLegacyFinancialBatch(
+    String batchId, {
+    required String resolution,
+  }) async {
+    await local.db.update(
+      'sync_outbox',
+      {
+        'status': 'FAILED',
+        'lastError': 'RECONCILED: $resolution',
+      },
+      where: 'batchId=?',
+      whereArgs: [batchId],
+    );
+  }
+
   Future<void> retry() => local.db.update('sync_outbox', {
     'status': 'PENDING',
     'lastError': null,
-  }, where: "status='FAILED'");
+  }, where: "status='FAILED' AND lastError NOT LIKE 'RECONCILIATION_REQUIRED%' AND lastError NOT LIKE 'RECONCILED%'");
 }
 
 class LocalTransactionContext implements FirestoreTransactionContext {

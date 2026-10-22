@@ -160,8 +160,9 @@ class OfflineFirestoreService
         final covering = syncQueries.where((row) {
           if (row['collectionName'] != query.collection ||
               row['lastSyncedAt'] == null ||
-              row['lastError'] != null)
+              row['lastError'] != null) {
             return false;
+          }
           final spec = jsonDecode(row['queryJson'] as String) as Map;
           if (spec['limit'] != null) return false;
           final filters = spec['filters'];
@@ -997,6 +998,12 @@ class OfflineFirestoreService
     sumField: sumField,
     idToken: idToken,
   );
+  /// Direct reference to the server transaction service for online-only financial operations.
+  FirestoreTransactionService get serverTransactions => remote;
+
+  /// Exposes the local cached data source for read-only query display.
+  LocalDataSource? get localDataSource => _local;
+
   @override
   Future<T> runAtomicOperation<T>(
     Future<T> Function(FirestoreTransactionContext) action, {
@@ -1010,6 +1017,18 @@ class OfflineFirestoreService
       if (context.writes.length > 500) {
         throw const AppException('Atomic operation exceeds 500 writes.');
       }
+
+      // Hard check: Financial operations require confirmed server transaction
+      for (final write in context.writes.values) {
+        final col = write['collection'] as String?;
+        if (SyncOutboxRepository.financialCollections.contains(col)) {
+          throw const AppException(
+            'Financial transactions must be confirmed directly by the server and cannot run in offline mode.',
+            code: 'offline-financial-prohibited',
+          );
+        }
+      }
+
       final outbox = SyncOutboxRepository(local);
       for (final write in context.writes.values) {
         // Capture baselines even for simple service writes that did not call get.

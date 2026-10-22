@@ -1635,6 +1635,26 @@ class SyncEngine extends ChangeNotifier {
     super.notifyListeners();
   }
 
+  /// Inspects any legacy or quarantined financial mutations in the outbox.
+  Future<List<Map<String, dynamic>>> getPendingFinancialEntries() async {
+    final src = local;
+    if (src == null) return const [];
+    return SyncOutboxRepository(src).getPendingFinancialEntries();
+  }
+
+  /// Manually reconciles a legacy queued financial batch.
+  Future<void> reconcileLegacyFinancialBatch(
+    String batchId, {
+    required String resolution,
+  }) async {
+    final src = local;
+    if (src == null) return;
+    await SyncOutboxRepository(src).reconcileLegacyFinancialBatch(
+      batchId,
+      resolution: resolution,
+    );
+  }
+
   @override
   void dispose() {
     _disposed = true;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/customer_ledger_entry_model.dart';
 import '../../data/models/customer_model.dart';
+import '../../data/sync/sync_engine.dart';
 import '../app_controller.dart';
 
 class CustomerLedgerDialog extends StatefulWidget {
@@ -121,7 +122,36 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
+
+              // Offline Stale Data Indicator
+              if (widget.controller.sync?.state == SyncState.offline)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade300),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.cloud_off, size: 16, color: Color(0xFFB45309)),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Offline Mode: Displaying locally cached ledger. Real-time balance and entries may be outdated until connected to server.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF92400E),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 6),
 
               // KPI Balance Summary
               Container(

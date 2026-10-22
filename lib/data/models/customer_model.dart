@@ -54,9 +54,9 @@ class CustomerModel {
   bool get isUnspecified => customerType == typeUnspecified;
 
   factory CustomerModel.fromData(String id, Map<String, dynamic> data) {
-    final rawCustomerType = data['customerType'] as String?;
+    final rawCustomerType = data['customerType']?.toString();
     final rawIsGstRegistered = data['isGstRegistered'] as bool?;
-    final rawGstin = data['gstin'] as String?;
+    final rawGstin = data['gstin']?.toString();
     final normalizedGstin = rawGstin?.trim().isEmpty == true ? null : rawGstin?.trim().toUpperCase();
 
     // Backward compatibility:
@@ -79,24 +79,29 @@ class CustomerModel {
           CustomerValidators.isValidGstin(normalizedGstin);
     }
 
+    final rawUpdatedAt = data['updatedAt'];
+    final updatedAt = rawUpdatedAt is DateTime
+        ? rawUpdatedAt.toIso8601String()
+        : rawUpdatedAt?.toString();
+
     return CustomerModel(
-      customerId: data['customerId'] as String? ?? id,
-      businessId: data['businessId'] as String? ?? '',
-      tenantId: data['tenantId'] as String?,
-      name: data['name'] as String? ?? '',
-      phone: data['phone'] as String? ?? '',
-      nameLower: data['nameLower'] as String? ?? '',
+      customerId: data['customerId']?.toString() ?? id,
+      businessId: data['businessId']?.toString() ?? '',
+      tenantId: data['tenantId']?.toString(),
+      name: data['name']?.toString() ?? '',
+      phone: data['phone']?.toString() ?? '',
+      nameLower: data['nameLower']?.toString() ?? '',
       customerType: customerType,
       isGstRegistered: isGstRegistered,
-      stateCode: data['stateCode'] as String?,
+      stateCode: data['stateCode']?.toString(),
       gstin: normalizedGstin,
-      address: data['address'] as String?,
+      address: data['address']?.toString(),
       creditLimitPaise: (data['creditLimitPaise'] as num?)?.toInt(),
       duePaise: (data['duePaise'] as num?)?.toInt() ?? 0,
       advancePaise: (data['advancePaise'] as num?)?.toInt() ?? 0,
-      status: data['status'] as String? ?? 'ACTIVE',
-      updatedAt: data['updatedAt'] as String?,
-      syncMutationId: data['_syncMutationId'] as String? ?? data['syncMutationId'] as String?,
+      status: data['status']?.toString() ?? 'ACTIVE',
+      updatedAt: updatedAt,
+      syncMutationId: data['_syncMutationId']?.toString() ?? data['syncMutationId']?.toString(),
     );
   }
 
