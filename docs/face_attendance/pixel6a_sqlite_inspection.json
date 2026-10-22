@@ -1,0 +1,15 @@
+{
+  "syntheticOnly": true,
+  "databaseFormat": "SQLite 3",
+  "records": 7,
+  "allValuesBlobs": true,
+  "ivLengths": [
+    12
+  ],
+  "allRecordIvsDistinct": true,
+  "plaintextSentinelAbsent": true,
+  "plaintextEmployeeAbsent": true,
+  "plaintextModelAbsent": true,
+  "plaintextTemplatesAbsent": true,
+  "schemaVersion": 1
+}

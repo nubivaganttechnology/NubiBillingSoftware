@@ -1,0 +1,665 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":36673,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_biometric_vault_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_biometric_vault_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"suite":{"id":2,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"suite","time":3}
+{"test":{"id":3,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/offline_face_recognition_test.dart","suiteID":2,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":3}
+{"suite":{"id":4,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_capture_processor_test.dart"},"type":"suite","time":3}
+{"test":{"id":5,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_capture_processor_test.dart","suiteID":4,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":3}
+{"suite":{"id":6,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/android_face_vault_channel_test.dart"},"type":"suite","time":3}
+{"test":{"id":7,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/android_face_vault_channel_test.dart","suiteID":6,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":4}
+{"count":13,"time":5,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2097}
+{"group":{"id":8,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":6,"line":null,"column":null,"url":null},"type":"group","time":2099}
+{"test":{"id":9,"name":"enrollment requires consent and stores only normalized embeddings","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":71,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_biometric_vault_test.dart"},"type":"testStart","time":2099}
+{"testID":3,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2121}
+{"group":{"id":10,"suiteID":2,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":10,"line":null,"column":null,"url":null},"type":"group","time":2121}
+{"test":{"id":11,"name":"synthetic cosine matching accepts a unique match only","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":22,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2121}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2130}
+{"test":{"id":12,"name":"model changes require re-enrollment and withdrawal removes the template","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":101,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_biometric_vault_test.dart"},"type":"testStart","time":2130}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2135}
+{"test":{"id":13,"name":"invalid, non-finite or empty embedding samples are rejected","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":123,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_biometric_vault_test.dart"},"type":"testStart","time":2135}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2137}
+{"test":{"id":14,"name":"duplicate enrollment needs explicit replacement and keeps a stable employee ID","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":138,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_biometric_vault_test.dart"},"type":"testStart","time":2137}
+{"testID":11,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2139}
+{"test":{"id":15,"name":"unknown is rejected instead of selecting the nearest employee","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":35,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2139}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2140}
+{"test":{"id":16,"name":"two identities above threshold without a safe margin are ambiguous","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":50,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2141}
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2142}
+{"test":{"id":17,"name":"zero, nonfinite, dimension-mismatched and expired templates fail safely","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":63,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2143}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2143}
+{"test":{"id":18,"name":"expired templates are removed and unrelated scopes remain invisible","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":179,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_biometric_vault_test.dart"},"type":"testStart","time":2144}
+{"testID":17,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2144}
+{"test":{"id":19,"name":"a different device or model cannot supply a matching identity","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":102,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2144}
+{"testID":19,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2146}
+{"test":{"id":20,"name":"production recognizer has no model, weights or recognition fallback","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":133,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2146}
+{"testID":18,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2146}
+{"test":{"id":21,"name":"corrupt, nonfinite or oversized profiles are rejected without returning vectors","suiteID":0,"groupIDs":[8],"metadata":{"skip":false,"skipReason":null},"line":208,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_biometric_vault_test.dart"},"type":"testStart","time":2147}
+{"testID":21,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2150}
+{"testID":20,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2154}
+{"test":{"id":22,"name":"identity without PresentationAttackStatus.unavailable PAD cannot create an attendance ticket","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":147,"column":5,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2154}
+{"suite":{"id":23,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_attendance_page_test.dart"},"type":"suite","time":2159}
+{"test":{"id":24,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_attendance_page_test.dart","suiteID":23,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2160}
+{"testID":22,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2160}
+{"test":{"id":25,"name":"identity without PresentationAttackStatus.rejected PAD cannot create an attendance ticket","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":147,"column":5,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2162}
+{"testID":25,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2163}
+{"test":{"id":26,"name":"missing calibration, wrong preprocessing and suspect device clock fail closed","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":171,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2163}
+{"testID":26,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2165}
+{"test":{"id":27,"name":"ticket is scope-bound, fresh, capture-time-bound and single use","suiteID":2,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":204,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_face_recognition_test.dart"},"type":"testStart","time":2165}
+{"testID":27,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2169}
+{"suite":{"id":28,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_capture_page_test.dart"},"type":"suite","time":2176}
+{"test":{"id":29,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/face_capture_page_test.dart","suiteID":28,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2176}
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2199}
+{"group":{"id":30,"suiteID":4,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":2199}
+{"test":{"id":31,"name":"inverse upright coordinates cover all four sensor rotations","suiteID":4,"groupIDs":[30],"metadata":{"skip":false,"skipReason":null},"line":31,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_capture_processor_test.dart"},"type":"testStart","time":2199}
+{"testID":31,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2210}
+{"test":{"id":32,"name":"quality heuristics reject darkness, glare, blur and malformed crops","suiteID":4,"groupIDs":[30],"metadata":{"skip":false,"skipReason":null},"line":49,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_capture_processor_test.dart"},"type":"testStart","time":2211}
+{"testID":32,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2214}
+{"test":{"id":33,"name":"malformed frames, no face, multiple faces and obscured landmarks are rejected","suiteID":4,"groupIDs":[30],"metadata":{"skip":false,"skipReason":null},"line":80,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_capture_processor_test.dart"},"type":"testStart","time":2215}
+{"testID":33,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2226}
+{"suite":{"id":34,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"suite","time":2232}
+{"test":{"id":35,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart","suiteID":34,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2232}
+{"testID":7,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2326}
+{"group":{"id":36,"suiteID":6,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":2326}
+{"test":{"id":37,"name":"Android adapter sends scoped lifecycle calls only to its local native channel","suiteID":6,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":31,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/android_face_vault_channel_test.dart"},"type":"testStart","time":2326}
+{"testID":37,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2341}
+{"test":{"id":38,"name":"native key or decryption failure becomes a generic manual fallback error","suiteID":6,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":62,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/android_face_vault_channel_test.dart"},"type":"testStart","time":2341}
+{"testID":38,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2351}
+{"test":{"id":39,"name":"non-Android platforms never call the protected vault","suiteID":6,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":85,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/android_face_vault_channel_test.dart"},"type":"testStart","time":2351}
+{"testID":39,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2353}
+{"suite":{"id":40,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/sales_posting_repository_test.dart"},"type":"suite","time":2358}
+{"test":{"id":41,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/sales_posting_repository_test.dart","suiteID":40,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2359}
+{"testID":24,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3637}
+{"group":{"id":42,"suiteID":23,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":3638}
+{"test":{"id":43,"name":"assigned staff and scope are visible; missing model blocks enrollment and attendance (variant: TargetPlatform.android)","suiteID":23,"groupIDs":[42],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":67,"root_column":3,"root_url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_attendance_page_test.dart"},"type":"testStart","time":3638}
+{"testID":35,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3863}
+{"group":{"id":44,"suiteID":34,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":null,"column":null,"url":null},"type":"group","time":3863}
+{"test":{"id":45,"name":"split outlet shifts combine before daily overtime threshold is applied","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":103,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3863}
+{"testID":45,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3881}
+{"test":{"id":46,"name":"attendance is idempotent, approval calculates overtime, and approved rows cannot be overwritten","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":130,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3882}
+{"testID":46,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3897}
+{"test":{"id":47,"name":"paid leave and half days produce explicit payable units; invalid check-out is rejected","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":191,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3897}
+{"testID":47,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3900}
+{"test":{"id":48,"name":"face kiosk check-in/out creates immutable idempotent events and pending payroll attendance","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":250,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3900}
+{"testID":48,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3912}
+{"test":{"id":49,"name":"listAttendance returns attendance records matching business and date range","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":413,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3912}
+{"testID":49,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3916}
+{"test":{"id":50,"name":"model and PAD version labels alone cannot record face attendance","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":442,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3916}
+{"testID":50,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3918}
+{"test":{"id":51,"name":"verified checkout needs an open session and inactive staff are rejected","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":473,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3918}
+{"testID":51,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3921}
+{"test":{"id":52,"name":"overnight face checkout closes the original workday and cannot reopen it","suiteID":34,"groupIDs":[44],"metadata":{"skip":false,"skipReason":null},"line":531,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_attendance_repository_test.dart"},"type":"testStart","time":3922}
+{"testID":52,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3926}
+{"suite":{"id":53,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"suite","time":3935}
+{"test":{"id":54,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/staff_salary_repository_test.dart","suiteID":53,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":3935}
+{"testID":29,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3998}
+{"group":{"id":55,"suiteID":28,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":3998}
+{"test":{"id":56,"name":"permission denial leaves capture disabled and closes preview privacy on exit (variant: TargetPlatform.android)","suiteID":28,"groupIDs":[55],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":51,"root_column":3,"root_url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_capture_page_test.dart"},"type":"testStart","time":3998}
+{"testID":41,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":4293}
+{"group":{"id":57,"suiteID":40,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":4293}
+{"test":{"id":58,"name":"staff khata invoice links employee and posts one receivable without bypassing stock","suiteID":40,"groupIDs":[57],"metadata":{"skip":false,"skipReason":null},"line":222,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/sales_posting_repository_test.dart"},"type":"testStart","time":4293}
+{"testID":58,"messageType":"print","message":"[startup] Opening account database","type":"print","time":4311}
+{"testID":54,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":4578}
+{"group":{"id":59,"suiteID":53,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":9,"line":null,"column":null,"url":null},"type":"group","time":4578}
+{"test":{"id":60,"name":"monthly and daily calculations use integer paise and rounded work units","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":80,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4578}
+{"testID":60,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4593}
+{"test":{"id":61,"name":"effective outlet allocations reject any basis point total other than 10000","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":118,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4593}
+{"testID":61,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4600}
+{"test":{"id":62,"name":"salary profile IDs include business scope for employees shared across businesses","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":136,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4600}
+{"testID":62,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4611}
+{"test":{"id":63,"name":"approving the same earned period is idempotent and allocates expense once","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":160,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4611}
+{"testID":63,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4618}
+{"test":{"id":64,"name":"salary period accepts approved attendance snapshot once and blocks reuse","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":221,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4618}
+{"testID":64,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4624}
+{"test":{"id":65,"name":"staff invoice payments and salary offsets keep cash and payable separate","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":288,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4624}
+{"testID":65,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4631}
+{"test":{"id":66,"name":"advance creates one cash event; replaying its request cannot duplicate it","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":408,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4631}
+{"testID":66,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4633}
+{"test":{"id":67,"name":"salary payments support partial settlement and request replay is idempotent","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":466,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4634}
+{"testID":67,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4638}
+{"test":{"id":68,"name":"employee acknowledgment is recorded once and cannot be silently overwritten","suiteID":53,"groupIDs":[59],"metadata":{"skip":false,"skipReason":null},"line":540,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_repository_test.dart"},"type":"testStart","time":4638}
+{"testID":68,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4641}
+{"suite":{"id":69,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/staff_salary_sqlite_upgrade_test.dart"},"type":"suite","time":4648}
+{"test":{"id":70,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/staff_salary_sqlite_upgrade_test.dart","suiteID":69,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":4648}
+{"testID":43,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4663}
+{"test":{"id":71,"name":"attendance permission is required before showing staff or enrollment actions (variant: TargetPlatform.android)","suiteID":23,"groupIDs":[42],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":126,"root_column":3,"root_url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_attendance_page_test.dart"},"type":"testStart","time":4664}
+{"testID":56,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4675}
+{"test":{"id":72,"name":"missing protected preview prevents any camera access (variant: TargetPlatform.android)","suiteID":28,"groupIDs":[55],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":91,"root_column":3,"root_url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/face_capture_page_test.dart"},"type":"testStart","time":4676}
+{"testID":71,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4694}
+{"suite":{"id":73,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"suite","time":4741}
+{"test":{"id":74,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/offline_sync_test.dart","suiteID":73,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":4741}
+{"testID":72,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4742}
+{"suite":{"id":75,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"suite","time":4755}
+{"test":{"id":76,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/complete_audit_report_test.dart","suiteID":75,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":4755}
+{"testID":58,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":5298}
+{"testID":70,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5320}
+{"group":{"id":77,"suiteID":69,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":5320}
+{"test":{"id":78,"name":"v12 disposable database opens at v13 and preserves product and pending outbox data","suiteID":69,"groupIDs":[77],"metadata":{"skip":false,"skipReason":null},"line":11,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_sqlite_upgrade_test.dart"},"type":"testStart","time":5320}
+{"testID":58,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5409}
+{"test":{"id":79,"name":"face kiosk attendance events persist in SQLite with outbox records offline","suiteID":40,"groupIDs":[57],"metadata":{"skip":false,"skipReason":null},"line":266,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/sales_posting_repository_test.dart"},"type":"testStart","time":5410}
+{"testID":79,"messageType":"print","message":"[startup] Opening account database","type":"print","time":5414}
+{"testID":79,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":5665}
+{"testID":78,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5716}
+{"testID":74,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5721}
+{"group":{"id":80,"suiteID":73,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":37,"line":null,"column":null,"url":null},"type":"group","time":5721}
+{"test":{"id":81,"name":"staff advance stays in the SQLite outbox offline and synchronizes once after reconnect","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":296,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":5721}
+{"test":{"id":82,"name":"salary documents and pending outbox survive closing and reopening SQLite","suiteID":69,"groupIDs":[77],"metadata":{"skip":false,"skipReason":null},"line":94,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/staff_salary_sqlite_upgrade_test.dart"},"type":"testStart","time":5722}
+{"testID":79,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5748}
+{"test":{"id":83,"name":"manual allocation posts invoice, SALE movements and stock atomically","suiteID":40,"groupIDs":[57],"metadata":{"skip":false,"skipReason":null},"line":367,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/sales_posting_repository_test.dart"},"type":"testStart","time":5748}
+{"testID":83,"messageType":"print","message":"[startup] Opening account database","type":"print","time":5750}
+{"testID":81,"messageType":"print","message":"[startup] Opening account database","type":"print","time":5751}
+{"testID":83,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":5926}
+{"testID":82,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5977}
+{"testID":83,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5978}
+{"test":{"id":84,"name":"under-allocation and legacy batches are rejected without writes","suiteID":40,"groupIDs":[57],"metadata":{"skip":false,"skipReason":null},"line":439,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/sales_posting_repository_test.dart"},"type":"testStart","time":5978}
+{"testID":84,"messageType":"print","message":"[startup] Opening account database","type":"print","time":5980}
+{"suite":{"id":85,"platform":"vm","path":"/Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/reproduce_audit_failure_test.dart"},"type":"suite","time":5986}
+{"test":{"id":86,"name":"loading /Users/sksuman/Desktop/Billing ERP/Test 2/NubiBillingSoftware-main/test/reproduce_audit_failure_test.dart","suiteID":85,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":5986}
+{"testID":81,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":6006}
+{"testID":81,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":6048}
+{"testID":81,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":6050}
+{"testID":84,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":6109}
+{"testID":84,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6132}
+{"test":{"id":87,"name":"ledger availability and exact batch scope are enforced","suiteID":40,"groupIDs":[57],"metadata":{"skip":false,"skipReason":null},"line":471,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/sales_posting_repository_test.dart"},"type":"testStart","time":6133}
+{"testID":87,"messageType":"print","message":"[startup] Opening account database","type":"print","time":6134}
+{"testID":81,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":6169}
+{"testID":81,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":6170}
+{"testID":81,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":6183}
+{"testID":81,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":6184}
+{"testID":87,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":6262}
+{"testID":87,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6291}
+{"testID":81,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":6460}
+{"testID":81,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6554}
+{"test":{"id":88,"name":"salary outbox survives REST authorization failure and retries without duplicate posting","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":366,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":6554}
+{"testID":88,"messageType":"print","message":"[startup] Opening account database","type":"print","time":6555}
+{"testID":88,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":6660}
+{"testID":88,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":6682}
+{"testID":88,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":6683}
+{"testID":88,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":6785}
+{"testID":88,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":6786}
+{"testID":88,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":6799}
+{"testID":88,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":6799}
+{"testID":88,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":6989}
+{"testID":88,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":7240}
+{"testID":88,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":7240}
+{"testID":88,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":7247}
+{"testID":88,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7504}
+{"test":{"id":89,"name":"salary periods are not registered in local sync scope without salary permission","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":437,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":7504}
+{"testID":89,"messageType":"print","message":"[startup] Opening account database","type":"print","time":7506}
+{"testID":89,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":7611}
+{"testID":89,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":7631}
+{"testID":89,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":7632}
+{"testID":89,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7673}
+{"test":{"id":90,"name":"attendance sync uses the dedicated access scope and outlet isolation","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":452,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":7673}
+{"testID":90,"messageType":"print","message":"[startup] Opening account database","type":"print","time":7674}
+{"testID":90,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":7784}
+{"testID":90,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":7807}
+{"testID":90,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":7808}
+{"testID":90,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":7893}
+{"testID":90,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":7894}
+{"testID":90,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7946}
+{"test":{"id":91,"name":"ten minutes idle and repeated local navigation generate zero reads","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":516,"root_column":3,"root_url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":7946}
+{"testID":91,"messageType":"print","message":"[startup] Opening account database","type":"print","time":7948}
+{"testID":76,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":7983}
+{"group":{"id":92,"suiteID":75,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":34,"line":null,"column":null,"url":null},"type":"group","time":7984}
+{"test":{"id":93,"name":"AUDIT-001/002 reference arithmetic exposes imbalance; missing source opening is never estimated","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":322,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":7984}
+{"testID":93,"messageType":"print","message":"[startup] Opening account database","type":"print","time":8000}
+{"testID":86,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":8003}
+{"group":{"id":94,"suiteID":85,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":8004}
+{"test":{"id":95,"name":"deterministic Product Edit regression persists packSize 12, warranty 2 Years and mixingRatio 2:1 offline and after reopen","suiteID":85,"groupIDs":[94],"metadata":{"skip":false,"skipReason":null},"line":83,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/reproduce_audit_failure_test.dart"},"type":"testStart","time":8004}
+{"testID":95,"messageType":"print","message":"[startup] Opening account database","type":"print","time":8028}
+{"testID":91,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":8077}
+{"testID":93,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":8219}
+{"testID":95,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":8255}
+{"testID":91,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":8260}
+{"testID":91,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":8261}
+{"testID":91,"messageType":"print","message":"[startup] SyncEngine.start: connectivity listener","type":"print","time":8291}
+{"testID":91,"messageType":"print","message":"[startup] SyncEngine.start completed","type":"print","time":8291}
+{"testID":91,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":8351}
+{"testID":91,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":8352}
+{"testID":91,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":8360}
+{"testID":91,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":8360}
+{"testID":93,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8407}
+{"test":{"id":96,"name":"AUDIT-003/004 complete embedded snapshots reconcile 6800 with all HSN/rate rows; discount is not subtracted twice","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":341,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":8408}
+{"testID":96,"messageType":"print","message":"[startup] Opening account database","type":"print","time":8410}
+{"testID":96,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":8596}
+{"testID":91,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":8689}
+{"testID":96,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8718}
+{"test":{"id":97,"name":"validated batch receipt costs yield independent COGS and balanced trading calculation","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":362,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":8718}
+{"testID":97,"messageType":"print","message":"[startup] Opening account database","type":"print","time":8719}
+{"testID":91,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8768}
+{"test":{"id":98,"name":"outbox-only upload does not pull and query identity is stable across scope switches","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":551,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":8768}
+{"testID":98,"messageType":"print","message":"[startup] Opening account database","type":"print","time":8770}
+{"testID":97,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":8859}
+{"testID":98,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":8907}
+{"testID":98,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":8930}
+{"testID":98,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":8931}
+{"testID":97,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8981}
+{"test":{"id":99,"name":"India date range includes final microsecond and excludes next day; undated sales block reliable revenue","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":375,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":8981}
+{"testID":99,"messageType":"print","message":"[startup] Opening account database","type":"print","time":8982}
+{"testID":98,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":8998}
+{"testID":98,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":8998}
+{"testID":98,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":9003}
+{"testID":98,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":9004}
+{"testID":99,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":9125}
+{"testID":98,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":9218}
+{"testID":99,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9234}
+{"test":{"id":100,"name":"zero-sales empty synchronized period is zero observed activity and not certified balance sheet","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":397,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":9234}
+{"testID":100,"messageType":"print","message":"[startup] Opening account database","type":"print","time":9236}
+{"testID":98,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":9282}
+{"testID":98,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":9283}
+{"testID":98,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":9323}
+{"testID":98,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":9323}
+{"testID":98,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":9329}
+{"testID":100,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":9361}
+{"testID":100,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9432}
+{"test":{"id":101,"name":"missing synchronization evidence is not a zero-activity report and leaves cursors untouched","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":405,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":9432}
+{"testID":101,"messageType":"print","message":"[startup] Opening account database","type":"print","time":9436}
+{"testID":101,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":9558}
+{"testID":98,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":9588}
+{"testID":98,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":9589}
+{"testID":98,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":9618}
+{"testID":98,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9632}
+{"test":{"id":102,"name":"verified central product master bootstraps atomically and searches locally","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":582,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":9632}
+{"testID":102,"messageType":"print","message":"[startup] Opening account database","type":"print","time":9634}
+{"testID":101,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9652}
+{"test":{"id":103,"name":"negative stock and mixed thousandths are exposed without silently scaling balances","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":416,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":9652}
+{"testID":103,"messageType":"print","message":"[startup] Opening account database","type":"print","time":9653}
+{"testID":102,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":9745}
+{"testID":103,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":9773}
+{"testID":102,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":9816}
+{"testID":102,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":9816}
+{"testID":103,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9860}
+{"test":{"id":104,"name":"unknown GST never defaults to 0 or 18 and missing HSN remains visible","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":433,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":9860}
+{"testID":104,"messageType":"print","message":"[startup] Opening account database","type":"print","time":9861}
+{"testID":102,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":9866}
+{"testID":102,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":9867}
+{"testID":102,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":9883}
+{"testID":102,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":9884}
+{"testID":104,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":9980}
+{"testID":104,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10050}
+{"test":{"id":105,"name":"all outlets include historical outlets and business rent once; single outlet does not invent allocation","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":466,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":10050}
+{"testID":105,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10054}
+{"testID":102,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":10115}
+{"testID":105,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10169}
+{"testID":102,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":10189}
+{"testID":102,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":10190}
+{"testID":102,"messageType":"print","message":"[startup] Verified source fetch complete: 0 document(s)","type":"print","time":10198}
+{"testID":102,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=1305 expected=1305 version=null","type":"print","time":10272}
+{"testID":102,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":10272}
+{"testID":105,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10274}
+{"test":{"id":106,"name":"approved salary is accrued once with saved 60/40 allocations; advances and settlements are cash/receivable events","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":495,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":10275}
+{"testID":106,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10276}
+{"testID":102,"messageType":"print","message":"[startup] Verified source fetch complete: 1304 document(s)","type":"print","time":10282}
+{"testID":102,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":10283}
+{"testID":102,"messageType":"print","message":"[sync] pull failed collection=central_product_master_verified queryKey=central_product_master_verified:{\"filters\":[]} query={\"filters\":[]} cursor=2026-10-21T14:16:38.275652Z error=Verified central product bootstrap returned 1304 documents; expected 1305. Existing local cache retained.","type":"print","time":10283}
+{"testID":102,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10292}
+{"testID":102,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10330}
+{"testID":102,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10335}
+{"test":{"id":107,"name":"quota cooldown persists and blocks manual, automatic and bootstrap attempts","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":862,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":10336}
+{"testID":107,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10340}
+{"testID":106,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10391}
+{"testID":107,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10444}
+{"testID":107,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":10467}
+{"testID":107,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":10468}
+{"testID":106,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10490}
+{"test":{"id":108,"name":"salary earning-period overlap is insufficient rather than prorated","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":569,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":10490}
+{"testID":108,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10491}
+{"testID":107,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":10512}
+{"testID":107,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":10513}
+{"testID":107,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":10518}
+{"testID":107,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":10518}
+{"testID":108,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10593}
+{"testID":108,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10662}
+{"test":{"id":109,"name":"posted cash links are not double counted and staff purchase offsets are noncash","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":588,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":10662}
+{"testID":109,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10664}
+{"testID":107,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":10702}
+{"testID":107,"messageType":"print","message":"[sync] pull failed collection=product_catalogue_releases queryKey=product_catalogue_releases:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]} query={\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]} cursor=2026-10-21T14:16:38.569650Z error=Quota exceeded.","type":"print","time":10746}
+{"testID":109,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10771}
+{"testID":107,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10788}
+{"test":{"id":110,"name":"failed later page commits neither documents nor cursor; equal timestamps paginate safely","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":907,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":10788}
+{"testID":110,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10789}
+{"testID":109,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10850}
+{"test":{"id":111,"name":"authorized selected outlets exclude unselected outlets and reject foreign outlet selection","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":627,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":10850}
+{"testID":111,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10851}
+{"testID":95,"messageType":"print","message":"[startup] Opening account database","type":"print","time":10868}
+{"testID":110,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10893}
+{"testID":95,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10904}
+{"testID":110,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":10912}
+{"testID":110,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":10913}
+{"testID":95,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10917}
+{"testID":111,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":10954}
+{"testID":110,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":10965}
+{"testID":110,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":10966}
+{"testID":110,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":10971}
+{"testID":110,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":10971}
+{"testID":111,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11019}
+{"test":{"id":112,"name":"employee reports respect outlet access and cannot include confidential payroll","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":658,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":11019}
+{"testID":112,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11020}
+{"testID":112,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":11126}
+{"testID":110,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":11137}
+{"testID":110,"messageType":"print","message":"[sync] pull failed collection=products queryKey=products:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"B\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"T\"}}]} query={\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"B\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"T\"}}]} cursor=null error=Page failed","type":"print","time":11139}
+{"testID":110,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":11160}
+{"testID":110,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":11161}
+{"testID":110,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":11165}
+{"testID":112,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11169}
+{"testID":112,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":11272}
+{"testID":112,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11325}
+{"test":{"id":113,"name":"internal transfer without historical cost link is disclosed and never treated as external purchase","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":689,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":11325}
+{"testID":113,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11326}
+{"testID":113,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":11427}
+{"testID":110,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":11461}
+{"testID":110,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":11462}
+{"testID":110,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":11468}
+{"testID":113,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11493}
+{"test":{"id":114,"name":"pending writes and cursors survive a full financial report unchanged","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":711,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":11493}
+{"testID":114,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11494}
+{"testID":114,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":11594}
+{"testID":114,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11669}
+{"test":{"id":115,"name":"purchase and sales returns reverse revenue, input tax and batch cost once","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":741,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":11670}
+{"testID":115,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11673}
+{"testID":110,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11767}
+{"test":{"id":116,"name":"unchanged catalogue is cached and incremental pulls exclude old documents","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":958,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":11767}
+{"testID":116,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11768}
+{"testID":115,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":11772}
+{"testID":115,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11832}
+{"test":{"id":117,"name":"material trading discrepancy blocks a clean conclusion without fallback COGS","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":823,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":11832}
+{"testID":117,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11833}
+{"testID":116,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":11860}
+{"testID":116,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":11876}
+{"testID":116,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":11877}
+{"testID":116,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":11914}
+{"testID":116,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":11914}
+{"testID":116,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":11919}
+{"testID":116,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":11919}
+{"testID":117,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":11931}
+{"testID":117,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11986}
+{"test":{"id":118,"name":"zero closing stock remains zero with a complete batch history","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":852,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":11986}
+{"testID":118,"messageType":"print","message":"[startup] Opening account database","type":"print","time":11987}
+{"testID":116,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":12071}
+{"testID":118,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":12086}
+{"testID":116,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":12113}
+{"testID":116,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":12114}
+{"testID":116,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":12120}
+{"testID":118,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12145}
+{"test":{"id":119,"name":"explicit authorized businesses combine while distinct GST identities retain separate schedules","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":861,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":12146}
+{"testID":119,"messageType":"print","message":"[startup] Opening account database","type":"print","time":12147}
+{"testID":119,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":12247}
+{"testID":116,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":12314}
+{"testID":116,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":12314}
+{"testID":116,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":12319}
+{"testID":119,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12353}
+{"test":{"id":120,"name":"unpaid salary accrues without cash outflow and missing approved profile coverage is disclosed","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":926,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":12354}
+{"testID":120,"messageType":"print","message":"[startup] Opening account database","type":"print","time":12355}
+{"testID":120,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":12454}
+{"testID":116,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":12524}
+{"testID":116,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":12524}
+{"testID":116,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":12528}
+{"testID":120,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12571}
+{"test":{"id":121,"name":"internal transfer invoice and bill are excluded from external totals while persisted GST is retained","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":961,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":12571}
+{"testID":121,"messageType":"print","message":"[startup] Opening account database","type":"print","time":12573}
+{"testID":116,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12773}
+{"test":{"id":122,"name":"resume freshness and reconnect use incremental pulls rather than initial downloads","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":994,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":12773}
+{"testID":122,"messageType":"print","message":"[startup] Opening account database","type":"print","time":12774}
+{"testID":121,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":12787}
+{"testID":121,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12849}
+{"test":{"id":123,"name":"void financial reference does not suppress a posted supplier payment","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1016,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":12849}
+{"testID":123,"messageType":"print","message":"[startup] Opening account database","type":"print","time":12850}
+{"testID":122,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":12875}
+{"testID":122,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":12893}
+{"testID":122,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":12893}
+{"testID":122,"messageType":"print","message":"[startup] SyncEngine.start: connectivity listener","type":"print","time":12908}
+{"testID":122,"messageType":"print","message":"[startup] SyncEngine.start completed","type":"print","time":12908}
+{"testID":122,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":12935}
+{"testID":122,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":12935}
+{"testID":122,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":12941}
+{"testID":122,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":12941}
+{"testID":123,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":12953}
+{"testID":123,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13007}
+{"test":{"id":124,"name":"pending deletion and limited sync downloads are disclosed without clearing the outbox","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1044,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":13007}
+{"testID":124,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13008}
+{"testID":122,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":13159}
+{"testID":124,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":13173}
+{"testID":122,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":13242}
+{"testID":122,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":13243}
+{"testID":122,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":13250}
+{"testID":124,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13279}
+{"test":{"id":125,"name":"disabled reporting permission and empty selected outlet lists fail closed","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1079,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":13279}
+{"testID":125,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13280}
+{"testID":125,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":13384}
+{"testID":125,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13435}
+{"testID":122,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":13445}
+{"testID":122,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13450}
+{"test":{"id":126,"name":"automatic upload attempts respect persisted transient backoff","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1037,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":13450}
+{"testID":126,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13451}
+{"testID":125,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":13543}
+{"testID":126,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":13552}
+{"testID":126,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13562}
+{"test":{"id":127,"name":"incremental remote tombstones hide synced records locally","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1058,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":13562}
+{"testID":127,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13564}
+{"testID":125,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13595}
+{"test":{"id":128,"name":"post-period invoice edit cannot be presented as a verified historical amount","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1102,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":13595}
+{"testID":128,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13596}
+{"testID":127,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":13659}
+{"testID":127,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":13685}
+{"testID":127,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":13686}
+{"testID":128,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":13697}
+{"testID":127,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":13743}
+{"testID":127,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":13743}
+{"testID":127,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":13749}
+{"testID":127,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":13750}
+{"testID":128,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13780}
+{"test":{"id":129,"name":"scope choices include historical outlets and enforce employee assignments","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1122,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":13780}
+{"testID":129,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13781}
+{"testID":129,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":13899}
+{"testID":127,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":13920}
+{"testID":129,"messageType":"print","message":"[startup] Opening account database","type":"print","time":13997}
+{"testID":127,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":14005}
+{"testID":127,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":14005}
+{"testID":127,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":14009}
+{"testID":129,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14111}
+{"testID":129,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14169}
+{"test":{"id":130,"name":"unallocated operating rent does not invalidate independently supported trading costs","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1138,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":14169}
+{"testID":130,"messageType":"print","message":"[startup] Opening account database","type":"print","time":14171}
+{"testID":127,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14217}
+{"test":{"id":131,"name":"legacy registry migration deduplicates identities and deactivates historical scopes without deleting pending data","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1078,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":14217}
+{"testID":131,"messageType":"print","message":"[startup] Opening account database","type":"print","time":14218}
+{"testID":130,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14267}
+{"testID":131,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14318}
+{"testID":130,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14333}
+{"test":{"id":132,"name":"assigned staff without payroll setup prevent an assumed zero salary expense","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1152,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":14334}
+{"testID":132,"messageType":"print","message":"[startup] Opening account database","type":"print","time":14334}
+{"testID":131,"messageType":"print","message":"[startup] Opening account database","type":"print","time":14512}
+{"testID":132,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14540}
+{"testID":131,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14638}
+{"testID":131,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":14675}
+{"testID":131,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":14675}
+{"testID":132,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14678}
+{"test":{"id":133,"name":"actual Staff Khata PAY-SP and FIN-SPAY cash collection contracts are counted once","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1166,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":14678}
+{"testID":133,"messageType":"print","message":"[startup] Opening account database","type":"print","time":14679}
+{"testID":131,"messageType":"print","message":"LEGACY_REGISTRY_MEASUREMENT {\"oldQueries\":98,\"oldQueriesDeactivated\":53,\"oldQueriesReused\":45,\"activeCanonicalQueries\":67,\"finalRegistryRows\":120}","type":"print","time":14729}
+{"testID":131,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14732}
+{"test":{"id":134,"name":"controlled before-after measurement replays the audited registry without live Firestore","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1165,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":14732}
+{"testID":134,"messageType":"print","message":"[startup] Opening account database","type":"print","time":14733}
+{"testID":133,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14786}
+{"testID":134,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14850}
+{"testID":133,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14871}
+{"test":{"id":135,"name":"cancelled invoice authorization does not erase a persisted real cash receipt","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1196,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":14871}
+{"testID":135,"messageType":"print","message":"[startup] Opening account database","type":"print","time":14872}
+{"testID":134,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":14885}
+{"testID":134,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":14885}
+{"testID":134,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":14942}
+{"testID":134,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":14942}
+{"testID":134,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":14948}
+{"testID":134,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":14948}
+{"testID":135,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":14970}
+{"testID":135,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15019}
+{"test":{"id":136,"name":"business non-operating expenses are separated and included once without inventing net profit","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1216,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":15019}
+{"testID":136,"messageType":"print","message":"[startup] Opening account database","type":"print","time":15020}
+{"testID":134,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":15101}
+{"testID":136,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":15117}
+{"testID":136,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15239}
+{"test":{"id":137,"name":"A4 PDF and Excel export retain large schedules and limitations without certification","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":1235,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":15239}
+{"testID":137,"messageType":"print","message":"[startup] Opening account database","type":"print","time":15240}
+{"testID":134,"messageType":"print","message":"CONTROLLED_READ_MEASUREMENT {\"oldRequestsPerCycle\":98,\"oldReturnedDocumentsPerCycle\":515,\"oldRequestsFor13IdleTicks\":1274,\"oldDocumentsFor13IdleTicks\":6695,\"newIdleRequests\":0,\"newInitialRequests\":52,\"newInitialDocuments\":513}","type":"print","time":15431}
+{"testID":134,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15432}
+{"test":{"id":138,"name":"remote tombstone can be recreated with version protection","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1234,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":15433}
+{"testID":138,"messageType":"print","message":"[startup] Opening account database","type":"print","time":15433}
+{"testID":137,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":15443}
+{"testID":138,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":15583}
+{"testID":138,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15602}
+{"test":{"id":139,"name":"Godown reservation stops at 100 collisions without partial local writes","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1256,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":15602}
+{"testID":139,"messageType":"print","message":"[startup] Opening account database","type":"print","time":15603}
+{"testID":139,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":15697}
+{"testID":139,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15811}
+{"test":{"id":140,"name":"concurrent bootstrap reads coalesce and cached navigation does not repeat REST","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1305,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":15811}
+{"testID":140,"messageType":"print","message":"[startup] Opening account database","type":"print","time":15814}
+{"testID":140,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":15908}
+{"testID":140,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15930}
+{"test":{"id":141,"name":"business attribute option deduplicates system names, survives offline restart and uploads via outbox","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1354,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":15930}
+{"testID":141,"messageType":"print","message":"[startup] Opening account database","type":"print","time":15931}
+{"testID":141,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":16022}
+{"testID":141,"messageType":"print","message":"[startup] Opening account database","type":"print","time":16028}
+{"testID":141,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":16057}
+{"testID":141,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16065}
+{"test":{"id":142,"name":"product KPI base dataset excludes deleted parents, orphan variants and other businesses while retaining pending records","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1412,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":16065}
+{"testID":142,"messageType":"print","message":"[startup] Opening account database","type":"print","time":16066}
+{"testID":137,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16110}
+{"test":{"id":143,"name":"reconciliation dialog exposes evidence sections and explicit limitations","suiteID":75,"groupIDs":[92],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":1269,"root_column":3,"root_url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/complete_audit_report_test.dart"},"type":"testStart","time":16111}
+{"testID":143,"messageType":"print","message":"[startup] Opening account database","type":"print","time":16113}
+{"testID":142,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":16157}
+{"testID":142,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16182}
+{"test":{"id":144,"name":"full product edit persists image and dynamic values offline and uploads one atomic batch","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1540,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":16182}
+{"testID":144,"messageType":"print","message":"[startup] Opening account database","type":"print","time":16183}
+{"testID":143,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":16208}
+{"testID":144,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":16282}
+{"testID":143,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16910}
+{"testID":144,"messageType":"print","message":"[startup] Opening account database","type":"print","time":18312}
+{"testID":144,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":18344}
+{"testID":144,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":18358}
+{"test":{"id":145,"name":"offline bulk soft deletion retains variants and historical lines through synchronization","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1700,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":18358}
+{"testID":145,"messageType":"print","message":"[startup] Opening account database","type":"print","time":18359}
+{"testID":145,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":18446}
+{"testID":145,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":18459}
+{"test":{"id":146,"name":"product stock reads enforce tenant, business and selected outlet","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1760,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":18460}
+{"testID":146,"messageType":"print","message":"[startup] Opening account database","type":"print","time":18460}
+{"testID":146,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":18546}
+{"testID":146,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":18551}
+{"test":{"id":147,"name":"brush measurements remain separate from selling units through offline restart, edit and new SKU","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1804,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":18551}
+{"testID":147,"messageType":"print","message":"[startup] Opening account database","type":"print","time":18552}
+{"testID":147,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":18637}
+{"testID":147,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":19928}
+{"testID":147,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":19928}
+{"testID":147,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":20176}
+{"testID":147,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":20176}
+{"testID":147,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":20181}
+{"testID":147,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":20181}
+{"testID":147,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":20332}
+{"testID":147,"messageType":"print","message":"[startup] Opening account database","type":"print","time":24206}
+{"testID":147,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":24241}
+{"testID":147,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":25023}
+{"testID":147,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":25023}
+{"testID":147,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":25030}
+{"testID":147,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":26878}
+{"test":{"id":148,"name":"initial pull caches catalogue; offline restart reads arrays and business options locally","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":1972,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":26879}
+{"testID":148,"messageType":"print","message":"[startup] Opening account database","type":"print","time":26880}
+{"testID":148,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":26972}
+{"testID":148,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":26986}
+{"testID":148,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":26987}
+{"testID":148,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":27018}
+{"testID":148,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":27019}
+{"testID":148,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":27024}
+{"testID":148,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":27025}
+{"testID":148,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":27170}
+{"testID":148,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27198}
+{"testID":148,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27225}
+{"testID":148,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":27229}
+{"test":{"id":149,"name":"offline create persists across restart; retries upload exactly once","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2058,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":27229}
+{"testID":149,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27230}
+{"testID":149,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27316}
+{"testID":149,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27318}
+{"testID":149,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27345}
+{"testID":149,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":27357}
+{"test":{"id":150,"name":"dependent create and edit replay in order without losing latest local value","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2108,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":27357}
+{"testID":150,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27358}
+{"testID":150,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27444}
+{"testID":150,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":27455}
+{"test":{"id":151,"name":"pull protects pending edits and upload records version conflicts","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2132,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":27455}
+{"testID":151,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27456}
+{"testID":151,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27542}
+{"testID":151,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":27551}
+{"test":{"id":152,"name":"soft deletion survives failed network and disappears after confirmed upload","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2171,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":27551}
+{"testID":152,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27551}
+{"testID":152,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27638}
+{"testID":152,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":27653}
+{"test":{"id":153,"name":"local queries isolate tenants and accounts; rollback leaves no partial records","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2195,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":27653}
+{"testID":153,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27654}
+{"testID":153,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27742}
+{"testID":153,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27747}
+{"testID":153,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27834}
+{"testID":153,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":27841}
+{"test":{"id":154,"name":"real product creation queues product, variants, unique key and sequences atomically","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2235,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":27842}
+{"testID":154,"messageType":"print","message":"[startup] Opening account database","type":"print","time":27843}
+{"testID":154,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":27931}
+{"testID":154,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":29225}
+{"testID":154,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":29225}
+{"testID":154,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":29470}
+{"testID":154,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":29470}
+{"testID":154,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":29475}
+{"testID":154,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":29475}
+{"testID":154,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":29640}
+{"testID":154,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":33987}
+{"testID":154,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":33987}
+{"testID":154,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":33991}
+{"testID":154,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":36417}
+{"test":{"id":155,"name":"catalogue deactivation and remote removal hide synced values but protect pending ones","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2372,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":36418}
+{"testID":155,"messageType":"print","message":"[startup] Opening account database","type":"print","time":36419}
+{"testID":155,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":36511}
+{"testID":155,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":36526}
+{"testID":155,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":36527}
+{"testID":155,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":36556}
+{"testID":155,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":36556}
+{"testID":155,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":36561}
+{"testID":155,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":36561}
+{"testID":155,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":36704}
+{"testID":155,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":36745}
+{"testID":155,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":36745}
+{"testID":155,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":36749}
+{"testID":155,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":36922}
+{"test":{"id":156,"name":"failed batch blocks its dependants while independent operations still upload","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2418,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":36922}
+{"testID":156,"messageType":"print","message":"[startup] Opening account database","type":"print","time":36922}
+{"testID":156,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":37009}
+{"testID":156,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":37022}
+{"test":{"id":157,"name":"persistent lease prevents concurrent engines and recovers interrupted PROCESSING batch","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2444,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":37022}
+{"testID":157,"messageType":"print","message":"[startup] Opening account database","type":"print","time":37023}
+{"testID":157,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":37110}
+{"testID":157,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":37121}
+{"test":{"id":158,"name":"supplier refund records money-in once and preserves payable/payment history","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2463,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":37121}
+{"testID":158,"messageType":"print","message":"[startup] Opening account database","type":"print","time":37121}
+{"testID":158,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":37207}
+{"testID":158,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":37225}
+{"testID":158,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":37226}
+{"testID":158,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":37293}
+{"testID":158,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":37293}
+{"testID":158,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":37300}
+{"testID":158,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":37300}
+{"testID":158,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":37445}
+{"testID":158,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":37497}
+{"test":{"id":159,"name":"offline purchase approval and payment preserve atomic inventory and ledger posting","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":2653,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":37497}
+{"testID":159,"messageType":"print","message":"[startup] Opening account database","type":"print","time":37498}
+{"testID":159,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":37584}
+{"testID":159,"messageType":"print","message":"[startup] Registering central_product_master_verified","type":"print","time":37605}
+{"testID":159,"messageType":"print","message":"[startup] Registered central_product_master_verified","type":"print","time":37606}
+{"testID":159,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=false localVerifiedRows=0 expected=1305 version=null","type":"print","time":37738}
+{"testID":159,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":37738}
+{"testID":159,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":37744}
+{"testID":159,"messageType":"print","message":"[startup] Starting verified SQLite replacement transaction","type":"print","time":37744}
+{"testID":159,"messageType":"print","message":"[startup] Verified SQLite replacement committed: localCount=1305","type":"print","time":37895}
+{"testID":159,"messageType":"print","message":"[startup] Verified bootstrap eligibility: initialized=true localVerifiedRows=1305 expected=1305 version=verified-central-master-v1","type":"print","time":38013}
+{"testID":159,"messageType":"print","message":"[startup] First remote request: central_product_master_verified","type":"print","time":38013}
+{"testID":159,"messageType":"print","message":"[startup] Verified source fetch complete: 1305 document(s)","type":"print","time":38019}
+{"testID":159,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":38216}
+{"test":{"id":160,"name":"schema v11 to v12 upgrade preserves data and adds refund tables","suiteID":73,"groupIDs":[80],"metadata":{"skip":false,"skipReason":null},"line":3398,"column":3,"url":"file:///Users/sksuman/Desktop/Billing%20ERP/Test%202/NubiBillingSoftware-main/test/offline_sync_test.dart"},"type":"testStart","time":38216}
+{"testID":160,"messageType":"print","message":"[startup] Opening account database","type":"print","time":38217}
+{"testID":160,"messageType":"print","message":"[startup] Account database open; sync attached","type":"print","time":38303}
+{"testID":160,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":38365}
+{"success":true,"type":"done","time":38380}

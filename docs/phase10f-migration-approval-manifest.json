@@ -1,0 +1,163 @@
+{
+  "phase": "PHASE_10F_PRODUCTION_MIGRATION_AND_RETENTION_PLAN",
+  "status": "RETENTION_POLICY_APPROVED_EXECUTION_BLOCKED",
+  "decision": "PLANNING_ONLY_RETENTION_APPROVED_NO_MIGRATION_NO_RETIREMENT_NO_RELEASE_INSTALL",
+  "sourceInventory": {
+    "path": "docs/phase10e-installed-v3-v4-diff.json",
+    "sha256": "3af5a17dd23b8aae66385c75519ca01bd007e4b9e742138317d053f9b553b50f",
+    "rowCount": 4958,
+    "dependencyBearingRowCount": 483,
+    "additionalReferenceOnlyIdentities": "See /referenceOnlyIdentities in source inventory",
+    "syncQueryCount": 195,
+    "protectedSyncQueryCount": 10,
+    "syncQueriesDigest": "311e4bd99435b5efb23d4f20192abc7677336169e6451787188f52e4e49fe303",
+    "identityKey": ["collection", "documentId"],
+    "referenceOwnerFields": ["source", "table", "ownerId", "active", "locations.path", "locations.role"],
+    "indexedSqlMirrors": "Not additional logical references; excluded by Phase 10E scanner"
+  },
+  "approvalDefaults": {
+    "approved": false,
+    "migrationApproved": false,
+    "retirementApproved": false,
+    "automaticReferenceMappingAllowed": false
+  },
+  "phase10lRetentionPolicyApproval": {
+    "retentionPolicyApproved": true,
+    "policyVersion": "1.0.0",
+    "policyName": "RETAIN_LEGACY_NO_AUTOMATIC_MIGRATION_NO_RETIREMENT",
+    "policyArtifact": "docs/phase10l-legacy-retention-policy.json",
+    "approvalDecision": "APPROVE_RETENTION_ONLY",
+    "migrationApproved": false,
+    "retirementApproved": false,
+    "executionAuthorized": false,
+    "approvalRationale": "Close the legacy governance blocker through explicit least-destructive preservation and exclusion from new Release-4 Product creation. This does not certify semantic correctness or authorize migration, remapping, retirement, Release-4 production installation, or execution.",
+    "coveredSourceClassifications": {
+      "LEGACY_RETAIN_REQUIRED": 242,
+      "REVIEW_REQUIRED": 2506,
+      "MIGRATION_REQUIRED": 2,
+      "SAFE_UNREFERENCED_RETIREMENT_CANDIDATE": 25
+    },
+    "coveredDispositionRowCount": 2775,
+    "sourceInventorySha256": "3af5a17dd23b8aae66385c75519ca01bd007e4b9e742138317d053f9b553b50f",
+    "historicalLedgerAndEvidenceRewritten": false,
+    "supersedesEarlierBlockersForRetentionApprovalOnly": [
+      "P10F-BLOCK-ALL-REVIEW-REQUIRED",
+      "P10F-BLOCK-LEGACY-RETENTION",
+      "P10F-BLOCK-MIGRATION-REQUIRED",
+      "P10F-BLOCK-HISTORICAL-TEMPLATES"
+    ],
+    "remainingExecutionGates": "All migration, retirement, query rewrite, and production installation authorizations remain false; this overlay grants no execution permission."
+  },
+  "actionProjection": {
+    "mode": "DETERMINISTIC_PER_SOURCE_ROW",
+    "description": "One approval action per Phase 10E entry. Do not merge rows by display name. This avoids copying and desynchronizing the authoritative owner/path evidence. Expand entries in sourceInventory.path in array order.",
+    "actionId": "PHASE10F:<collection>:<documentId>",
+    "sourceId": "documentId",
+    "targetId": "target row id only when the reviewed action is an explicit remap; otherwise null",
+    "entityType": "collection",
+    "referenceCount": "source entry referenceCount",
+    "affectedOwners": "source entry referenceRecords, preserving source/table/ownerId/active/locations exactly",
+    "actionType": "source entry action plus a separately reviewed migration/retention decision; never infer approval from the source action",
+    "reason": "source entry reason plus explicit reviewer rationale",
+    "risk": "BLOCKING for MIGRATION_REQUIRED or unresolved mandatory refs; HIGH for other referenced changes; MEDIUM for unreferenced review/retention decisions; LOW only for a separately approved non-mutating verification",
+    "approved": false,
+    "migrationApproved": false,
+    "retirementApproved": false
+  },
+  "identityReviewActions": [
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_ADHESIVES_TILING_TILE_ADHESIVES","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_ADHESIVES_TILING_TILE_ADHESIVES","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_ADHESIVES_TILING_TILE_ADHESIVES"],"parentCategoryId":"SYS_CATEGORY_ADHESIVES_TILING","referenceCount":12,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_ALLIED_PRODUCTS_THINNERS","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_ALLIED_PRODUCTS_THINNERS","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_ALLIED_PRODUCTS_THINNERS"],"parentCategoryId":"SYS_CATEGORY_ALLIED_PRODUCTS","referenceCount":6,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_TILE_COATINGS_EPOXY_FLOORING","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_TILE_COATINGS_EPOXY_FLOORING","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_FLOOR_TILE_COATINGS_EPOXY_FLOORING"],"parentCategoryId":"SYS_CATEGORY_FLOOR_TILE_COATINGS","referenceCount":21,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_PUTTY_SURFACE_PREPARATION_ACRYLIC_PUTTY","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_PUTTY_SURFACE_PREPARATION_ACRYLIC_PUTTY","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_PUTTY_SURFACE_PREPARATION_ACRYLIC_PUTTY"],"parentCategoryId":"SYS_CATEGORY_PUTTY_SURFACE_PREPARATION","referenceCount":19,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_PUTTY_SURFACE_PREPARATION_WATERPROOF_WALL_PUTTY","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_PUTTY_SURFACE_PREPARATION_WATERPROOF_WALL_PUTTY","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_PUTTY_SURFACE_PREPARATION_WATERPROOF_WALL_PUTTY"],"parentCategoryId":"SYS_CATEGORY_PUTTY_SURFACE_PREPARATION","referenceCount":19,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_SEALANTS_REPAIR_ACRYLIC_SEALANTS","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_SEALANTS_REPAIR_ACRYLIC_SEALANTS","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_SEALANTS_REPAIR_ACRYLIC_SEALANTS"],"parentCategoryId":"SYS_CATEGORY_SEALANTS_REPAIR","referenceCount":14,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BATHROOM_KITCHEN_WATERPROOFING","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BATHROOM_KITCHEN_WATERPROOFING","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_WATERPROOFING_BATHROOM_KITCHEN"],"parentCategoryId":"SYS_CATEGORY_WATERPROOFING","referenceCount":14,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_EXTERIOR_WALL_WATERPROOFING","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_EXTERIOR_WALL_WATERPROOFING","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_WATERPROOFING_EXTERIOR_WALL"],"parentCategoryId":"SYS_CATEGORY_WATERPROOFING","referenceCount":14,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_INTERIOR_DAMPNESS_TREATMENT","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_INTERIOR_DAMPNESS_TREATMENT","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_WATERPROOFING_INTERIOR_DAMPNESS"],"parentCategoryId":"SYS_CATEGORY_WATERPROOFING","referenceCount":14,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_ROOF_TERRACE_WATERPROOFING","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_ROOF_TERRACE_WATERPROOFING","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_WATERPROOFING_ROOF_TERRACE"],"parentCategoryId":"SYS_CATEGORY_WATERPROOFING","referenceCount":14,"actionType":"RETAIN_LEGACY_METADATA","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS","releaseCanonicalId":"SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS","targetId":null,"prospectiveTargetIds":[],"parentCategoryId":"SYS_CATEGORY_INTERIOR_WALL_COATINGS","referenceCount":22,"actionType":"MIGRATION_REQUIRED","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS","sourceKind":"referenceOnlyIdentity","sourceCollection":null,"sourceId":"SYS_SUBCATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS","targetId":null,"prospectiveTargetIds":[],"parentCategoryId":null,"referenceCount":21,"actionType":"MIGRATION_REQUIRED","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BASEMENT_WATERPROOFING","sourceKind":"ledgerEntry","sourceCollection":"product_subcategories","sourceId":"SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BASEMENT_WATERPROOFING","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_LIQUID","SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_CEMENTITIOUS"],"parentCategoryId":"SYS_CATEGORY_WATERPROOFING","referenceCount":14,"actionType":"MIGRATION_REQUIRED","approved":false,"migrationApproved":false,"retirementApproved":false},
+    {"actionId":"PHASE10F:IDENTITY:SYS_SUBCATEGORY_WATERPROOFING_BASEMENT","sourceKind":"referenceOnlyIdentity","sourceCollection":null,"sourceId":"SYS_SUBCATEGORY_WATERPROOFING_BASEMENT","targetId":null,"prospectiveTargetIds":["SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_LIQUID","SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_CEMENTITIOUS"],"parentCategoryId":null,"referenceCount":14,"actionType":"MIGRATION_REQUIRED","approved":false,"migrationApproved":false,"retirementApproved":false}
+  ],
+  "preapprovedMappings": [],
+  "blockingDecisionSets": [
+    {
+      "id": "P10F-BLOCK-ALL-REVIEW-REQUIRED",
+      "sourceSelection": "entries where classification is REVIEW_REQUIRED",
+      "requiredBefore": "Any Release 4 installation"
+    },
+    {
+      "id": "P10F-BLOCK-LEGACY-RETENTION",
+      "sourceSelection": "entries where classification is LEGACY_RETAIN_REQUIRED",
+      "requiredBefore": "Any ordinary snapshot reconciliation that could deactivate or tombstone the identity"
+    },
+    {
+      "id": "P10F-BLOCK-MIGRATION-REQUIRED",
+      "sourceSelection": "entries where classification is MIGRATION_REQUIRED, plus all referenceOnlyIdentities and oldBasementReferences",
+      "requiredBefore": "Any reference remap, deactivation, retirement, or Release 4 installation"
+    },
+    {
+      "id": "P10F-BLOCK-PROTECTED-QUERIES",
+      "sourceSelection": "all protectedLegacyQueries",
+      "requiredBefore": "Any sync query rewrite, reactivation, deletion, or migration that changes its referenced identity"
+    },
+    {
+      "id": "P10F-BLOCK-HISTORICAL-TEMPLATES",
+      "sourceSelection": "all absent/deactivated historical templates with Product, Variant, config, or history dependencies; all other absent template rows remain REVIEW_REQUIRED",
+      "requiredBefore": "Template deactivation, retirement, or replacement"
+    }
+  ],
+  "requiredIndependentApprovals": [
+    "semantic mapping approval per source identity and target",
+    "data migration approval per explicit remap",
+    "historical retention approval per retained legacy identity/template/attribute/option/unit",
+    "sync-query rewrite approval per protected query, only after its identity decision",
+    "retirement approval per identity, only after zero mandatory references are proven",
+    "production installation approval for the complete reviewed change set"
+  ],
+  "migrationOrder": {
+    "nodes": [
+      "freeze_app_sync_writers",
+      "take_verified_backup",
+      "verify_production_preimage_fingerprint",
+      "apply_explicitly_approved_reference_remaps",
+      "retain_required_legacy_metadata",
+      "verify_zero_unresolved_mandatory_references",
+      "install_release4_snapshot_and_marker_atomically",
+      "verify_release_marker_fingerprint",
+      "verify_canonical_selectors_and_forms",
+      "verify_historical_product_variant_readability",
+      "verify_sync_query_integrity",
+      "resume_app_sync"
+    ],
+    "edges": [
+      ["freeze_app_sync_writers", "take_verified_backup"],
+      ["take_verified_backup", "verify_production_preimage_fingerprint"],
+      ["verify_production_preimage_fingerprint", "apply_explicitly_approved_reference_remaps"],
+      ["apply_explicitly_approved_reference_remaps", "retain_required_legacy_metadata"],
+      ["retain_required_legacy_metadata", "verify_zero_unresolved_mandatory_references"],
+      ["verify_zero_unresolved_mandatory_references", "install_release4_snapshot_and_marker_atomically"],
+      ["install_release4_snapshot_and_marker_atomically", "verify_release_marker_fingerprint"],
+      ["verify_release_marker_fingerprint", "verify_canonical_selectors_and_forms"],
+      ["verify_canonical_selectors_and_forms", "verify_historical_product_variant_readability"],
+      ["verify_historical_product_variant_readability", "verify_sync_query_integrity"],
+      ["verify_sync_query_integrity", "resume_app_sync"]
+    ],
+    "consistencyBarrier": "One SQLite transaction for approved remaps, metadata retention, complete snapshot and marker; otherwise maintenance mode must span these operations and all post-install verification."
+  },
+  "rollbackPlanCompleteness": {
+    "backupRequirements": true,
+    "rollbackTriggers": true,
+    "restoreAccountAndPublicConfigAsOneConsistentSet": true,
+    "associatedMetadataAndReleaseMarkerRestore": true,
+    "productVariantSkuBarcodeQueryIdentityProof": true,
+    "executionAuthorized": false
+  },
+  "invariants": [
+    "No action is approved by name similarity, parent similarity, Release 4 omission, or zero cached references alone.",
+    "Do not rewrite Product, Variant, SKU, barcode, transaction/history, sync-query identity, cursor, attempt timestamp, or lastSyncedAt without an explicit scoped approval.",
+    "Keep old option values and units readable as historical metadata; do not coerce them into new option sets.",
+    "No action in this manifest authorizes execution."
+  ]
+}

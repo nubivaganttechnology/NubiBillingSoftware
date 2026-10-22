@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-02",
+  "tests": {
+    "command": "flutter test --no-pub",
+    "exitCode": 0,
+    "passed": 66
+  },
+  "analyzer": {
+    "command": "flutter analyze --no-pub",
+    "exitCode": 1,
+    "errors": 0,
+    "warnings": 5,
+    "infos": 39,
+    "note": "44 pre-existing findings; no findings in the new synchronization or sync test code."
+  },
+  "controlledReadMeasurement": {
+    "oldRequestsPerCycle": 98,
+    "oldReturnedDocumentsPerCycle": 515,
+    "oldRequestsFor13IdleTicks": 1274,
+    "oldDocumentsFor13IdleTicks": 6695,
+    "newIdleRequests": 0,
+    "newInitialRequests": 38,
+    "newInitialDocuments": 513
+  },
+  "controlledRegistryMigration": {
+    "oldQueries": 98,
+    "oldQueriesDeactivated": 54,
+    "oldQueriesReused": 44,
+    "activeCanonicalQueries": 50,
+    "finalRegistryRows": 104
+  },
+  "liveBackend": {
+    "operation": "ONE_BOUNDED_READ",
+    "httpStatus": 429,
+    "errorStatus": "RESOURCE_EXHAUSTED",
+    "errorMessage": "Quota exceeded."
+  },
+  "indexDeployment": {
+    "project": "test1-bcebe",
+    "success": true,
+    "preservedOtherRemoteIndexes": true,
+    "verifiedStates": {
+      "operation": "ADMIN_INDEX_STATE_CHECK",
+      "pages": 1,
+      "states": {
+        "READY": 110
+      }
+    }
+  },
+  "outstandingLiveChecks": [
+    "Run the updated app build and its additive SQLite migration.",
+    "Observe a real initialized app idle for ten minutes; virtual-clock test passes.",
+    "Verify live outbox acknowledgement and incremental document reads after Firestore quota is restored."
+  ],
+  "liveUserDatabaseMutation": false
+}

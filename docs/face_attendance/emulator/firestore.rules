@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(data) {
+      return signedIn() && data.tenantId == request.auth.uid;
+    }
+
+    match /employees/{employeeId} {
+      allow get, list: if resource == null || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if signedIn()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == resource.data.ownerUid;
+      allow delete: if false;
+    }
+    match /outlets/{outletId} {
+      allow get, list: if resource == null || owns(resource.data);
+      allow create: if owns(request.resource.data);
+      allow update: if owns(resource.data) && owns(request.resource.data);
+      allow delete: if false;
+    }
+    match /staff_attendance/{attendanceId} {
+      allow get, list: if resource == null || owns(resource.data);
+      allow create: if owns(request.resource.data)
+        && request.resource.data.attendanceId == attendanceId
+        && request.resource.data.approvalStatus == 'PENDING'
+        && exists(/databases/$(database)/documents/employees/$(request.resource.data.employeeId))
+        && get(/databases/$(database)/documents/employees/$(request.resource.data.employeeId)).data.ownerUid == request.auth.uid
+        && get(/databases/$(database)/documents/employees/$(request.resource.data.employeeId)).data.businessIds.hasAny([request.resource.data.businessId])
+        && get(/databases/$(database)/documents/employees/$(request.resource.data.employeeId)).data.outletIds.hasAny([request.resource.data.outletId]);
+      allow update: if owns(resource.data)
+        && request.resource.data.tenantId == resource.data.tenantId
+        && request.resource.data.businessId == resource.data.businessId
+        && request.resource.data.employeeId == resource.data.employeeId
+        && request.resource.data.outletId == resource.data.outletId;
+      allow delete: if false;
+    }
+    match /staff_attendance_events/{eventId} {
+      allow get, list: if resource == null || owns(resource.data);
+      allow create: if owns(request.resource.data)
+        && request.resource.data.eventId == eventId
+        && request.resource.data.immutable == true
+        && request.resource.data.eventType in ['CHECK_IN', 'CHECK_OUT']
+        && exists(/databases/$(database)/documents/employees/$(request.resource.data.employeeId))
+        && get(/databases/$(database)/documents/employees/$(request.resource.data.employeeId)).data.ownerUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+    match /staff_khata_transactions/{recordId} {
+      allow get, list: if resource == null || owns(resource.data);
+      allow create: if owns(request.resource.data)
+        && request.resource.data.recordId == recordId
+        && request.resource.data.status == 'POSTED';
+      allow update, delete: if false;
+    }
+    match /employee_salary_profiles/{profileId} {
+      allow get, list: if resource == null || owns(resource.data);
+      allow create: if owns(request.resource.data)
+        && request.resource.data.profileId == profileId;
+      allow update: if owns(resource.data)
+        && request.resource.data.tenantId == resource.data.tenantId
+        && request.resource.data.businessId == resource.data.businessId
+        && request.resource.data.employeeId == resource.data.employeeId;
+      allow delete: if false;
+    }
+    match /employee_outlet_allocations/{allocationId} {
+      allow get, list: if resource == null || owns(resource.data);
+      allow create: if owns(request.resource.data)
+        && request.resource.data.allocationId == allocationId
+        && request.resource.data.allocationTotalBasisPoints == 10000;
+      allow update: if owns(resource.data)
+        && request.resource.data.tenantId == resource.data.tenantId
+        && request.resource.data.businessId == resource.data.businessId
+        && request.resource.data.employeeId == resource.data.employeeId
+        && request.resource.data.allocationTotalBasisPoints == 10000;
+      allow delete: if false;
+    }
+    match /salary_periods/{periodId} {
+      allow get, list: if resource == null || owns(resource.data);
+      allow create: if owns(request.resource.data)
+        && request.resource.data.periodId == periodId
+        && request.resource.data.status == 'APPROVED';
+      allow update: if owns(resource.data)
+        && request.resource.data.tenantId == resource.data.tenantId
+        && request.resource.data.businessId == resource.data.businessId
+        && request.resource.data.employeeId == resource.data.employeeId;
+      allow delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

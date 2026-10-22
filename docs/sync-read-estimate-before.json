@@ -1,0 +1,399 @@
+{
+  "note": "Read-only cache-based estimate, not live remote or billed reads. Pending and locally deleted rows excluded. Actual remote may differ.",
+  "requestsPerSuccessfulOldCycle": 98,
+  "cachedSyncedDocumentMatchesPerOldCycle": 749,
+  "queries": [
+    {
+      "queryKey": "user:{\"id\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "businesses:{\"filters\":[{\"field\":\"ownerUid\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "cachedSyncedMatchingDocuments": 5
+    },
+    {
+      "queryKey": "product_catalogue_releases:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_catalogue_releases:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 6
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 11
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 49
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 5
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 21
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 16
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 511
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "products:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_variants:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 2
+    },
+    {
+      "queryKey": "document_sequences:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_unique_keys:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 2
+    },
+    {
+      "queryKey": "supplier_businesses:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "supplier_products:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "supplier_balances:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "supplier_ledger_entries:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "godowns:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "racks:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "shelves:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "stock_balances:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "inventory_transactions:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "suppliers:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "outlets:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 2
+    },
+    {
+      "queryKey": "outlets:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 2
+    },
+    {
+      "queryKey": "purchase_bills:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "purchase_orders:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "purchase_order_items:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "goods_receipts:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "goods_receipt_items:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "supplier_payments:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "supplier_credits:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "payment_allocations:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "purchase_returns:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "purchases:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "customers:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "purchases:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "products:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"active\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "customers:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-25T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-26T18:30:00.000Z\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-26T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-27T18:30:00.000Z\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-27T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-28T18:30:00.000Z\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-28T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-29T18:30:00.000Z\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-29T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-30T18:30:00.000Z\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-30T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-10-01T18:30:00.000Z\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-10-01T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-10-02T18:30:00.000Z\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_variants:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 2
+    },
+    {
+      "queryKey": "products:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 6
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 11
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 5
+    },
+    {
+      "queryKey": "businesses:{\"id\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "outlets:{\"id\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}",
+      "cachedSyncedMatchingDocuments": 1
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}}]}",
+      "cachedSyncedMatchingDocuments": 4
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 21
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 13
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"baseType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"colourFamily\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"dilutionType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"finish\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 4
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"hsnCode\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"numberOfCoats\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"packSize\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"segment\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"shade\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"shadeCode\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"surface\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 5
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"unit\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 4
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"usage\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 3
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 16
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "stock_balances:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}}]}",
+      "cachedSyncedMatchingDocuments": 3
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "cachedSyncedMatchingDocuments": 5
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"bristleMaterial\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"brushSize\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"brushType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}}]}",
+      "cachedSyncedMatchingDocuments": 0
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "source": "Read-only synced SQLite snapshot; remote current state not queried",
+  "wallPaintUsageDefaultsCorrect": true,
+  "usageTemplateRestrictionsNeeded": [
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_EXTERIOR_EMULSION_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_PREMIUM_EXTERIOR_PAINTS_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_WEATHER_RESISTANT_PAINTS_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_DISTEMPER_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_ECONOMY_PAINTS_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_EMULSION_PAINTS_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_LUXURY_PAINTS_USAGE",
+    "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_PREMIUM_PAINTS_USAGE"
+  ],
+  "controlledAttributeDefinitionsNeedingOptions": [
+    {
+      "documentId": "baseType",
+      "currentDataType": "TEXT",
+      "requiredDataType": "SELECT",
+      "optionsAvailable": 0
+    },
+    {
+      "documentId": "colourFamily",
+      "currentDataType": "TEXT",
+      "requiredDataType": "SELECT",
+      "optionsAvailable": 0
+    },
+    {
+      "documentId": "dilutionType",
+      "currentDataType": "TEXT",
+      "requiredDataType": "SELECT",
+      "optionsAvailable": 0
+    },
+    {
+      "documentId": "segment",
+      "currentDataType": "TEXT",
+      "requiredDataType": "SELECT",
+      "optionsAvailable": 0
+    }
+  ],
+  "hsnMasterCount": 0,
+  "localProductCount": 3,
+  "localClassificationMismatchCount": 0,
+  "localWallPaintUsageMismatchCount": 0
+}

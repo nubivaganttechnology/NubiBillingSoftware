@@ -1,0 +1,973 @@
+{
+  "source_sha256": "853c9fd6dd9a9032a25bfb0e742f1a3b5acb30fb60cb6211f7218b2783cdf651",
+  "schema_fingerprint": "ccd6c9a5a94b52dc181b1553c988d71a9366020b058a183981ca43553c9d492a",
+  "user_version": 3,
+  "schema_rows": [
+    {
+      "type": "index",
+      "name": "conflict_entity",
+      "table": "sync_conflicts",
+      "sql": "CREATE INDEX conflict_entity ON sync_conflicts(entityType,documentId,resolved)"
+    },
+    {
+      "type": "index",
+      "name": "local_app_config_reconcile",
+      "table": "local_app_config",
+      "sql": "CREATE INDEX local_app_config_reconcile ON local_app_config(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_app_config_scope",
+      "table": "local_app_config",
+      "sql": "CREATE INDEX local_app_config_scope ON local_app_config(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_brands_reconcile",
+      "table": "local_brands",
+      "sql": "CREATE INDEX local_brands_reconcile ON local_brands(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_brands_scope",
+      "table": "local_brands",
+      "sql": "CREATE INDEX local_brands_scope ON local_brands(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_business_name_reservations_reconcile",
+      "table": "local_business_name_reservations",
+      "sql": "CREATE INDEX local_business_name_reservations_reconcile ON local_business_name_reservations(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_business_name_reservations_scope",
+      "table": "local_business_name_reservations",
+      "sql": "CREATE INDEX local_business_name_reservations_scope ON local_business_name_reservations(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_business_sub_types_reconcile",
+      "table": "local_business_sub_types",
+      "sql": "CREATE INDEX local_business_sub_types_reconcile ON local_business_sub_types(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_business_sub_types_scope",
+      "table": "local_business_sub_types",
+      "sql": "CREATE INDEX local_business_sub_types_scope ON local_business_sub_types(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_business_types_reconcile",
+      "table": "local_business_types",
+      "sql": "CREATE INDEX local_business_types_reconcile ON local_business_types(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_business_types_scope",
+      "table": "local_business_types",
+      "sql": "CREATE INDEX local_business_types_scope ON local_business_types(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_businesses_reconcile",
+      "table": "local_businesses",
+      "sql": "CREATE INDEX local_businesses_reconcile ON local_businesses(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_businesses_scope",
+      "table": "local_businesses",
+      "sql": "CREATE INDEX local_businesses_scope ON local_businesses(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_customers_reconcile",
+      "table": "local_customers",
+      "sql": "CREATE INDEX local_customers_reconcile ON local_customers(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_customers_scope",
+      "table": "local_customers",
+      "sql": "CREATE INDEX local_customers_scope ON local_customers(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_document_sequences_reconcile",
+      "table": "local_document_sequences",
+      "sql": "CREATE INDEX local_document_sequences_reconcile ON local_document_sequences(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_document_sequences_scope",
+      "table": "local_document_sequences",
+      "sql": "CREATE INDEX local_document_sequences_scope ON local_document_sequences(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_employees_reconcile",
+      "table": "local_employees",
+      "sql": "CREATE INDEX local_employees_reconcile ON local_employees(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_employees_scope",
+      "table": "local_employees",
+      "sql": "CREATE INDEX local_employees_scope ON local_employees(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_godown_code_reservations_reconcile",
+      "table": "local_godown_code_reservations",
+      "sql": "CREATE INDEX local_godown_code_reservations_reconcile ON local_godown_code_reservations(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_godown_code_reservations_scope",
+      "table": "local_godown_code_reservations",
+      "sql": "CREATE INDEX local_godown_code_reservations_scope ON local_godown_code_reservations(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_godowns_reconcile",
+      "table": "local_godowns",
+      "sql": "CREATE INDEX local_godowns_reconcile ON local_godowns(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_godowns_scope",
+      "table": "local_godowns",
+      "sql": "CREATE INDEX local_godowns_scope ON local_godowns(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_goods_receipt_items_reconcile",
+      "table": "local_goods_receipt_items",
+      "sql": "CREATE INDEX local_goods_receipt_items_reconcile ON local_goods_receipt_items(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_goods_receipt_items_scope",
+      "table": "local_goods_receipt_items",
+      "sql": "CREATE INDEX local_goods_receipt_items_scope ON local_goods_receipt_items(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_goods_receipts_reconcile",
+      "table": "local_goods_receipts",
+      "sql": "CREATE INDEX local_goods_receipts_reconcile ON local_goods_receipts(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_goods_receipts_scope",
+      "table": "local_goods_receipts",
+      "sql": "CREATE INDEX local_goods_receipts_scope ON local_goods_receipts(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_hsn_codes_reconcile",
+      "table": "local_hsn_codes",
+      "sql": "CREATE INDEX local_hsn_codes_reconcile ON local_hsn_codes(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_hsn_codes_scope",
+      "table": "local_hsn_codes",
+      "sql": "CREATE INDEX local_hsn_codes_scope ON local_hsn_codes(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_inventory_transactions_reconcile",
+      "table": "local_inventory_transactions",
+      "sql": "CREATE INDEX local_inventory_transactions_reconcile ON local_inventory_transactions(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_inventory_transactions_scope",
+      "table": "local_inventory_transactions",
+      "sql": "CREATE INDEX local_inventory_transactions_scope ON local_inventory_transactions(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_invoices_reconcile",
+      "table": "local_invoices",
+      "sql": "CREATE INDEX local_invoices_reconcile ON local_invoices(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_invoices_scope",
+      "table": "local_invoices",
+      "sql": "CREATE INDEX local_invoices_scope ON local_invoices(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_outlets_reconcile",
+      "table": "local_outlets",
+      "sql": "CREATE INDEX local_outlets_reconcile ON local_outlets(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_outlets_scope",
+      "table": "local_outlets",
+      "sql": "CREATE INDEX local_outlets_scope ON local_outlets(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_pack_sizes_reconcile",
+      "table": "local_pack_sizes",
+      "sql": "CREATE INDEX local_pack_sizes_reconcile ON local_pack_sizes(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_pack_sizes_scope",
+      "table": "local_pack_sizes",
+      "sql": "CREATE INDEX local_pack_sizes_scope ON local_pack_sizes(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_payment_allocations_reconcile",
+      "table": "local_payment_allocations",
+      "sql": "CREATE INDEX local_payment_allocations_reconcile ON local_payment_allocations(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_payment_allocations_scope",
+      "table": "local_payment_allocations",
+      "sql": "CREATE INDEX local_payment_allocations_scope ON local_payment_allocations(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_permissions_reconcile",
+      "table": "local_permissions",
+      "sql": "CREATE INDEX local_permissions_reconcile ON local_permissions(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_permissions_scope",
+      "table": "local_permissions",
+      "sql": "CREATE INDEX local_permissions_scope ON local_permissions(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_attribute_options_reconcile",
+      "table": "local_product_attribute_options",
+      "sql": "CREATE INDEX local_product_attribute_options_reconcile ON local_product_attribute_options(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_attribute_options_scope",
+      "table": "local_product_attribute_options",
+      "sql": "CREATE INDEX local_product_attribute_options_scope ON local_product_attribute_options(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_attributes_reconcile",
+      "table": "local_product_attributes",
+      "sql": "CREATE INDEX local_product_attributes_reconcile ON local_product_attributes(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_attributes_scope",
+      "table": "local_product_attributes",
+      "sql": "CREATE INDEX local_product_attributes_scope ON local_product_attributes(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_catalogue_releases_reconcile",
+      "table": "local_product_catalogue_releases",
+      "sql": "CREATE INDEX local_product_catalogue_releases_reconcile ON local_product_catalogue_releases(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_catalogue_releases_scope",
+      "table": "local_product_catalogue_releases",
+      "sql": "CREATE INDEX local_product_catalogue_releases_scope ON local_product_catalogue_releases(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_categories_reconcile",
+      "table": "local_product_categories",
+      "sql": "CREATE INDEX local_product_categories_reconcile ON local_product_categories(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_categories_scope",
+      "table": "local_product_categories",
+      "sql": "CREATE INDEX local_product_categories_scope ON local_product_categories(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_classification_options_reconcile",
+      "table": "local_product_classification_options",
+      "sql": "CREATE INDEX local_product_classification_options_reconcile ON local_product_classification_options(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_classification_options_scope",
+      "table": "local_product_classification_options",
+      "sql": "CREATE INDEX local_product_classification_options_scope ON local_product_classification_options(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_subcategories_reconcile",
+      "table": "local_product_subcategories",
+      "sql": "CREATE INDEX local_product_subcategories_reconcile ON local_product_subcategories(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_subcategories_scope",
+      "table": "local_product_subcategories",
+      "sql": "CREATE INDEX local_product_subcategories_scope ON local_product_subcategories(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_unique_keys_reconcile",
+      "table": "local_product_unique_keys",
+      "sql": "CREATE INDEX local_product_unique_keys_reconcile ON local_product_unique_keys(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_unique_keys_scope",
+      "table": "local_product_unique_keys",
+      "sql": "CREATE INDEX local_product_unique_keys_scope ON local_product_unique_keys(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_variants_reconcile",
+      "table": "local_product_variants",
+      "sql": "CREATE INDEX local_product_variants_reconcile ON local_product_variants(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_product_variants_scope",
+      "table": "local_product_variants",
+      "sql": "CREATE INDEX local_product_variants_scope ON local_product_variants(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_products_reconcile",
+      "table": "local_products",
+      "sql": "CREATE INDEX local_products_reconcile ON local_products(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_products_scope",
+      "table": "local_products",
+      "sql": "CREATE INDEX local_products_scope ON local_products(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_bills_reconcile",
+      "table": "local_purchase_bills",
+      "sql": "CREATE INDEX local_purchase_bills_reconcile ON local_purchase_bills(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_bills_scope",
+      "table": "local_purchase_bills",
+      "sql": "CREATE INDEX local_purchase_bills_scope ON local_purchase_bills(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_order_items_reconcile",
+      "table": "local_purchase_order_items",
+      "sql": "CREATE INDEX local_purchase_order_items_reconcile ON local_purchase_order_items(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_order_items_scope",
+      "table": "local_purchase_order_items",
+      "sql": "CREATE INDEX local_purchase_order_items_scope ON local_purchase_order_items(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_orders_reconcile",
+      "table": "local_purchase_orders",
+      "sql": "CREATE INDEX local_purchase_orders_reconcile ON local_purchase_orders(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_orders_scope",
+      "table": "local_purchase_orders",
+      "sql": "CREATE INDEX local_purchase_orders_scope ON local_purchase_orders(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_returns_reconcile",
+      "table": "local_purchase_returns",
+      "sql": "CREATE INDEX local_purchase_returns_reconcile ON local_purchase_returns(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchase_returns_scope",
+      "table": "local_purchase_returns",
+      "sql": "CREATE INDEX local_purchase_returns_scope ON local_purchase_returns(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchases_reconcile",
+      "table": "local_purchases",
+      "sql": "CREATE INDEX local_purchases_reconcile ON local_purchases(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_purchases_scope",
+      "table": "local_purchases",
+      "sql": "CREATE INDEX local_purchases_scope ON local_purchases(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_racks_reconcile",
+      "table": "local_racks",
+      "sql": "CREATE INDEX local_racks_reconcile ON local_racks(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_racks_scope",
+      "table": "local_racks",
+      "sql": "CREATE INDEX local_racks_scope ON local_racks(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_roles_reconcile",
+      "table": "local_roles",
+      "sql": "CREATE INDEX local_roles_reconcile ON local_roles(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_roles_scope",
+      "table": "local_roles",
+      "sql": "CREATE INDEX local_roles_scope ON local_roles(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_shades_reconcile",
+      "table": "local_shades",
+      "sql": "CREATE INDEX local_shades_reconcile ON local_shades(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_shades_scope",
+      "table": "local_shades",
+      "sql": "CREATE INDEX local_shades_scope ON local_shades(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_shelves_reconcile",
+      "table": "local_shelves",
+      "sql": "CREATE INDEX local_shelves_reconcile ON local_shelves(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_shelves_scope",
+      "table": "local_shelves",
+      "sql": "CREATE INDEX local_shelves_scope ON local_shelves(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_stock_balances_reconcile",
+      "table": "local_stock_balances",
+      "sql": "CREATE INDEX local_stock_balances_reconcile ON local_stock_balances(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_stock_balances_scope",
+      "table": "local_stock_balances",
+      "sql": "CREATE INDEX local_stock_balances_scope ON local_stock_balances(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_storage_locations_reconcile",
+      "table": "local_storage_locations",
+      "sql": "CREATE INDEX local_storage_locations_reconcile ON local_storage_locations(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_storage_locations_scope",
+      "table": "local_storage_locations",
+      "sql": "CREATE INDEX local_storage_locations_scope ON local_storage_locations(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_subcategory_attribute_templates_reconcile",
+      "table": "local_subcategory_attribute_templates",
+      "sql": "CREATE INDEX local_subcategory_attribute_templates_reconcile ON local_subcategory_attribute_templates(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_subcategory_attribute_templates_scope",
+      "table": "local_subcategory_attribute_templates",
+      "sql": "CREATE INDEX local_subcategory_attribute_templates_scope ON local_subcategory_attribute_templates(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_balances_reconcile",
+      "table": "local_supplier_balances",
+      "sql": "CREATE INDEX local_supplier_balances_reconcile ON local_supplier_balances(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_balances_scope",
+      "table": "local_supplier_balances",
+      "sql": "CREATE INDEX local_supplier_balances_scope ON local_supplier_balances(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_businesses_reconcile",
+      "table": "local_supplier_businesses",
+      "sql": "CREATE INDEX local_supplier_businesses_reconcile ON local_supplier_businesses(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_businesses_scope",
+      "table": "local_supplier_businesses",
+      "sql": "CREATE INDEX local_supplier_businesses_scope ON local_supplier_businesses(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_credits_reconcile",
+      "table": "local_supplier_credits",
+      "sql": "CREATE INDEX local_supplier_credits_reconcile ON local_supplier_credits(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_credits_scope",
+      "table": "local_supplier_credits",
+      "sql": "CREATE INDEX local_supplier_credits_scope ON local_supplier_credits(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_ledger_entries_reconcile",
+      "table": "local_supplier_ledger_entries",
+      "sql": "CREATE INDEX local_supplier_ledger_entries_reconcile ON local_supplier_ledger_entries(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_ledger_entries_scope",
+      "table": "local_supplier_ledger_entries",
+      "sql": "CREATE INDEX local_supplier_ledger_entries_scope ON local_supplier_ledger_entries(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_payments_reconcile",
+      "table": "local_supplier_payments",
+      "sql": "CREATE INDEX local_supplier_payments_reconcile ON local_supplier_payments(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_payments_scope",
+      "table": "local_supplier_payments",
+      "sql": "CREATE INDEX local_supplier_payments_scope ON local_supplier_payments(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_products_reconcile",
+      "table": "local_supplier_products",
+      "sql": "CREATE INDEX local_supplier_products_reconcile ON local_supplier_products(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_supplier_products_scope",
+      "table": "local_supplier_products",
+      "sql": "CREATE INDEX local_supplier_products_scope ON local_supplier_products(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_suppliers_reconcile",
+      "table": "local_suppliers",
+      "sql": "CREATE INDEX local_suppliers_reconcile ON local_suppliers(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_suppliers_scope",
+      "table": "local_suppliers",
+      "sql": "CREATE INDEX local_suppliers_scope ON local_suppliers(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_units_reconcile",
+      "table": "local_units",
+      "sql": "CREATE INDEX local_units_reconcile ON local_units(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_units_scope",
+      "table": "local_units",
+      "sql": "CREATE INDEX local_units_scope ON local_units(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "local_user_reconcile",
+      "table": "local_user",
+      "sql": "CREATE INDEX local_user_reconcile ON local_user(syncStatus,isDeleted)"
+    },
+    {
+      "type": "index",
+      "name": "local_user_scope",
+      "table": "local_user",
+      "sql": "CREATE INDEX local_user_scope ON local_user(tenantId,businessId,outletId,scopeType)"
+    },
+    {
+      "type": "index",
+      "name": "outbox_batch",
+      "table": "sync_outbox",
+      "sql": "CREATE INDEX outbox_batch ON sync_outbox(batchId,id)"
+    },
+    {
+      "type": "index",
+      "name": "outbox_entity",
+      "table": "sync_outbox",
+      "sql": "CREATE INDEX outbox_entity ON sync_outbox(entityType,documentId,id)"
+    },
+    {
+      "type": "index",
+      "name": "outbox_status",
+      "table": "sync_outbox",
+      "sql": "CREATE INDEX outbox_status ON sync_outbox(status,batchId,id)"
+    },
+    {
+      "type": "index",
+      "name": "sync_queries_active",
+      "table": "sync_queries",
+      "sql": "CREATE INDEX sync_queries_active ON sync_queries(active)"
+    },
+    {
+      "type": "table",
+      "name": "local_app_config",
+      "table": "local_app_config",
+      "sql": "CREATE TABLE local_app_config (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_brands",
+      "table": "local_brands",
+      "sql": "CREATE TABLE local_brands (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_business_name_reservations",
+      "table": "local_business_name_reservations",
+      "sql": "CREATE TABLE local_business_name_reservations (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_business_sub_types",
+      "table": "local_business_sub_types",
+      "sql": "CREATE TABLE local_business_sub_types (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_business_types",
+      "table": "local_business_types",
+      "sql": "CREATE TABLE local_business_types (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_businesses",
+      "table": "local_businesses",
+      "sql": "CREATE TABLE local_businesses (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_customers",
+      "table": "local_customers",
+      "sql": "CREATE TABLE local_customers (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_document_sequences",
+      "table": "local_document_sequences",
+      "sql": "CREATE TABLE local_document_sequences (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_employees",
+      "table": "local_employees",
+      "sql": "CREATE TABLE local_employees (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_godown_code_reservations",
+      "table": "local_godown_code_reservations",
+      "sql": "CREATE TABLE local_godown_code_reservations (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_godowns",
+      "table": "local_godowns",
+      "sql": "CREATE TABLE local_godowns (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_goods_receipt_items",
+      "table": "local_goods_receipt_items",
+      "sql": "CREATE TABLE local_goods_receipt_items (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_goods_receipts",
+      "table": "local_goods_receipts",
+      "sql": "CREATE TABLE local_goods_receipts (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_hsn_codes",
+      "table": "local_hsn_codes",
+      "sql": "CREATE TABLE local_hsn_codes (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_inventory_transactions",
+      "table": "local_inventory_transactions",
+      "sql": "CREATE TABLE local_inventory_transactions (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_invoices",
+      "table": "local_invoices",
+      "sql": "CREATE TABLE local_invoices (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_outlets",
+      "table": "local_outlets",
+      "sql": "CREATE TABLE local_outlets (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_pack_sizes",
+      "table": "local_pack_sizes",
+      "sql": "CREATE TABLE local_pack_sizes (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_payment_allocations",
+      "table": "local_payment_allocations",
+      "sql": "CREATE TABLE local_payment_allocations (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_permissions",
+      "table": "local_permissions",
+      "sql": "CREATE TABLE local_permissions (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_attribute_options",
+      "table": "local_product_attribute_options",
+      "sql": "CREATE TABLE local_product_attribute_options (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_attributes",
+      "table": "local_product_attributes",
+      "sql": "CREATE TABLE local_product_attributes (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_catalogue_releases",
+      "table": "local_product_catalogue_releases",
+      "sql": "CREATE TABLE local_product_catalogue_releases (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_categories",
+      "table": "local_product_categories",
+      "sql": "CREATE TABLE local_product_categories (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_classification_options",
+      "table": "local_product_classification_options",
+      "sql": "CREATE TABLE local_product_classification_options (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_subcategories",
+      "table": "local_product_subcategories",
+      "sql": "CREATE TABLE local_product_subcategories (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_unique_keys",
+      "table": "local_product_unique_keys",
+      "sql": "CREATE TABLE local_product_unique_keys (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_product_variants",
+      "table": "local_product_variants",
+      "sql": "CREATE TABLE local_product_variants (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_products",
+      "table": "local_products",
+      "sql": "CREATE TABLE local_products (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_purchase_bills",
+      "table": "local_purchase_bills",
+      "sql": "CREATE TABLE local_purchase_bills (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_purchase_order_items",
+      "table": "local_purchase_order_items",
+      "sql": "CREATE TABLE local_purchase_order_items (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_purchase_orders",
+      "table": "local_purchase_orders",
+      "sql": "CREATE TABLE local_purchase_orders (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_purchase_returns",
+      "table": "local_purchase_returns",
+      "sql": "CREATE TABLE local_purchase_returns (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_purchases",
+      "table": "local_purchases",
+      "sql": "CREATE TABLE local_purchases (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_racks",
+      "table": "local_racks",
+      "sql": "CREATE TABLE local_racks (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_roles",
+      "table": "local_roles",
+      "sql": "CREATE TABLE local_roles (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_shades",
+      "table": "local_shades",
+      "sql": "CREATE TABLE local_shades (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_shelves",
+      "table": "local_shelves",
+      "sql": "CREATE TABLE local_shelves (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_stock_balances",
+      "table": "local_stock_balances",
+      "sql": "CREATE TABLE local_stock_balances (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_storage_locations",
+      "table": "local_storage_locations",
+      "sql": "CREATE TABLE local_storage_locations (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_subcategory_attribute_templates",
+      "table": "local_subcategory_attribute_templates",
+      "sql": "CREATE TABLE local_subcategory_attribute_templates (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_supplier_balances",
+      "table": "local_supplier_balances",
+      "sql": "CREATE TABLE local_supplier_balances (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_supplier_businesses",
+      "table": "local_supplier_businesses",
+      "sql": "CREATE TABLE local_supplier_businesses (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_supplier_credits",
+      "table": "local_supplier_credits",
+      "sql": "CREATE TABLE local_supplier_credits (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_supplier_ledger_entries",
+      "table": "local_supplier_ledger_entries",
+      "sql": "CREATE TABLE local_supplier_ledger_entries (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_supplier_payments",
+      "table": "local_supplier_payments",
+      "sql": "CREATE TABLE local_supplier_payments (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_supplier_products",
+      "table": "local_supplier_products",
+      "sql": "CREATE TABLE local_supplier_products (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_suppliers",
+      "table": "local_suppliers",
+      "sql": "CREATE TABLE local_suppliers (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_units",
+      "table": "local_units",
+      "sql": "CREATE TABLE local_units (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "local_user",
+      "table": "local_user",
+      "sql": "CREATE TABLE local_user (\n          remoteId TEXT PRIMARY KEY, payloadJson TEXT NOT NULL,\n          scopeType TEXT, status TEXT, catalogueId TEXT,\n          businessTypeId TEXT, businessSubTypeId TEXT,\n          tenantId TEXT, businessId TEXT, outletId TEXT,\n          categoryId TEXT, subcategoryId TEXT, attributeId TEXT,\n          syncStatus TEXT NOT NULL DEFAULT 'SYNCED',\n          localUpdatedAt TEXT NOT NULL, remoteUpdatedAt TEXT,\n          remoteUpdateTime TEXT, lastSyncedAt TEXT,\n          isDeleted INTEGER NOT NULL DEFAULT 0, syncError TEXT,\n          localRevision INTEGER NOT NULL DEFAULT 0,\n          acknowledgedRevision INTEGER NOT NULL DEFAULT 0\n        )"
+    },
+    {
+      "type": "table",
+      "name": "sqlite_sequence",
+      "table": "sqlite_sequence",
+      "sql": "CREATE TABLE sqlite_sequence(name,seq)"
+    },
+    {
+      "type": "table",
+      "name": "sync_conflicts",
+      "table": "sync_conflicts",
+      "sql": "CREATE TABLE sync_conflicts (\n        id INTEGER PRIMARY KEY AUTOINCREMENT, entityType TEXT NOT NULL,\n        documentId TEXT NOT NULL, batchId TEXT, localJson TEXT,\n        remoteJson TEXT, reason TEXT NOT NULL, createdAt TEXT NOT NULL,\n        resolved INTEGER NOT NULL DEFAULT 0\n      )"
+    },
+    {
+      "type": "table",
+      "name": "sync_control",
+      "table": "sync_control",
+      "sql": "CREATE TABLE sync_control (id INTEGER PRIMARY KEY CHECK(id=1), cooldownUntil TEXT, failureCount INTEGER NOT NULL DEFAULT 0, lastPullAt TEXT, lastError TEXT)"
+    },
+    {
+      "type": "table",
+      "name": "sync_lease",
+      "table": "sync_lease",
+      "sql": "CREATE TABLE sync_lease (\n        id INTEGER PRIMARY KEY CHECK(id=1), owner TEXT, expiresAt TEXT\n      )"
+    },
+    {
+      "type": "table",
+      "name": "sync_outbox",
+      "table": "sync_outbox",
+      "sql": "CREATE TABLE sync_outbox (\n        id INTEGER PRIMARY KEY AUTOINCREMENT, batchId TEXT NOT NULL,\n        entityType TEXT NOT NULL, documentId TEXT NOT NULL,\n        operation TEXT NOT NULL CHECK(operation IN ('CREATE','UPDATE','DELETE')),\n        tenantId TEXT, businessId TEXT, outletId TEXT,\n        payloadJson TEXT NOT NULL, readSetJson TEXT NOT NULL,\n        localRevision INTEGER NOT NULL, createdAt TEXT NOT NULL,\n        attemptCount INTEGER NOT NULL DEFAULT 0, lastAttemptAt TEXT,\n        lastError TEXT, status TEXT NOT NULL DEFAULT 'PENDING'\n          CHECK(status IN ('PENDING','PROCESSING','FAILED'))\n      )"
+    },
+    {
+      "type": "table",
+      "name": "sync_queries",
+      "table": "sync_queries",
+      "sql": "CREATE TABLE sync_queries (\n        queryKey TEXT PRIMARY KEY, collectionName TEXT NOT NULL,\n        queryJson TEXT NOT NULL, lastSyncedAt TEXT\n      , lastAttemptAt TEXT, lastError TEXT, active INTEGER NOT NULL DEFAULT 0, cursor TEXT, catalogueVersion TEXT)"
+    }
+  ]
+}

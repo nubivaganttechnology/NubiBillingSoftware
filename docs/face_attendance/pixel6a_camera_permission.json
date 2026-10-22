@@ -1,0 +1,8 @@
+{
+  "syntheticFixturePackage": "com.example.testflutter.attendancefixture",
+  "cameraRuntimePermission": [
+    "android.permission.CAMERA: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+  ],
+  "realCameraCaptureTested": false,
+  "actualRecognitionTested": false
+}

@@ -1,0 +1,89 @@
+{
+  "catalogueVersionBefore": 1,
+  "catalogueVersionAfter": 3,
+  "collections": {
+    "product_categories": {
+      "total": 34,
+      "activeSystem": 22,
+      "inactiveSystem": 10,
+      "business": 2,
+      "pending": 1
+    },
+    "product_subcategories": {
+      "total": 164,
+      "activeSystem": 114,
+      "inactiveSystem": 49,
+      "business": 1,
+      "pending": 0
+    },
+    "product_attributes": {
+      "total": 40,
+      "activeSystem": 37,
+      "inactiveSystem": 3,
+      "business": 0,
+      "pending": 0
+    },
+    "product_attribute_options": {
+      "total": 145,
+      "activeSystem": 139,
+      "inactiveSystem": 5,
+      "business": 1,
+      "pending": 1
+    },
+    "subcategory_attribute_templates": {
+      "total": 2109,
+      "activeSystem": 1598,
+      "inactiveSystem": 511,
+      "business": 0,
+      "pending": 0
+    },
+    "product_catalogue_releases": {
+      "total": 1,
+      "activeSystem": 1,
+      "inactiveSystem": 0,
+      "business": 0,
+      "pending": 0
+    },
+    "units": {
+      "total": 26,
+      "activeSystem": 25,
+      "inactiveSystem": 0,
+      "business": 1,
+      "pending": 0
+    }
+  },
+  "activeSystemCategories": [
+    "Waterproofing",
+    "Adhesives & Tiling",
+    "Admixtures",
+    "Allied Products",
+    "Automotive Coatings",
+    "DIY & Aerosols",
+    "Exterior Wall Coatings",
+    "Floor & Tile Coatings",
+    "Health & Hygiene",
+    "Interior & Exterior Coatings",
+    "Interior Wall Coatings",
+    "Metal & Wood Enamels",
+    "Painting Tools & Accessories",
+    "Pipe & GI Coatings",
+    "Powder Coatings",
+    "Primers & Undercoats",
+    "Protective & Industrial Coatings",
+    "Putty & Surface Preparation",
+    "Sealants & Repair",
+    "Textures & Special Effects",
+    "Wall Coverings",
+    "Wood Finishes"
+  ],
+  "businessCategories": [
+    {
+      "name": "Paint",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Interior Wall Coatings",
+      "syncStatus": "PENDING_CREATE"
+    }
+  ]
+}

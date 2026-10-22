@@ -1,0 +1,101 @@
+{
+  "phase": "10IB",
+  "title": "Product/Variant Business Write-Path Closure",
+  "status": "DISPOSABLE_CLONE_WRITE_PATH_PASSED_PRODUCTION_NOT_APPROVED",
+  "runDate": "2026-10-05",
+  "repository": {
+    "branch": "fix/product-master-audit",
+    "baselineCommit": "3f41e52",
+    "phase10ibChangesCommitted": false,
+    "note": "Baseline commit is recorded; Phase 10IB changes are currently uncommitted."
+  },
+  "safety": {
+    "productionDatabasesOpenedWritable": false,
+    "productionProductCreated": false,
+    "release4InstalledOnProduction": false,
+    "firestoreAccessedByRehearsal": false,
+    "rehearsalRemoteCalls": 0,
+    "phase11Started": false,
+    "scope": "Writes were confined to disposable child copies of the migrated Phase 10I account clone."
+  },
+  "sourceDatabasesFinalVerification": [
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+      "sizeBytes": 9744384,
+      "sha256": "7751a6cc30a1f3765067bcec646beb16b0dc9dd094e1ccacd0d4d23e7e1515ef",
+      "unchangedFromPreflight": true,
+      "verificationSource": "Separate read-only hash check, compared to Phase 10I preflight; not asserted by the Phase 10IB test."
+    },
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-public-config.db",
+      "sizeBytes": 937984,
+      "sha256": "a81b30213ada2f9fbb962eb4c55b5824545048cf0be534dcc12d591dc9c93693",
+      "unchangedFromPreflight": true,
+      "verificationSource": "Separate read-only hash check, compared to Phase 10I preflight; not asserted by the Phase 10IB test."
+    }
+  ],
+  "cloneSet": {
+    "root": "/tmp/phase10i-production-clones-20261005-092618",
+    "children": [
+      "write-success/nubibill--C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+      "write-failure/nubibill--C6btLkx5SyZvUQOzOeUUd7XxsFh2.db"
+    ],
+    "successChildMatchedUpgradedClone": true,
+    "failureChildMatchedUpgradedClone": true
+  },
+  "release4": {
+    "fingerprint": "sha256:cfc96ca97f343ea5593813e28cc38a22c85fbd1d5c1e3d52d4fdfa52f5bb1f88",
+    "canonicalSelectors": 137,
+    "selectedCanonicalSubcategory": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_PREMIUM_INTERIOR_EMULSIONS"
+  },
+  "successfulCreate": {
+    "repositoryMethod": "ProductRepository.createStructuredProduct",
+    "identifiersAreObservedRunOutput": true,
+    "productId": "PROD-77FFBB43C4A74D37AB51E20E34684A04",
+    "variantId": "VAR-11B063F72FC644C59FFABA04EEBBC179",
+    "sku": "SKU-0007",
+    "barcode": "P10IB-1791183345245791",
+    "productAndOutboxFingerprintEqual": true,
+    "variantUsesParentProductIdForProvenance": true,
+    "variantHasIndependentFingerprint": false,
+    "productValidatorValid": true,
+    "localReadBackValid": true,
+    "skuUnique": true,
+    "barcodeUnique": true,
+    "duplicateBarcodeRejectedWithoutStateChange": true,
+    "historicalNullProvenanceFailClosed": true
+  },
+  "preservation": {
+    "preexistingProducts": 4,
+    "preexistingVariants": 7,
+    "syncQueries": 195,
+    "archiveRows": 3903,
+    "archiveDigestBefore": "c9bf37ad0cbcd7f88fa09aa369f83acc610c14d510831c5ae85a497e4397a907",
+    "archiveDigestAfter": "c9bf37ad0cbcd7f88fa09aa369f83acc610c14d510831c5ae85a497e4397a907",
+    "archiveDigestPreserved": true
+  },
+  "rollback": {
+    "injectedFailureStage": "after Product create staged, before Variant create",
+    "productCreateReachedBeforeFailure": true,
+    "completeDatabaseStateRestored": true
+  },
+  "verification": {
+    "dedicatedCloneRehearsal": "passed after final fixture correction",
+    "fullWorkspaceSuite": {
+      "command": "flutter test --timeout 3m --concurrency 1 --reporter compact (PHASE10I clone environment enabled)",
+      "result": "passed",
+      "passed": 664,
+      "failed": 0,
+      "skipped": 0,
+      "cloneSpecificPhase10I10IBTest": "passed",
+      "log": "/tmp/phase10ib-final-full-test.log"
+    },
+    "flutterAnalyze": {
+      "workspaceFindings": 48,
+      "errors": 0,
+      "phase10ibTestDiagnostics": 0,
+      "exitStatus": "non-zero due to existing workspace infos/warnings"
+    },
+    "gitDiffCheck": "passed"
+  }
+}

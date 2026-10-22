@@ -1,0 +1,194 @@
+{
+  "phase": "10I",
+  "title": "Production Clone Migration Rehearsal",
+  "status": "REHEARSAL_PASSED_PRODUCTION_NOT_APPROVED",
+  "runDate": "2026-10-05",
+  "repository": {
+    "branch": "fix/product-master-audit",
+    "headCommit": "f96d2f5",
+    "workingTreeAtRehearsal": "Phase 10I resolver/test changes were uncommitted; no production DB modifications were made"
+  },
+  "safety": {
+    "productionDatabasesOpenedWritable": false,
+    "firestoreAccessed": false,
+    "remoteCalls": 0,
+    "release4ProductionInstallApproved": false,
+    "phase11Started": false,
+    "scope": "Only disposable byte-identical SQLite copies under /tmp were opened writable by LocalDatabase. Production paths were read-only for integrity/hash verification."
+  },
+  "cloneSet": {
+    "directory": "/tmp/phase10i-production-clones-20261005-092618",
+    "copyMethod": "Byte-for-byte filesystem copy, verified against source SHA-256 and byte length before migration",
+    "sources": [
+      {
+        "role": "account",
+        "sourcePath": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+        "clonePath": "/tmp/phase10i-production-clones-20261005-092618/account.db",
+        "bytes": 9744384,
+        "sha256": "7751a6cc30a1f3765067bcec646beb16b0dc9dd094e1ccacd0d4d23e7e1515ef",
+        "cloneMatchedSource": true,
+        "sourceIntegrityCheck": "ok",
+        "cloneIntegrityCheckBeforeMigration": "ok",
+        "sourceFinalSha256": "7751a6cc30a1f3765067bcec646beb16b0dc9dd094e1ccacd0d4d23e7e1515ef",
+        "sourceUnchanged": true
+      },
+      {
+        "role": "public-config",
+        "sourcePath": "/Users/sksuman/Documents/nubibill-test1-bcebe-public-config.db",
+        "clonePath": "/tmp/phase10i-production-clones-20261005-092618/public-config.db",
+        "bytes": 937984,
+        "sha256": "a81b30213ada2f9fbb962eb4c55b5824545048cf0be534dcc12d591dc9c93693",
+        "cloneMatchedSource": true,
+        "sourceIntegrityCheck": "ok",
+        "cloneIntegrityCheckBeforeMigration": "ok",
+        "sourceFinalSha256": "a81b30213ada2f9fbb962eb4c55b5824545048cf0be534dcc12d591dc9c93693",
+        "sourceUnchanged": true
+      }
+    ],
+    "initialSchemaVersion": 3,
+    "productionReadObservation": {
+      "durationSeconds": 121,
+      "test": "Phase 9C guarded read-only observation",
+      "processViolation": false,
+      "sidecarOrChecksumViolation": false,
+      "accountSha256Unchanged": true,
+      "backupSha256Unchanged": true
+    }
+  },
+  "accountPreimage": {
+    "products": 4,
+    "variants": 7,
+    "syncQueries": 195,
+    "protectedLegacyQueries": 10,
+    "outboxRows": 0,
+    "systemCatalogueRows": {
+      "brands": 10,
+      "product_categories": 34,
+      "product_subcategories": 198,
+      "product_attributes": 50,
+      "product_attribute_options": 221,
+      "units": 27,
+      "subcategory_attribute_templates": 3377,
+      "product_catalogue_releases": 1
+    }
+  },
+  "migrationAndImport": {
+    "appAccountClonePath": "/tmp/phase10i-production-clones-20261005-092618/account-app/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+    "appPublicConfigClonePath": "/tmp/phase10i-production-clones-20261005-092618/public-config-app/nubibill-test1-bcebe-public-config.db",
+    "schemaVersionAfterOpen": 4,
+    "bothClonesMigrated": true,
+    "postMigrationAndRelease4IntegrityCheck": {
+      "accountClone": "ok",
+      "publicConfigClone": "ok"
+    },
+    "legacyArchive": {
+      "rows": 3903,
+      "fingerprint": "sha256:1557b7d098f0ae5f829853fb798c86152282af67776cbb525063e2055387e74b",
+      "preservationProof": "For every eligible preimage SYSTEM row, the archived (collection, documentId), payloadId, and payloadJson matched the source row exactly; the two known documentId/payloadId mismatches remained distinct and unchanged."
+    },
+    "release4": {
+      "catalogueId": "PAINT_V1",
+      "catalogueVersion": 4,
+      "schemaRevision": 1,
+      "compilerRevision": 6,
+      "candidateSelectors": 137,
+      "resolvedSelectors": 137,
+      "formsReadyAndValid": 137,
+      "semanticSha256": "3f02fef8f5ce368757f28c0b64ab797f19585efbeb0dd5263a4b1a38cac285ef",
+      "contentFingerprint": "b29528b8ed70428c",
+      "installedLocalCatalogueFingerprint": "sha256:cfc96ca97f343ea5593813e28cc38a22c85fbd1d5c1e3d52d4fdfa52f5bb1f88"
+    },
+    "historicalReadability": {
+      "legacyProductsWithMissingProvenance": 4,
+      "resolutionStatus": "provenanceMissing",
+      "fallbackToRelease4": false,
+      "identityInferenceOrRemap": false,
+      "ceilingDocumentAndPayloadIdsPreserved": true,
+      "basementDocumentAndPayloadIdsPreserved": true
+    },
+    "invariants": {
+      "productsPreserved": 4,
+      "variantsPreserved": 7,
+      "syncQueriesPreserved": 195,
+      "protectedQueriesPreserved": 10,
+      "outboxRowsPreserved": 0,
+      "noOpReplayLeavesCompleteDatabaseStateUnchanged": true
+    }
+  },
+  "rollback": {
+    "method": "Each injected failure ran against an independent disposable clone; the complete SQLite table state and release-marker rows were compared before and after the failed transaction.",
+    "checkpointsPassed": [
+      "before_archive",
+      "archive_row_1",
+      "after_archive",
+      "product_subcategories",
+      "before_release_marker",
+      "after_release_marker"
+    ],
+    "completeDatabaseStateRestoredAtEveryCheckpoint": true
+  },
+  "restoreDrill": {
+    "directory": "/tmp/phase10i-production-clones-20261005-092618/restore-drill",
+    "accountAndPublicConfigPairRestoredFromOriginalByteImages": true,
+    "accountRestoreSha256": "7751a6cc30a1f3765067bcec646beb16b0dc9dd094e1ccacd0d4d23e7e1515ef",
+    "publicConfigRestoreSha256": "a81b30213ada2f9fbb962eb4c55b5824545048cf0be534dcc12d591dc9c93693",
+    "restoredAccountSchemaVersion": 3,
+    "restoredAccountIntegrityCheck": "ok"
+  },
+  "verification": {
+    "dedicatedCloneRehearsal": "passed",
+    "dedicatedCloneRehearsalSummary": {
+      "accountSchemaVersion": 4,
+      "publicConfigSchemaVersion": 4,
+      "productsPreserved": 4,
+      "variantsPreserved": 7,
+      "syncQueriesPreserved": 195,
+      "protectedQueriesPreserved": 10,
+      "outboxRowsPreserved": 0,
+      "archivedLegacyRows": 3903,
+      "selectors": 137,
+      "formsReady": 137,
+      "rollbackCheckpoints": 6,
+      "postUpgradeIntegrityChecks": "ok",
+      "remoteCalls": 0,
+      "restorePairVerified": true,
+      "sourceHashesUnchanged": true
+    },
+    "focusedResolverCompatibilityTests": {
+      "passed": 305,
+      "failed": 0,
+      "suites": [
+        "catalogue_phase10a_audit_test.dart",
+        "catalogue_release4_forms_test.dart",
+        "catalogue_phase10c_content_test.dart"
+      ]
+    },
+    "fullFlutterSuite": {
+      "command": "flutter test --timeout 3m --concurrency 1 --reporter compact",
+      "result": "all other tests passed; one environment-gated Phase 10I test skipped because clone env vars were absent",
+      "passed": 663,
+      "skipped": 1,
+      "failed": 0
+    },
+    "flutterAnalyze": {
+      "result": "exit code 1 due to repository-wide infos/warnings; no errors reported",
+      "findings": 48,
+      "findingsAttributedToPhase10iFilesAfterCleanup": 0
+    }
+  },
+  "compatibilityInterpretation": {
+    "legacyRetainRequired": 242,
+    "reviewRequired": 2506,
+    "meaning": "Compatibility classifications are retention/review evidence, not authorization to alter historical IDs or migrate/remap historical records. Historical rows and query definitions remain preserved pending explicit approval."
+  },
+  "limitations": [
+    "The rehearsal proves byte identity at clone creation, then clone-local migration/import invariants; it is not a separate independent semantic reconstruction of every source table before migration.",
+    "The test deliberately does not create a new Product or Variant; its write-path proof is transactional snapshot/import rollback and existing Product/Variant preservation, not a new-product smoke test.",
+    "The normal full-suite invocation needs a longer test timeout and sequential concurrency for the repository's existing 120-second guarded observation and long catalogue form simulations."
+  ],
+  "approval": {
+    "productionRelease4Install": "NOT APPROVED",
+    "productionMigration": "NOT PERFORMED",
+    "phase11": "NOT STARTED"
+  }
+}

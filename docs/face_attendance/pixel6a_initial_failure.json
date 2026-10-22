@@ -1,0 +1,12 @@
+{
+  "syntheticOnly": true,
+  "cameraOpened": false,
+  "productionTouched": false,
+  "checks": {},
+  "environment": {
+    "packageId": "com.example.testflutter.attendancefixture",
+    "androidApi": 37,
+    "model": "Pixel 6a"
+  },
+  "result": "FAIL"
+}

@@ -1,0 +1,241 @@
+{
+  "phase": "PHASE_10O5_IMMUTABLE_CANDIDATE_COMMIT_AND_POSTCOMMIT_FULL_SUITE",
+  "revision": 5,
+  "status": "DEPLOYMENT_CANDIDATE_READY",
+  "productionExecutionAuthorized": true,
+  "decision": "DEPLOYMENT_CANDIDATE_READY",
+  "decisionRule": "The immutable Release 4 candidate commit and complete sequential post-commit suite passed. This decision marks the candidate ready for the separately controlled deployment phase; production migration remains prohibited in O5.",
+  "runbook": "docs/phase10j-production-deployment-runbook.md",
+  "authorizationOverlay": "docs/phase10o2-deployment-authorization.json",
+  "authorizationScope": {
+    "catalogueId": "PAINT_V1",
+    "dataVersion": 4,
+    "schemaRevision": 1,
+    "compilerRevision": 6,
+    "catalogueFingerprint": "sha256:cfc96ca97f343ea5593813e28cc38a22c85fbd1d5c1e3d52d4fdfa52f5bb1f88",
+    "accountPreimageSha256": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8",
+    "publicConfigPreimageSha256": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289",
+    "installationOnly": true,
+    "automaticLegacyRemapping": false,
+    "historicalMigration": false,
+    "historicalRetirement": false
+  },
+  "releaseExpected": {
+    "catalogueId": "PAINT_V1",
+    "dataVersion": 4,
+    "schemaRevision": 1,
+    "compilerRevision": 6,
+    "canonicalSelectorCount": 137,
+    "canonicalReadyCount": 137,
+    "catalogueFingerprint": "sha256:cfc96ca97f343ea5593813e28cc38a22c85fbd1d5c1e3d52d4fdfa52f5bb1f88"
+  },
+  "sections": [
+    {
+      "id": "code_readiness",
+      "title": "Code readiness",
+      "items": [
+        {"id":"approved_branch_commit","mandatory":true,"answer":"YES","evidence":"Immutable Release 4 candidate commit 8e3658690ddb142717c7e9a75246a27fcb2bb877 (release(product-master): bind Release 4 production candidate) was created on fix/product-master-audit after reviewing and staging exactly 40 Release 4 source, test, governance, and evidence files. The candidate tree was clean before post-commit verification.","approver":"SK SUMAN — Project Owner / Release Commander"},
+        {"id":"no_unreviewed_source_or_catalogue_changes","mandatory":true,"answer":"YES","evidence":"All release-critical source and runner/test modification times precede the Phase 10N7 report time (latest source 2026-10-05 22:25 +0530; report 23:41 +0530); the exact current candidate tree is covered by focused and sequential tests. No unrelated worktree files were found.","approver":"SK SUMAN — Project Owner / Release Commander"},
+        {"id":"production_runner_exists_and_is_reviewed","mandatory":true,"answer":"YES","evidence":"ProductionMigrationRunner is implemented and reviewed; Phase 10N4 clone CLI validation and Phase 10N7 production DRY_RUN GO are recorded. The immutable O3 candidate binds the reviewed source tree.","approver":"SK SUMAN — Project Owner / Release Commander"},
+        {"id":"sync_query_invariants_proven","mandatory":true,"answer":"YES","evidence":"Phase 10N7 validated the exact 195-query digest; Release 4 snapshot and clone tests preserve all 195 rows and all 10 protected rows. Phase 10O3 performs no migration.","approver":"SK SUMAN — Project Owner / Release Commander"}
+      ]
+    },
+    {
+      "id": "test_readiness",
+      "title": "Test readiness",
+      "items": [
+        {"id":"full_tests_green_at_deployment_commit","mandatory":true,"answer":"YES","evidence":"At candidate commit 8e3658690ddb142717c7e9a75246a27fcb2bb877, the required sequential command ran with all five PHASE10I_* variables unset and completed with 698 passed, 1 environment-gated Phase 10I/10IB legacy clone test skipped, all other tests passed, and exit code 0. The current v4/R3 clone runner and CLI paths passed in the included Phase 10M/N4 tests.","approver":null},
+        {"id":"fresh_hash_matched_clone_rehearsal_passed","mandatory":true,"answer":"YES","evidence":"Phase 10M clone rehearsal and Phase 10N4 CLI clone tests passed on hash-matched disposable copies; no production clone operation is run in O2.","approver":null},
+        {"id":"rollback_rehearsal_passed_for_exact_build","mandatory":true,"answer":"YES","evidence":"The candidate commit binds tool/paired_database_restore.py at SHA-256 69bc6cb201fe299b0bb465038c54c0db2d962422aa21e0cbaf408d2bd9914249; its 11 focused crash-recovery and fail-closed tests passed before commit, and the post-commit suite passed Phase 10M v4/R3 disposable-clone failure-injection and rollback cases.","approver":null}
+      ]
+    },
+    {
+      "id": "backup_readiness",
+      "title": "Backup readiness",
+      "items": [
+        {"id":"timestamped_account_and_config_backup_set","mandatory":true,"answer":"YES","evidence":"Approved paired backup set is recorded in Phase 10N3/10N7; fresh O2 hashes match both production preimages.","approver":null},
+        {"id":"source_and_backup_hashes_match","mandatory":true,"answer":"YES","evidence":"Fresh O5 postflight recomputed account/public-config and paired backup SHA-256 values; both pairs match the approved hashes.","approver":null},
+        {"id":"backup_integrity_and_restore_readability_pass","mandatory":true,"answer":"YES","evidence":"Fresh O5 read-only integrity checks returned ok for both production DBs and both paired backups; Phase 10N3 restore-readability drill passed.","approver":null},
+        {"id":"backup_location_and_sidecar_inventory_recorded","mandatory":true,"answer":"YES","evidence":"Exact paired backup root and paths are in the O2 authorization overlay; fresh O2 sidecar scan found none.","approver":null}
+      ]
+    },
+    {
+      "id": "database_preimage_readiness",
+      "title": "Database preimage readiness",
+      "items": [
+        {"id":"approved_preimage_hashes_match","mandatory":true,"answer":"YES","evidence":"Fresh O2 hashes exactly match the two approved preimages and paired backups.","approver":null},
+        {"id":"both_integrity_checks_ok","mandatory":true,"answer":"YES","evidence":"O2 read-only integrity checks returned exactly ok for both production DBs and backups.","approver":null},
+        {"id":"schema_and_v3_release_marker_match","mandatory":true,"answer":"YES","evidence":"Phase 10N7 runner verified the pinned schema-v4/catalogue-v3 preimage and release marker; O2 did not rerun the production dry-run.","approver":null},
+        {"id":"product_variant_query_outbox_and_archive_baselines_match","mandatory":true,"answer":"YES","evidence":"Phase 10N7 verified Products=4, Variants=7, queries=195, protected=10, outbox=0, archive=0, and 3,903 eligible legacy rows.","approver":null},
+        {"id":"no_wal_shm_journal_anomaly_or_writer","mandatory":true,"answer":"YES","evidence":"Fresh O5 exact-path lsof and sidecar scans found no handles or sidecars for production DBs or paired backups.","approver":null}
+      ]
+    },
+    {
+      "id": "maintenance_mode_readiness",
+      "title": "Maintenance-mode readiness",
+      "items": [
+        {"id":"all_clients_closed","mandatory":true,"answer":"YES","evidence":"Fresh Phase 10O3 process scan found no NubiBill or production Flutter client; exact production DB handles are absent. The observed Dart MCP service is tooling, not a NubiBill client.","approver":"SK SUMAN — Database Operator"},
+        {"id":"all_sync_workers_stopped_and_fenced","mandatory":true,"answer":"YES","evidence":"Operator attests workers, scheduled jobs, and automatic restarts stopped; no matching launchd configuration or loaded NubiBill job and no user crontab were found. Repository scan found only the in-app sync timer, inactive without the app; no process was stopped.","approver":"SK SUMAN — Database Operator"},
+        {"id":"single_writer_barrier_verified","mandatory":true,"answer":"YES","evidence":"SK SUMAN's fresh attestation confirms all NubiBill/Flutter production instances, sync workers, scheduled jobs, and automatic restarts are stopped and maintenance remains active through post-deployment verification. Fresh exact-path handle/sidecar, process, launchd, and user crontab scans found no NubiBill writer; no process was stopped.","approver":"SK SUMAN — Database Operator; independently observed by Arnab — Senior Developer"},
+        {"id":"no_remote_calls_during_local_transaction","mandatory":true,"answer":"YES","evidence":"ProductionMigrationRunner is local SQLite-only; Phase 10N7 reports zero Firestore/network calls, and O2 performs no migration transaction.","approver":null}
+      ]
+    },
+    {
+      "id": "release_artifact_readiness",
+      "title": "Release artifact readiness",
+      "items": [
+        {"id":"release4_artifact_signature_and_hash_approved","mandatory":true,"answer":"YES","evidence":"Business Owner approval and Arnab's independent-verifier approval bind the exact reviewed Release 4 fingerprint sha256:cfc96ca97f343ea5593813e28cc38a22c85fbd1d5c1e3d52d4fdfa52f5bb1f88; statements are verbatim and no cryptographic signature metadata is invented.","approver":"SK SUMAN — Business Owner; Arnab — Senior Developer"},
+        {"id":"137_selector_ids_and_137_ready_forms_verified","mandatory":true,"answer":"YES","evidence":"Phase 10N7 actual-production DRY_RUN verified the exact Release 4 fingerprint and 137 selectors/137 READY forms.","approver":null},
+        {"id":"archive_count_and_canonical_digest_approved_for_exact_preimage","mandatory":true,"answer":"YES","evidence":"Phase 10N7 verified 3,903 eligible rows and the approved legacy fingerprint; expected archive content remains retention-only with no preimage archive rows.","approver":null},
+        {"id":"phase10f_identity_reference_and_query_blockers_closed","mandatory":true,"answer":"YES","evidence":"The new scoped semantic approval explicitly authorizes Release 4 installation under retention-only handling. No per-row migration/retirement action or target mapping is approved; all Phase 10F flags stay false/null, all legacy metadata is retained, and all 195 queries/10 protected queries remain unchanged.","approver":"SK SUMAN — Business Owner / Project Owner"}
+      ]
+    },
+    {
+      "id": "rollback_readiness",
+      "title": "Rollback readiness",
+      "items": [
+        {"id":"paired_backup_restore_rehearsed","mandatory":true,"answer":"YES","evidence":"Phase 10O4 final utility tool/paired_database_restore.py completed disposable paired restore operation 92cbf0d057e24f3290c069ab39356af4 in /tmp/nubibill-o4.Jfht00; manifest /tmp/nubibill-o4.Jfht00/journal/restore-manifest.json ended COMPLETE. Both final targets equal the approved backup hashes (account 2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8; public-config 9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289), both integrity checks are ok, both progress flags and pair verification PASS, and both failed-postimage forensic copies remain. Four process-kill/restart rehearsals cover before replacement, after account replacement, after config replacement before verification, and during verification; 11 focused tests pass, including all required fail-closed negatives. Targets and forensic files are owner-only mode 0600 in the rehearsal, with the forensic directory mode 0700. Disposable clones only; no production restore.","approver":null},
+        {"id":"failed_postimage_forensic_preservation_ready","mandatory":true,"answer":"YES","evidence":"Runbook section 8 steps 1-3 require frozen writers, a separate access-controlled forensic copy of both postimage databases and sidecars, and hash/inventory before any restore.","approver":"SK SUMAN — Project Owner / Rollback Authority"},
+        {"id":"preimage_logical_identity_verifier_ready","mandatory":true,"answer":"YES","evidence":"Runbook section 8 steps 5 and 7 specify staging hash and integrity checks plus release marker, Product/Variant, SKU/barcode, full sync-query, protected-query, and outbox identity checks; runner/clone tests cover corresponding invariants.","approver":"SK SUMAN — Project Owner / Rollback Authority"},
+        {"id":"rollback_authority_and_contacts_confirmed","mandatory":true,"answer":"YES","evidence":"SK SUMAN is named Rollback Authority and explicitly authorizes restoring the verified paired backup on failed post-commit verification or ROLLBACK_REQUIRED; deployment-window/abort contact details are recorded in the Phase 10O3 authorization evidence.","approver":"SK SUMAN — Project Owner / Rollback Authority"}
+      ]
+    },
+    {
+      "id": "operator_approval",
+      "title": "Operator approval",
+      "items": [
+        {"id":"named_release_commander_approves","mandatory":true,"answer":"YES","evidence":"SK SUMAN is named Project Owner / Release Commander and the supplied conditional deployment authorization is recorded verbatim in the authorization overlay.","approver":"SK SUMAN — Project Owner / Release Commander"},
+        {"id":"named_database_operator_and_independent_verifier_accept","mandatory":true,"answer":"YES","evidence":"SK SUMAN is named Database Operator and attests the maintenance freeze; Arnab, Senior Developer, independently approves proceeding subject to all gates. Their roles and verbatim statements are recorded separately.","approver":"Arnab — Senior Developer (independent verifier)"},
+        {"id":"maintenance_window_and_abort_contacts_recorded","mandatory":true,"answer":"YES","evidence":"The supplied maintenance window is active and remains in force until post-deployment verification completes. The named Project Owner contact and phone/email are recorded in the restricted authorization evidence; no calendar end time was supplied.","approver":"SK SUMAN — Project Owner"}
+      ]
+    },
+    {
+      "id": "business_operator_approval",
+      "title": "Business/operator approval",
+      "items": [
+        {"id":"all_semantic_reference_decisions_signed","mandatory":true,"answer":"YES","evidence":"SK SUMAN explicitly approves this exact Release 4 installation under the retention-only policy and forbids historical Product/Variant remap, merge, retirement, deletion, reclassification, or backfill. Phase 10F per-row migration/retirement approvals and target IDs remain false/null; no such actions are in scope.","approver":"SK SUMAN — Business Owner / Project Owner"},
+        {"id":"business_operator_approves_release_and_data_impact","mandatory":true,"answer":"YES","evidence":"SK SUMAN's scoped semantic installation approval and conditional release authorization are recorded verbatim in the Phase 10O3 authorization evidence.","approver":"SK SUMAN — Business Owner / Project Owner"},
+        {"id":"smoke_product_policy_explicitly_yes_or_no","mandatory":true,"answer":"YES","evidence":"No production smoke Product is authorized or created in Phase 10O3.","approver":"SK SUMAN — Business Owner / Project Owner"}
+      ]
+    }
+  ],
+  "hardBlockers": [],
+  "phaseRestrictions": [
+    "Production migration execution remains prohibited during Phase 10O5; candidate readiness does not mean production migration was executed."
+  ],
+  "executionGuard": {
+    "productionMigrationPermittedInThisPhase": false,
+    "productionDryRunPermittedInThisPhase": false,
+    "executeFlagPermittedInThisPhase": false,
+    "firestoreOrNetworkAccessPermittedInThisPhase": false
+  },
+  "phase10O5Evidence": {
+    "candidateCommit": "8e3658690ddb142717c7e9a75246a27fcb2bb877",
+    "candidateCommitMessage": "release(product-master): bind Release 4 production candidate",
+    "candidateTreeWasCleanBeforeVerification": true,
+    "fullWorkspaceSuite": {
+      "command": "env -u PHASE10I_CLONE_DIR -u PHASE10I_ACCOUNT_PROJECT -u PHASE10I_ACCOUNT_UID -u PHASE10I_CONFIG_PROJECT -u PHASE10I_CONFIG_UID flutter test --no-pub --timeout 5m --concurrency 1 --reporter compact",
+      "phase10iEnvironmentVariablesUnset": true,
+      "passed": 698,
+      "failed": 0,
+      "skipped": 1,
+      "skipReason": "The Phase 10I/10IB legacy clone rehearsal is environment-gated and skips when PHASE10I_CLONE_DIR is unset, as required for this O5 full-suite run.",
+      "exitCode": 0
+    },
+    "analyzer": {
+      "command": "flutter analyze --no-pub",
+      "errors": 0,
+      "warnings": 5,
+      "infos": 42,
+      "warningLocations": [
+        "lib/presentation/procurement/purchase_entry_page.dart",
+        "lib/presentation/procurement/purchase_pages.dart"
+      ],
+      "releaseRunnerAndCatalogueErrors": 0
+    },
+    "artifactSha256": {
+      "bin/production_migration_runner.dart": "0303c1cc31a07772489e7c89ecc88f55d32476814426fa8bed460075e40e371a",
+      "lib/data/migration/production_migration_runner.dart": "0827dfcf9f164b11acaba835203ab6f7037e5dfd60af408b7fc1a56450ead4fb",
+      "tool/paired_database_restore.py": "69bc6cb201fe299b0bb465038c54c0db2d962422aa21e0cbaf408d2bd9914249",
+      "test/fixtures/system_catalogue_v4.json": "f9b6cb7711df6fe6af740750eca816f2e0a1d76074e7dd3ba930b8dd5d094bd8",
+      "lib/data/catalogue/catalogue_contract.dart": "2a341937c0d79d73aed26957025d159e1374028784bfcede6b4479153ceaafd0",
+      "lib/data/catalogue/catalogue_fingerprint.dart": "87978dc7bb86b41732ce0a1ccc24821e40381e70d9b47700d5a8d82065abdc33",
+      "lib/data/catalogue/system_catalogue_metadata.dart": "4040a5ffb53df7d7740c0d613f1be90d515e46d33dc6e5628dbd388e79f187e8",
+      "lib/data/catalogue/system_catalogue_snapshot.dart": "c06a18d078b8a3ff4fdb5ae190e8e4743ad62e0ce2ef13c23417c520974ec3fc",
+      "docs/phase10f-migration-approval-manifest.json": "4baaffaad071e29efc6c3371a8fcfc6c918754def4ef287c45fd17fb3e919b46",
+      "docs/phase10l-legacy-retention-policy.json": "8e7f9dfcf12135d302c296639ba245ca57c1402c58073919097c99887d690fd7",
+      "docs/phase10j-go-no-go-checklist.json at candidate commit": "c007eddc164e91a5c43549eb03fd09a41821d1671324b567e1819378c79ac0dc",
+      "docs/phase10j-production-deployment-runbook.md at candidate commit": "9de382a1e0a991e91c18ac3215a92d822f8d62820e531118cdcd3f29303644d0",
+      "docs/phase10o2-deployment-authorization.json at candidate commit": "e834c67dd25dbbbfacc1a6ec07adec546c6b32a05db4acef2cec90bbca2e6cb1"
+    },
+    "freshReadOnlyPostflight": {
+      "checkedAtUtc": "2026-10-05T20:41:48Z",
+      "account": {"sha256":"2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8","bytes":9748480,"mode":"0644","integrityCheck":"ok"},
+      "publicConfig": {"sha256":"9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289","bytes":946176,"mode":"0644","integrityCheck":"ok"},
+      "accountBackup": {"sha256":"2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8","bytes":9748480,"mode":"0600","integrityCheck":"ok"},
+      "publicConfigBackup": {"sha256":"9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289","bytes":946176,"mode":"0600","integrityCheck":"ok"},
+      "sidecarsFound": [],
+      "openHandlesFound": [],
+      "productionFilesOpenedWritable": false
+    },
+    "productionMigrationExecuted": false,
+    "productionDryRunRepeated": false,
+    "firestoreOrNetworkAccessed": false
+  },
+  "phase10O4Evidence": {
+    "utility": "tool/paired_database_restore.py",
+    "disposableRehearsalRoot": "/tmp/nubibill-o4.Jfht00",
+    "operationId": "92cbf0d057e24f3290c069ab39356af4",
+    "manifestPath": "/tmp/nubibill-o4.Jfht00/journal/restore-manifest.json",
+    "finalManifestState": "COMPLETE",
+    "finalHashes": {
+      "account": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8",
+      "publicConfig": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289"
+    },
+    "integrityChecks": {"account": "ok", "publicConfig": "ok"},
+    "replacementProgress": {"account": true, "publicConfig": true},
+    "publishedFileMode": "0600",
+    "pairVerification": "PASS",
+    "forensicCopiesPreserved": true,
+    "productionReadOnlyPostflight": {
+      "checkedAtUtc": "2026-10-05T20:12:22Z",
+      "accountSha256": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8",
+      "publicConfigSha256": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289",
+      "accountBackupSha256": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8",
+      "publicConfigBackupSha256": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289",
+      "productionIntegrity": {"account": "ok", "publicConfig": "ok"},
+      "sidecarsFound": [],
+      "exactPathHandlesFound": [],
+      "productionFilesOpenedWritable": false
+    },
+    "processRestartCrashPoints": ["after PREPARED before replacement", "after account rename before state update", "after config rename before verification", "during verification"],
+    "focusedRestoreTests": "11 passed",
+    "productionTargetsModified": false,
+    "productionMigrationOrDryRunExecuted": false,
+    "firestoreOrNetworkAccessed": false
+  },
+  "approvals": {
+    "releaseCommander": {"name":"SK SUMAN","role":"Project Owner / Release Commander","status":"APPROVED","source":"Operator-provided evidence in this conversation"},
+    "databaseOperator": {"name":"SK SUMAN","role":"Database Operator","status":"ATTESTED","source":"Operator-provided evidence in this conversation"},
+    "rollbackAuthority": {"name":"SK SUMAN","role":"Project Owner / Rollback Authority","status":"APPROVED","source":"Operator-provided evidence in this conversation"},
+    "deploymentWindowContact": {"name":"SK SUMAN","role":"Project Owner","phone":"9035714708","email":"sksuman66@gmail.com"},
+    "independentVerifier": {
+      "name": "Arnab",
+      "role": "Senior Developer",
+      "status": "APPROVED",
+      "approval": "I independently reviewed the Release 4 deployment evidence and approve proceeding with the controlled production deployment, subject to all pre-write and post-deployment verification gates passing.",
+      "signature": null,
+      "timestamp": null
+    },
+    "businessOperator": {
+      "status": "APPROVED",
+      "authorization": "I authorize the controlled production deployment, provided every preflight and backup gate passes.",
+      "name": "SK SUMAN",
+      "signature": null,
+      "timestamp": null
+    },
+    "approvedAtUtc": null
+  },
+  "productionWritesPerformedByPhase10J": false,
+  "firestoreAccessedByPhase10J": false
+}

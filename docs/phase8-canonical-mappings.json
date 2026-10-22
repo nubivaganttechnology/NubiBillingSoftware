@@ -1,0 +1,1326 @@
+{
+  "approvedForLiveExecution": false,
+  "canonicalMappings": [
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "PM_C6btLkx5SyZvUQOzOeUUd7XxsFh2_BUS-6CB1F7443C2142159B8EBE3F9303839B_CATEGORY_23f9b9314131ef27",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 0,
+      "requiresDataMigration": false,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "PM_CATEGORY_93d0611d84196d62",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 2,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_ACCESSORIES",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 6,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": "SYS_CATEGORY_EXTERIOR_WALL_COATINGS",
+      "legacyId": "SYS_CATEGORY_EXTERIOR_WALL_PAINTS",
+      "reason": "Explicit current SYSTEM category alias; same catalogue/business scope.",
+      "recordType": "category",
+      "referenceCount": 7,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "Explicit current SYSTEM category alias; same catalogue/business scope.",
+      "warnings": []
+    },
+    {
+      "approved": false,
+      "canonicalId": "SYS_CATEGORY_FLOOR_TILE_COATINGS",
+      "legacyId": "SYS_CATEGORY_FLOOR_COATINGS",
+      "reason": "Explicit current SYSTEM category alias; same catalogue/business scope.",
+      "recordType": "category",
+      "referenceCount": 3,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "Explicit current SYSTEM category alias; same catalogue/business scope.",
+      "warnings": []
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_HEALTH_HYGIENE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 1,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_INDUSTRIAL_COATINGS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_INTERIOR_WALL_COATINGS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 21,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": "SYS_CATEGORY_INTERIOR_WALL_COATINGS",
+      "legacyId": "SYS_CATEGORY_INTERIOR_WALL_PAINTS",
+      "reason": "Explicit current SYSTEM category alias; same catalogue/business scope.",
+      "recordType": "category",
+      "referenceCount": 5,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "Explicit current SYSTEM category alias; same catalogue/business scope.",
+      "warnings": []
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_METAL_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_PRIMERS_PUTTY",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_WALLPAPERS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_WALL_TEXTURES",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 8,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_CATEGORY_WOOD_COATINGS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "category",
+      "referenceCount": 5,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "PM_SUBCATEGORY_ce0bf39843417fca",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 3,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_ADHESIVES_TILING_TILE_ADHESIVES",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 8,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_ALLIED_PRODUCTS_THINNERS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 6,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_FLOOR_TILE_COATINGS_EPOXY_FLOORING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 21,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_PUTTY_SURFACE_PREPARATION_ACRYLIC_PUTTY",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 17,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_PUTTY_SURFACE_PREPARATION_WATERPROOF_WALL_PUTTY",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 17,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SEALANTS_REPAIR_ACRYLIC_SEALANTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 9,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 8,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_ROLLER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_SANDPAPER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 3,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_ADHESIVES_TILING_TILE_ADHESIVES",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_ALLIED_PRODUCTS_MISCELLANEOUS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 6,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_ALLIED_PRODUCTS_THINNERS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 6,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_COATINGS_EXTERIOR_TEXTURES",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 24,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 16,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_EXTERIOR_EMULSION",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_PREMIUM_EXTERIOR_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_WEATHER_RESISTANT_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_COATINGS_CONCRETE_COATING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_COATINGS_EPOXY_FLOORING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_COATINGS_FLOOR_PAINT",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_TILE_COATINGS_EPOXY_FLOORING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 21,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_HEALTH_HYGIENE_HAND_SANITIZERS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 22,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_ANTI_CORROSION_COATING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_EPOXY_COATING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_HEAT_RESISTANT_COATING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_PROTECTIVE_COATING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_DISTEMPER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_ECONOMY_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_EMULSION_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_LUXURY_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_PREMIUM_PAINTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 13,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_ANTI_CORROSION_PAINT",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_DECORATIVE_METAL_PAINT",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_ENAMEL_PAINT",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_PROTECTIVE_COATING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_EXTERIOR_WALL_PRIMER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_INTERIOR_WALL_PRIMER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_WALL_PUTTY",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 7,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_WOOD_PRIMER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_PUTTY_SURFACE_PREPARATION_ACRYLIC_PUTTY",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 19,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_PUTTY_SURFACE_PREPARATION_WATERPROOF_WALL_PUTTY",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 19,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_SEALANTS_REPAIR_ACRYLIC_SEALANTS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 14,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_TEXTURES_SPECIAL_EFFECTS_EXTERIOR_TEXTURES",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 23,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_DESIGNER_WALLPAPER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_NON_WOVEN_WALLPAPER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_PAPER_WALLPAPER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_VINYL_WALLPAPER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 4,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_3D_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_CONCRETE_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_DESIGNER_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_MARBLE_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_METALLIC_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_STONE_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_STUCCO_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_VELVET_TEXTURE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BATHROOM_KITCHEN_WATERPROOFING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 14,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BATHROOM_WATERPROOFING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 7,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_CRACK_REPAIR",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 7,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_DAMP_PROOFING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 7,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_EXTERIOR_WALL_WATERPROOFING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 14,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_INTERIOR_DAMPNESS_TREATMENT",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 14,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_ROOF_TERRACE_WATERPROOFING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 14,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_TERRACE_WATERPROOFING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 7,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_WALL_WATERPROOFING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 7,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_MELAMINE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_PU_COATING",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_WOOD_POLISH",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_WOOD_SEALER",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_WOOD_STAIN",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 12,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_WATERPROOFING_BATHROOM_KITCHEN",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 15,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_WATERPROOFING_EXTERIOR_WALL",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 15,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_WATERPROOFING_INTERIOR_DAMPNESS",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 15,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_WATERPROOFING_ROOF_TERRACE",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "subcategory",
+      "referenceCount": 15,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Name/parent candidate is insufficient: template semantics differ or candidates conflict.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "PM_UNIT_3871fc5bdee74d78",
+      "reason": "DOMAIN_REVIEW_REQUIRED: no verified semantic equivalence.",
+      "recordType": "unit",
+      "referenceCount": 2,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "Exact dimension/kind/scale/meaning metadata is missing or incompatible; retain display alias.",
+        "No unambiguous ID/parent/semantic mapping established; keep record."
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "reason": "Missing subcategory definition; no verified parent context.",
+      "recordType": "templateGroup",
+      "referenceCount": 22,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "DOMAIN_REVIEW_REQUIRED"
+      ]
+    },
+    {
+      "approved": false,
+      "canonicalId": null,
+      "legacyId": "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT",
+      "reason": "Missing subcategory definition; no verified parent context.",
+      "recordType": "templateGroup",
+      "referenceCount": 15,
+      "requiresDataMigration": true,
+      "safeToDeactivate": false,
+      "semanticEvidence": "",
+      "warnings": [
+        "DOMAIN_REVIEW_REQUIRED"
+      ]
+    }
+  ],
+  "counts": {
+    "brokenReferences": 1,
+    "differentParentNameGroups": 1,
+    "duplicateCategoryGroups": 1,
+    "duplicateSubcategoryGroups": 10,
+    "legacyReferencedCategories": 3,
+    "legacyReferencedSubcategories": 3,
+    "missingSubcategoryTemplateGroups": 2,
+    "orphanTemplateGroups": 53,
+    "safeCanonicalMappings": 3,
+    "unitAliases": 1,
+    "unsafeAmbiguousMappings": 88
+  },
+  "phase": "PHASE_8_DESIGN_ONLY",
+  "source": {
+    "mode": "read-only",
+    "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+    "sha256": "02741485aa4c73a9dc1c0f363a4517d6009adcb1351792f510ba4ce53970e21c"
+  }
+}

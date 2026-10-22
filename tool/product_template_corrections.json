@@ -1,0 +1,104 @@
+{
+  "instructions": "SYSTEM-only catalogue source corrections. Apply with an administrator through the existing REST migration process using update-time preconditions, updateMask, and server updatedAt. These records are not loaded by widgets. BUSINESS overrides/options remain intact. Controlled lists for baseType, colourFamily, segment and dilutionType need approved catalogue options before changing their dataType.",
+  "records": [
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS_USAGE",
+      "fields": {
+        "defaultValue": "Exterior",
+        "options": [
+          "Exterior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_EXTERIOR_EMULSION_USAGE",
+      "fields": {
+        "defaultValue": "Exterior",
+        "options": [
+          "Exterior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_PREMIUM_EXTERIOR_PAINTS_USAGE",
+      "fields": {
+        "defaultValue": "Exterior",
+        "options": [
+          "Exterior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_WEATHER_RESISTANT_PAINTS_USAGE",
+      "fields": {
+        "defaultValue": "Exterior",
+        "options": [
+          "Exterior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_DISTEMPER_USAGE",
+      "fields": {
+        "defaultValue": "Interior",
+        "options": [
+          "Interior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_ECONOMY_PAINTS_USAGE",
+      "fields": {
+        "defaultValue": "Interior",
+        "options": [
+          "Interior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_EMULSION_PAINTS_USAGE",
+      "fields": {
+        "defaultValue": "Interior",
+        "options": [
+          "Interior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_LUXURY_PAINTS_USAGE",
+      "fields": {
+        "defaultValue": "Interior",
+        "options": [
+          "Interior"
+        ],
+        "allowAddNewOption": false
+      }
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_PREMIUM_PAINTS_USAGE",
+      "fields": {
+        "defaultValue": "Interior",
+        "options": [
+          "Interior"
+        ],
+        "allowAddNewOption": false
+      }
+    }
+  ]
+}

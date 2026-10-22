@@ -1,0 +1,83 @@
+{
+  "phase": "PHASE_10G2_VERSIONED_LEGACY_CATALOGUE_ARCHIVE",
+  "status": "IMPLEMENTED_AND_DISPOSABLE_VALIDATION_PASSED",
+  "productionMigrationApproved": false,
+  "releaseInstallationAllowed": false,
+  "firestoreAllowed": false,
+  "identity": {
+    "algorithm": "SHA-256",
+    "format": "sha256:<64 lowercase hex characters>",
+    "canonicalization": "UTF-8 JSON; lexical collection and document-ID order; recursively lexical map-key order; preserve array order; include full decoded semantic metadata and document identity; exclude self catalogueFingerprint and local synchronization bookkeeping.",
+    "fingerprintCollections": [
+      "brands",
+      "product_categories",
+      "product_subcategories",
+      "product_attributes",
+      "product_attribute_options",
+      "units",
+      "subcategory_attribute_templates",
+      "product_catalogue_releases"
+    ],
+    "legacyChangeHash": "CatalogueContract.fingerprint remains the existing FNV content-change hash and is not an archive identity."
+  },
+  "archive": {
+    "table": "local_catalogue_archive",
+    "primaryKey": ["catalogueFingerprint", "collection", "documentId"],
+    "archivedCollections": [
+      "product_categories",
+      "product_subcategories",
+      "product_attributes",
+      "product_attribute_options",
+      "units",
+      "subcategory_attribute_templates",
+      "product_catalogue_releases"
+    ],
+    "storedFields": ["catalogueFingerprint", "collection", "documentId", "payloadId", "payloadJson", "canonicalContent", "archivedAt"],
+    "sourcePolicy": "Only non-deleted SYSTEM source rows are archived, preserving payload JSON and source document/payload identities independently.",
+    "collisionPolicy": "Identical archive key and canonical payload is an idempotent no-op; same key with different content throws and aborts the enclosing transaction.",
+    "transactionPolicy": "Archive the current SYSTEM preimage before reconciliation and write the incoming installed release marker last, in the same SQLite transaction as snapshot reconciliation.",
+    "noProductOrVariantArchive": true
+  },
+  "installation": {
+    "installedMarkerFields": ["contentFingerprint", "catalogueFingerprint", "installed"],
+    "sameVersionSameContentWithToken": "No-op.",
+    "sameVersionSameContentWithoutToken": "Compute the exact current installed snapshot SHA-256 and upgrade only the release marker.",
+    "olderMarkerWithoutToken": "Derive a deterministic identity from exact currently installed SYSTEM metadata before archival; do not assign it to Product or Variant records.",
+    "sameVersionDifferentContent": "Reject.",
+    "injectedCheckpoints": ["before_archive", "archive_row_N", "after_archive", "before_release_marker", "after_release_marker"]
+  },
+  "productProvenance": {
+    "field": "catalogueFingerprint",
+    "nullable": true,
+    "variantToken": false,
+    "createRule": "New Products require exactly one valid installed SYSTEM fingerprint for Release 4 (data version 4, CatalogueContract schema revision, and compiler revision). The value is written into Product fields in the existing atomic create operation; Variants inherit through productId.",
+    "editRule": "Ordinary edit and reclassification preserve saved provenance; only a separate approved semantic migration may retag.",
+    "duplicateRule": "A duplicate receives the currently installed canonical Release 4 fingerprint as a new Product.",
+    "nullRule": "Absent, null, or malformed provenance never triggers current-catalogue/name/date/ID semantic fallback."
+  },
+  "resolution": {
+    "contexts": ["createCanonical", "readExisting", "historical"],
+    "historicalLookup": "Exact archive namespace selected by Product catalogueFingerprint; Variant resolution follows exact productId to its Product. No current selector tables, names, timestamps, or semantic similarity are consulted.",
+    "statuses": ["exact", "provenanceMissing", "archiveNotFound"],
+    "provenanceMissingBehavior": "Keep raw saved Product fields available and expose explicit provenanceMissing status for manual review.",
+    "ceiling": "Same document ID under different fingerprints preserves distinct historical payloadId and current canonical identity.",
+    "basement": "Historical Basement identity remains absent from Release 4 Liquid/Cementitious keys; no mapping or retagging is performed."
+  },
+  "safety": {
+    "localOnlyArchiveResolution": true,
+    "syncQueriesChanged": false,
+    "productionProductVariantRowsTouched": false,
+    "productionSchemaMigrationExecuted": false,
+    "releaseInstalledInProduction": false,
+    "firestoreCalls": 0,
+    "backfillExecuted": false
+  },
+  "validation": {
+    "fullFlutterSuite": {"passed": 663, "failed": 0},
+    "focusedArchiveSuite": {"passed": 7, "failed": 0},
+    "analyzer": "48 pre-existing info/warning diagnostics; no errors in changed implementation or archive tests.",
+    "productionAccountHashUnchanged": "7751a6cc30a1f3765067bcec646beb16b0dc9dd094e1ccacd0d4d23e7e1515ef",
+    "publicConfigHashUnchanged": "a81b30213ada2f9fbb962eb4c55b5824545048cf0be534dcc12d591dc9c93693",
+    "firestoreRequests": 0
+  }
+}

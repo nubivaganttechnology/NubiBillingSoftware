@@ -1,0 +1,112 @@
+{
+  "phase": "PHASE_10K_PRODUCTION_MIGRATION_RUNNER_AND_SYNC_QUERY_PRESERVATION",
+  "auditTimestamp": "2026-10-05T16:42:00Z",
+  "status": "CLOSED_NO_GO_BLOCKER_1",
+  "blocker": "Current importer mutates SYSTEM sync-query tracking fields during complete snapshot reconciliation.",
+  "rootCause": {
+    "file": "lib/data/catalogue/system_catalogue_snapshot.dart",
+    "lines": "185-214",
+    "mechanism": "During complete snapshot reconciliation, SystemCatalogueSnapshot.import iterated over all compiled snapshot collections and unconditionally executed an UPDATE on sync_queries WHERE scopeType = 'SYSTEM' AND collection = collection, mutating lastSyncedAt to LocalDataSource.now(), resetting lastError to null, updating catalogueVersion to releaseFingerprint, and overwriting cursor with readTimes[entry.key].",
+    "consequence": "Any local snapshot installation or migration would silently mutate tracking timestamps, cursors, and backoff states of registered client sync queries, destroying historical sync state and causing spurious remote refetches or lost sync progress."
+  },
+  "fieldsAudited": [
+    {
+      "field": "queryKey",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Migration never regenerates, alters, or replaces query keys."
+    },
+    {
+      "field": "collectionName",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Collection binding remains immutable."
+    },
+    {
+      "field": "queryJson",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Canonical filter JSON specifications are not rewritten during catalogue migration."
+    },
+    {
+      "field": "active",
+      "preMigrationState": "Preserved exact (0 or 1)",
+      "postMigrationState": "Identical",
+      "contract": "Existing active/inactive registration flags are client-owned and never reactivated or deactivated by migration."
+    },
+    {
+      "field": "cursor",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Resume tokens and readTime watermarks are never overwritten by static snapshot defaults."
+    },
+    {
+      "field": "lastSyncedAt",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Durable sync timestamps are not bumped during snapshot imports."
+    },
+    {
+      "field": "lastAttemptAt",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Attempt timestamps remain untouched."
+    },
+    {
+      "field": "lastError",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Backoff errors and retry tracking metadata are not cleared."
+    },
+    {
+      "field": "catalogueVersion",
+      "preMigrationState": "Preserved exact",
+      "postMigrationState": "Identical",
+      "contract": "Sync query schema catalogue version tracking is decoupled from snapshot installation."
+    }
+  ],
+  "preservationContractRule": "Existing registered sync query state is client-owned and NOT migration-owned. Release 4 catalogue installation must not reset, rewrite, recreate, or reactivate existing sync-query registrations unless separately approved.",
+  "importerFix": {
+    "file": "lib/data/catalogue/system_catalogue_snapshot.dart",
+    "changes": [
+      "Added bool preserveSyncQueries = true parameter to SystemCatalogueSnapshot.import.",
+      "Wrapped sync_queries update loop in if (!preserveSyncQueries) { ... } block.",
+      "Added DatabaseExecutor? executor parameter to allow in-transaction execution without nested transaction deadlocks.",
+      "Updated SyncEngine to explicitly specify preserveSyncQueries: false only during live remote pulls where cursor advancement from Firestore is required."
+    ],
+    "invariantsMaintained": [
+      "Complete catalogue reconciliation across all collections is maintained.",
+      "Legitimate metadata inserts, updates, and deactivations are not suppressed.",
+      "Legacy-reference query interlock remains intact.",
+      "Zero display-name matching used.",
+      "Zero Firestore/remote client calls introduced."
+    ]
+  },
+  "acceptanceMetrics": {
+    "expectedTotalQueries": 195,
+    "actualTotalQueries": 195,
+    "protectedLegacyQueries": 10,
+    "actualProtectedLegacyQueries": 10,
+    "queryDigestBefore": "d6b9e1b4c2b2d9e11327b96256e8198b545d9273bdf42d5eb2ad33f9ef927269",
+    "queryDigestAfter": "d6b9e1b4c2b2d9e11327b96256e8198b545d9273bdf42d5eb2ad33f9ef927269",
+    "queryDigestMatch": true,
+    "byteAndLogicalParity": "100% exact parity across all 195 rows",
+    "protectedQueryKeys": [
+      "product_subcategories:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "product_subcategories:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "product_subcategories:{\"filters\":[{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "product_subcategories:{\"filters\":[{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "subcategory_attribute_templates:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "subcategory_attribute_templates:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "subcategory_attribute_templates:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}}]}",
+      "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}}]}",
+      "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}}]}"
+    ]
+  },
+  "productionSafety": {
+    "productionDatabasesTouched": false,
+    "productionHashesUnchanged": true,
+    "firestoreCalls": 0
+  }
+}

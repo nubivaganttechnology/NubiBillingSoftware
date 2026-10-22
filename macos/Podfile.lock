@@ -1,0 +1,28 @@
+PODS:
+  - flutter_ocr_native (0.0.7):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - printing (1.0.0):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - flutter_ocr_native (from `Flutter/ephemeral/.symlinks/plugins/flutter_ocr_native/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - printing (from `Flutter/ephemeral/.symlinks/plugins/printing/macos`)
+
+EXTERNAL SOURCES:
+  flutter_ocr_native:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_ocr_native/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  printing:
+    :path: Flutter/ephemeral/.symlinks/plugins/printing/macos
+
+SPEC CHECKSUMS:
+  flutter_ocr_native: d1cc811b3b34465f7c66c296f6cc8e6d792fbeaf
+  FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
+  printing: c4cf83c78fd684f9bc318e6aadc18972aa48f617
+
+PODFILE CHECKSUM: 1e95c36afbfd1cb6423ceca4de7a8e1b256fb6ac
+
+COCOAPODS: 1.16.2

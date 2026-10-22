@@ -1,0 +1,280 @@
+{
+  "phase": "PHASE_10H_PRODUCT_PROVENANCE_BACKFILL_FEASIBILITY",
+  "status": "READ_ONLY_INVENTORY_COMPLETE_NO_AUTOMATIC_BACKFILL_PROPOSALS",
+  "authority": "Local SQLite only; query_only/read-only mode; no backup SQL inspection.",
+  "productionReadOnlyEvidence": {
+    "accountPath": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+    "accountSha256BeforeAndAfter": "7751a6cc30a1f3765067bcec646beb16b0dc9dd094e1ccacd0d4d23e7e1515ef",
+    "backupPath": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db.bak",
+    "backupSha256BeforeAndAfter": "853c9fd6dd9a9032a25bfb0e742f1a3b5acb30fb60cb6211f7218b2783cdf651",
+    "publicConfigPath": "/Users/sksuman/Documents/nubibill-test1-bcebe-public-config.db",
+    "publicConfigSha256BeforeAndAfter": "a81b30213ada2f9fbb962eb4c55b5824545048cf0be534dcc12d591dc9c93693",
+    "firestoreCalls": 0,
+    "productionWrites": 0
+  },
+  "installedReleaseInventory": [
+    {
+      "source": "account.local_product_catalogue_releases",
+      "documentId": "PAINT_V1",
+      "payloadCatalogueId": "PAINT_V1",
+      "dataVersion": 3,
+      "publishedAt": "2026-10-03T08:17:12.255935Z",
+      "status": "ACTIVE",
+      "schemaRevision": null,
+      "compilerRevision": null,
+      "contentFingerprint": null,
+      "catalogueFingerprint": null,
+      "scopeType": "SYSTEM",
+      "notes": "v3 incremental Nerolac normalization patch. Adds confirmed normalized subcategories, aliases and templates without rebuilding v2 master data.",
+      "backfillUse": "Candidate release evidence only; not linked to any saved Product or Variant."
+    }
+  ],
+  "publicConfigReleaseRows": 0,
+  "existingModelAndWireFields": {
+    "ProductModelHasExactCatalogueProvenance": false,
+    "ProductVariantModelHasExactCatalogueProvenance": false,
+    "productPayloadHasCatalogueIdOrDataVersion": false,
+    "productPayloadVersionIsCatalogueVersion": false,
+    "variantPayloadHasCatalogueIdOrDataVersion": false,
+    "variantPayloadVersionIsCatalogueVersion": false,
+    "existingVersionMeaning": "Product/Variant payload version is the ordinary entity mutation version; it is not a catalogue release discriminator.",
+    "classificationAndOptionFieldsAreNotProvenance": true
+  },
+  "historyInventory": {
+    "local_inventory_transactions": 0,
+    "local_purchases": 0,
+    "local_purchase_bills": 0,
+    "local_invoices": 0,
+    "local_goods_receipts": 0,
+    "local_purchase_returns": 0,
+    "separateProductAuditSnapshotModelFound": false,
+    "transactionHistoryRewriteRequired": false
+  },
+  "classificationCounts": {
+    "recordCount": 11,
+    "EXACT": 0,
+    "AMBIGUOUS": 0,
+    "UNRESOLVED": 11,
+    "automaticProposals": 0,
+    "reason": "All stored Product/Variant documents lack catalogueFingerprint and any exact release token. Only one local release descriptor exists; it lacks schema/compiler/full-content fingerprint, and no earlier immutable catalogue snapshot archive is available. IDs and stored values establish references, not the release version under which each record was resolved."
+  },
+  "candidateVersions": [
+    {
+      "catalogueId": "PAINT_V1",
+      "dataVersion": 3,
+      "schemaRevision": null,
+      "compilerRevision": null,
+      "fingerprint": null,
+      "candidateStatus": "AVAILABLE_LOCAL_DESCRIPTOR_NOT_PROVEN_FOR_ANY_RECORD"
+    },
+    {
+      "catalogueId": null,
+      "dataVersion": 1,
+      "schemaRevision": null,
+      "compilerRevision": null,
+      "fingerprint": null,
+      "candidateStatus": "HISTORICAL_SOURCE_VERSION_UNAVAILABLE"
+    },
+    {
+      "catalogueId": null,
+      "dataVersion": 2,
+      "schemaRevision": null,
+      "compilerRevision": null,
+      "fingerprint": null,
+      "candidateStatus": "HISTORICAL_SOURCE_VERSION_UNAVAILABLE"
+    }
+  ],
+  "records": [
+    {
+      "kind": "PRODUCT",
+      "id": "PROD-515E99F5F2C24423B75AEBFE81CB075A",
+      "state": "ACTIVE/SYNCED",
+      "createdAt": "2026-10-02T15:58:31.786208Z",
+      "updatedAt": "2026-10-03T10:22:30.785Z",
+      "classificationIds": {
+        "categoryId": "SYS_CATEGORY_ACCESSORIES",
+        "subcategoryId": "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH"
+      },
+      "attributeKeys": ["brushType", "bristleMaterial"],
+      "unitIds": [],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_EXACT_RELEASE_TOKEN_OR_ARCHIVE"
+    },
+    {
+      "kind": "PRODUCT",
+      "id": "PROD-6198168F50EA48BB9209914A7A2003D2",
+      "state": "ACTIVE/SYNCED",
+      "createdAt": "2026-10-02T12:47:53.611860Z",
+      "updatedAt": "2026-10-02T12:47:53.611860Z",
+      "classificationIds": {
+        "categoryId": "SYS_CATEGORY_EXTERIOR_WALL_PAINTS",
+        "subcategoryId": "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS"
+      },
+      "attributeKeys": ["usage", "surface", "segment", "numberOfCoats", "dilutionType"],
+      "unitIds": [],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_EXACT_RELEASE_TOKEN_OR_ARCHIVE"
+    },
+    {
+      "kind": "PRODUCT",
+      "id": "PROD-78125CD6E1864CA1AF4E3E71C915D025",
+      "state": "DELETED/SYNCED/tombstoned",
+      "createdAt": "2026-10-01T17:51:12.701877Z",
+      "updatedAt": "2026-10-03T10:22:17.719Z",
+      "classificationIds": {
+        "categoryId": "PM_CATEGORY_93d0611d84196d62",
+        "subcategoryId": "PM_SUBCATEGORY_ce0bf39843417fca"
+      },
+      "attributeKeys": [],
+      "unitIds": [],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_EXACT_RELEASE_TOKEN_OR_ARCHIVE"
+    },
+    {
+      "kind": "PRODUCT",
+      "id": "PROD-C446FD4E4DD349DAB46DDFEDA251915D",
+      "state": "DELETED/SYNCED/tombstoned",
+      "createdAt": "2026-10-03T13:52:48.905617Z",
+      "updatedAt": "2026-10-03T13:53:25.376Z",
+      "classificationIds": {
+        "categoryId": "SYS_CATEGORY_INTERIOR_WALL_COATINGS",
+        "subcategoryId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_INTERIOR_SHEEN_EMULSIONS"
+      },
+      "attributeKeys": ["usage", "surface", "segment", "numberOfCoats", "dilutionType", "coverage", "dilutionRatio", "dryingRecoatTime", "warranty", "shelfLife"],
+      "unitIds": [],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_EXACT_RELEASE_TOKEN_OR_ARCHIVE"
+    },
+    {
+      "kind": "VARIANT",
+      "id": "VAR-089A2A0AA0A14E45AEC89328F3A193E6",
+      "parentProductId": "PROD-C446FD4E4DD349DAB46DDFEDA251915D",
+      "state": "INACTIVE/SYNCED",
+      "createdAt": "2026-10-03T13:52:48.905617Z",
+      "updatedAt": "2026-10-03T13:53:25.376Z",
+      "classificationIds": {},
+      "attributeKeys": ["finish", "colourType", "colourMode", "shade", "shadeCode", "colourFamily", "packSize", "unit", "soldAs"],
+      "unitIds": ["SYS_UNIT_CAN", "SYS_UNIT_LITRE"],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_PARENT_PROVENANCE"
+    },
+    {
+      "kind": "VARIANT",
+      "id": "VAR-233931D4CB8A432E8F2DC88912B59C48",
+      "parentProductId": "PROD-4B68A3FB3C10447F8A5696B17739C81F",
+      "state": "ACTIVE/SYNCED/orphan-parent-not-in-local_products",
+      "createdAt": "2026-10-02T09:43:27.333420Z",
+      "updatedAt": "2026-10-02T09:43:27.333420Z",
+      "classificationIds": {},
+      "attributeKeys": ["finish", "shade", "shadeCode", "colourFamily", "baseType", "packSize", "unit"],
+      "unitIds": ["SYS_UNIT_LITRE", "SYS_UNIT_PACK"],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_PARENT_PROVENANCE"
+    },
+    {
+      "kind": "VARIANT",
+      "id": "VAR-3F8DCEC102144603B4BFF7DF558ECFDF",
+      "parentProductId": "PROD-78125CD6E1864CA1AF4E3E71C915D025",
+      "state": "INACTIVE/SYNCED",
+      "createdAt": "2026-10-01T17:51:12.701877Z",
+      "updatedAt": "2026-10-03T10:22:17.719Z",
+      "classificationIds": {},
+      "attributeKeys": [],
+      "unitIds": ["PM_UNIT_3871fc5bdee74d78"],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_PARENT_PROVENANCE"
+    },
+    {
+      "kind": "VARIANT",
+      "id": "VAR-42F8F567B7F54AC9A653C5826B53344B",
+      "parentProductId": "PROD-515E99F5F2C24423B75AEBFE81CB075A",
+      "state": "ACTIVE/SYNCED",
+      "createdAt": "2026-10-02T15:58:31.786208Z",
+      "updatedAt": "2026-10-03T10:22:30.785Z",
+      "classificationIds": {},
+      "attributeKeys": ["brushSize", "unit"],
+      "unitIds": ["SYS_UNIT_PIECE"],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_PARENT_PROVENANCE"
+    },
+    {
+      "kind": "VARIANT",
+      "id": "VAR-808222B8F37A40138FE9416965A61F49",
+      "parentProductId": "PROD-6198168F50EA48BB9209914A7A2003D2",
+      "state": "ACTIVE/SYNCED",
+      "createdAt": "2026-10-02T12:47:53.611860Z",
+      "updatedAt": "2026-10-02T12:47:53.611860Z",
+      "classificationIds": {},
+      "attributeKeys": ["finish", "shade", "shadeCode", "colourFamily", "baseType", "packSize", "unit"],
+      "unitIds": ["SYS_UNIT_LITRE", "SYS_UNIT_PACK"],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_PARENT_PROVENANCE"
+    },
+    {
+      "kind": "VARIANT",
+      "id": "VAR-CF94091746164266B8DA7863706991A0",
+      "parentProductId": "PROD-515E99F5F2C24423B75AEBFE81CB075A",
+      "state": "ACTIVE/SYNCED",
+      "createdAt": "2026-10-02T15:58:31.786208Z",
+      "updatedAt": "2026-10-03T10:22:30.785Z",
+      "classificationIds": {},
+      "attributeKeys": ["brushSize", "unit"],
+      "unitIds": ["SYS_UNIT_PIECE"],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_PARENT_PROVENANCE"
+    },
+    {
+      "kind": "VARIANT",
+      "id": "VAR-FE7BA134B0B94E058B21689F4DBB757B",
+      "parentProductId": "PROD-515E99F5F2C24423B75AEBFE81CB075A",
+      "state": "ACTIVE/SYNCED",
+      "createdAt": "2026-10-02T15:58:31.786208Z",
+      "updatedAt": "2026-10-03T10:22:30.785Z",
+      "classificationIds": {},
+      "attributeKeys": ["brushSize", "unit"],
+      "unitIds": ["SYS_UNIT_PIECE"],
+      "candidateVersions": ["PAINT_V1@3", "historical-v1-unknown", "historical-v2-unknown"],
+      "backfillState": "UNRESOLVED",
+      "backfillConfidence": "NONE_NO_PARENT_PROVENANCE"
+    }
+  ],
+  "identityProofs": {
+    "ceiling": {
+      "historicalDocumentId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "historicalPayloadSubcategoryId": "SYS_SUBCATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "release4DocumentId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "historicalReferences": 22,
+      "referenceOnlyHistoricalPayloadReferences": 21,
+      "idOnlyLookup": "AMBIGUOUS_DOCUMENT_ID_OVERLAP",
+      "fingerprintLookup": "DISTINGUISHES_ONLY_IF_EXACT_OLD_SNAPSHOT_FINGERPRINT_IS_KNOWN; CURRENT_RECORDS_HAVE_NONE",
+      "productionBackfill": "NONE"
+    },
+    "basement": {
+      "historicalDocumentId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BASEMENT_WATERPROOFING",
+      "historicalPayloadSubcategoryId": "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT",
+      "historicalReferences": 14,
+      "referenceOnlyHistoricalPayloadReferences": 14,
+      "release4DocumentIds": [
+        "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_LIQUID",
+        "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_CEMENTITIOUS"
+      ],
+      "automaticMapping": false,
+      "provenanceForExistingRecords": null
+    }
+  },
+  "rollup": {
+    "products": {"total": 4, "EXACT": 0, "AMBIGUOUS": 0, "UNRESOLVED": 4},
+    "variants": {"total": 7, "EXACT": 0, "AMBIGUOUS": 0, "UNRESOLVED": 7},
+    "policy": "Do not backfill any record in Phase 10H. Null provenance is the only evidence-honest result."
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "phase": "PHASE_10G_LEGACY_METADATA_RETENTION_AND_RESOLUTION",
+  "status": "BLOCKED_PENDING_EXACT_PRODUCT_METADATA_VERSION_DISCRIMINATOR",
+  "decision": "DESIGN_ONLY_NO_SCHEMA_CHANGE_NO_IMPORT_NO_PRODUCT_MUTATION",
+  "approved": false,
+  "productionInstallationAllowed": false,
+  "firestoreAccessAllowed": false,
+  "sourceInventory": {
+    "path": "docs/phase10e-installed-v3-v4-diff.json",
+    "sha256": "3af5a17dd23b8aae66385c75519ca01bd007e4b9e742138317d053f9b553b50f",
+    "identityKey": ["collection", "documentId"],
+    "rowCount": 4958,
+    "classificationCounts": {
+      "CANONICAL_KEEP": 1128,
+      "LEGACY_RETAIN_REQUIRED": 242,
+      "MIGRATION_REQUIRED": 2,
+      "NEW_CANONICAL": 1055,
+      "REVIEW_REQUIRED": 2506,
+      "SAFE_UNREFERENCED_RETIREMENT_CANDIDATE": 25
+    },
+    "referencedRows": 483,
+    "protectedSyncQueries": 10
+  },
+  "retentionProjection": {
+    "mode": "DETERMINISTIC_SOURCE_ROW_SELECTION",
+    "sourceRowsAreAuthoritative": true,
+    "rowIdentity": ["collection", "documentId"],
+    "retainBeforeImageFor": [
+      {
+        "selector": "classification == LEGACY_RETAIN_REQUIRED",
+        "expectedRows": 242,
+        "reason": "Phase 10F explicitly requires exact legacy metadata retention; keep all document and payload identities distinct."
+      },
+      {
+        "selector": "classification == REVIEW_REQUIRED",
+        "expectedRows": 2506,
+        "reason": "Historical semantics are unresolved; preserve preimage rather than infer a replacement or retirement. Includes 2,267 template rows."
+      },
+      {
+        "selector": "classification == MIGRATION_REQUIRED",
+        "expectedRows": 2,
+        "reason": "Do not migrate or rewrite the old identity. Preserve its exact metadata and references while the decision remains blocked."
+      }
+    ],
+    "sourceRowLocator": "For each selected row, resolve exactly one entry in sourceInventory.path by (collection, documentId); preserve beforeFields, beforePayloadId, beforeDigest, referenceRecords, and source order verbatim. Do not group by name, normalizedName, payload ID, or target candidate.",
+    "recommendedStore": {
+      "kind": "append_only_local_catalogue_snapshot",
+      "key": ["sourceReleaseFingerprint", "collection", "documentId"],
+      "payload": "verbatim decoded preimage fields plus original documentId and payload identity",
+      "writeBoundary": "same SQLite transaction as snapshot reconciliation and release marker",
+      "readBoundary": "historical-only exact-version reader; never join into canonical selector or new-product validator"
+    },
+    "implementationStatus": "NOT_IMPLEMENTED: existing Product records do not persist a catalogue release fingerprint, metadata version, or equivalent exact version discriminator."
+  },
+  "rowAccounting": {
+    "retentionRequiredRows": 242,
+    "unresolvedHistoricalRows": 2506,
+    "migrationRequiredRowsPreservedWithoutRemap": 2,
+    "projectedBeforeImageRows": 2750,
+    "deactivatedLegacyOptions": 163,
+    "deactivatedLegacyAttributes": 6,
+    "deactivatedLegacyUnits": 1,
+    "reviewRequiredTemplateRows": 2267,
+    "protectedSyncQueries": 10
+  },
+  "identityExceptions": [
+    {
+      "collection": "product_subcategories",
+      "documentId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "payloadSubcategoryId": "SYS_SUBCATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "historicalReferenceCount": 22,
+      "releaseCanonicalId": "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "action": "RETAIN_EXACT_IDENTITIES_NO_REMAP",
+      "approved": false
+    },
+    {
+      "collection": null,
+      "documentId": null,
+      "payloadSubcategoryId": "SYS_SUBCATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+      "historicalReferenceCount": 21,
+      "sourceKind": "referenceOnlyIdentity",
+      "action": "PRESERVE_REFERENCE_ONLY_IDENTITY_NO_ALIAS",
+      "approved": false
+    },
+    {
+      "collection": "product_subcategories",
+      "documentId": "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BASEMENT_WATERPROOFING",
+      "payloadSubcategoryId": "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT",
+      "historicalReferenceCount": 14,
+      "releaseCandidates": [
+        "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_LIQUID",
+        "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_CEMENTITIOUS"
+      ],
+      "action": "RETAIN_EXACT_IDENTITIES_NO_REMAP",
+      "approved": false
+    },
+    {
+      "collection": null,
+      "documentId": null,
+      "payloadSubcategoryId": "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT",
+      "historicalReferenceCount": 14,
+      "sourceKind": "referenceOnlyIdentity",
+      "releaseCandidates": [
+        "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_LIQUID",
+        "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT_CEMENTITIOUS"
+      ],
+      "action": "PRESERVE_REFERENCE_ONLY_IDENTITY_NO_ALIAS",
+      "approved": false
+    }
+  ],
+  "canonicalIsolation": {
+    "newProductCreation": "Use only currently active canonical SYSTEM metadata and existing business-scoped rules.",
+    "historicalResolution": "Must be a distinct read path selected by an exact metadata version already associated with the saved record.",
+    "displayNameMatching": false,
+    "aliasing": false,
+    "optionSubstitution": false,
+    "unitSubstitution": false,
+    "semanticRewriting": false,
+    "ProductVariantOrQueryIdentityMutation": false
+  },
+  "blockingFinding": {
+    "code": "MISSING_EXACT_VERSION_PROVENANCE",
+    "evidence": [
+      "ProductModel contains categoryId/subcategoryId and values but no catalogueVersion or snapshot fingerprint.",
+      "ProductRepository.updateStructuredProduct resolves current templates and validates against active metadata.",
+      "The Ceiling subcategory document identity is the same as its Release 4 canonical identity, while historical references use a different payload subcategoryId. ID-only routing cannot distinguish an old Product from a Product created after the canonical release.",
+      "Using retained legacy rows unconditionally would resolve some post-release Products against obsolete definitions; using canonical rows unconditionally can discard legacy options, units, and attributes in historical forms. Product creation timestamps are not an exact catalogue-version token."
+    ],
+    "requiredToUnblock": "Provide an approved non-mutating exact version discriminator already stored for each affected Product/history record, or explicitly authorize a narrowly scoped provenance field/backfill. Without that, do not implement an automatic historical resolver or snapshot installation."
+  },
+  "safety": {
+    "migrationApproved": false,
+    "retirementApproved": false,
+    "semanticMappingApproved": false,
+    "releaseInstallationApproved": false,
+    "protectedQueryRewriteApproved": false,
+    "productionDatabaseOpened": false,
+    "firestoreCalled": false,
+    "executionAuthorized": false
+  }
+}

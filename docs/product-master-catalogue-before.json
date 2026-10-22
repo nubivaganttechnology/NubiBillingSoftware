@@ -1,0 +1,277 @@
+{
+  "catalogueVersion": 1,
+  "catalogueVersion3Present": false,
+  "schemaVersion": 3,
+  "collections": {
+    "product_categories": {
+      "total": 13,
+      "activeSystem": 11,
+      "business": 2,
+      "pending": 1
+    },
+    "product_subcategories": {
+      "total": 50,
+      "activeSystem": 49,
+      "business": 1,
+      "pending": 0
+    },
+    "product_attributes": {
+      "total": 21,
+      "activeSystem": 21,
+      "business": 0,
+      "pending": 0
+    },
+    "product_attribute_options": {
+      "total": 17,
+      "activeSystem": 16,
+      "business": 1,
+      "pending": 1
+    },
+    "subcategory_attribute_templates": {
+      "total": 511,
+      "activeSystem": 511,
+      "business": 0,
+      "pending": 0
+    },
+    "product_catalogue_releases": {
+      "total": 1,
+      "activeSystem": 1,
+      "business": 0,
+      "pending": 0
+    },
+    "units": {
+      "total": 6,
+      "activeSystem": 5,
+      "business": 1,
+      "pending": 0
+    }
+  },
+  "categories": [
+    {
+      "name": "Accessories",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Exterior Wall Paints",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Floor Coatings",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Industrial Coatings",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Interior Wall Paints",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Metal Paints",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Primers & Putty",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Wallpapers",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Wall Textures",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Waterproofing",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Wood Coatings",
+      "scope": "SYSTEM",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Paint",
+      "scope": "BUSINESS",
+      "status": "ACTIVE",
+      "syncStatus": "SYNCED"
+    },
+    {
+      "name": "Interior Wall Coatings",
+      "scope": "BUSINESS",
+      "status": "ACTIVE",
+      "syncStatus": "PENDING_CREATE"
+    }
+  ],
+  "attributes": [
+    {
+      "attributeId": "baseType",
+      "name": "Base Type",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "bristleMaterial",
+      "name": "Bristle Material",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "brushSize",
+      "name": "Brush Size",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "brushType",
+      "name": "Brush Type",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "colourFamily",
+      "name": "Colour Family",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "dilutionType",
+      "name": "Dilution / Thinner Type",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "finish",
+      "name": "Finish",
+      "dataType": "SELECT"
+    },
+    {
+      "attributeId": "grit",
+      "name": "Grit",
+      "dataType": "NUMBER"
+    },
+    {
+      "attributeId": "hsnCode",
+      "name": "HSN Code",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "length",
+      "name": "Length",
+      "dataType": "NUMBER"
+    },
+    {
+      "attributeId": "numberOfCoats",
+      "name": "Number of Coats",
+      "dataType": "NUMBER"
+    },
+    {
+      "attributeId": "packSize",
+      "name": "Pack Size",
+      "dataType": "NUMBER"
+    },
+    {
+      "attributeId": "rollerType",
+      "name": "Roller Type",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "rollerWidth",
+      "name": "Roller Width",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "segment",
+      "name": "Segment / Grade",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "shade",
+      "name": "Shade / Colour",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "shadeCode",
+      "name": "Shade Code",
+      "dataType": "TEXT"
+    },
+    {
+      "attributeId": "surface",
+      "name": "Surface",
+      "dataType": "MULTI_SELECT"
+    },
+    {
+      "attributeId": "unit",
+      "name": "Unit",
+      "dataType": "SELECT"
+    },
+    {
+      "attributeId": "usage",
+      "name": "Usage",
+      "dataType": "SELECT"
+    },
+    {
+      "attributeId": "width",
+      "name": "Width",
+      "dataType": "NUMBER"
+    }
+  ],
+  "release": [
+    {
+      "catalogueId": "PAINT_V1",
+      "catalogueVersion": 1,
+      "status": "ACTIVE",
+      "published": true,
+      "updatedAt": "2026-10-02T10:44:34.118075Z"
+    }
+  ],
+  "syncFailures": [
+    {
+      "collection": "product_catalogue_releases",
+      "lastSyncedAt": "2026-10-02T13:51:53.182312Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "collection": "product_categories",
+      "lastSyncedAt": "2026-10-02T13:51:57.075608Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "collection": "product_subcategories",
+      "lastSyncedAt": "2026-10-02T13:51:58.878502Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "collection": "product_attributes",
+      "lastSyncedAt": "2026-10-02T13:52:02.343598Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "collection": "product_attribute_options",
+      "lastSyncedAt": "2026-10-02T13:52:04.125334Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "collection": "subcategory_attribute_templates",
+      "lastSyncedAt": "2026-10-02T13:27:54.802688Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    }
+  ]
+}

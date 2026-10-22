@@ -1,0 +1,334 @@
+{
+  "source": {
+    "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+    "sha256": "e0f621fc7271325e8378b4d6b677c98e1d9ce07d5c028d2b990612978a870580",
+    "size": 9728000
+  },
+  "queryCount": 195,
+  "activeQueries": 50,
+  "protectedLegacyIds": [
+    "PM_CATEGORY_93d0611d84196d62",
+    "PM_SUBCATEGORY_ce0bf39843417fca",
+    "PM_UNIT_3871fc5bdee74d78",
+    "SYS_CATEGORY_ACCESSORIES",
+    "SYS_CATEGORY_EXTERIOR_WALL_PAINTS",
+    "SYS_CATEGORY_FLOOR_COATINGS",
+    "SYS_CATEGORY_INDUSTRIAL_COATINGS",
+    "SYS_CATEGORY_INTERIOR_WALL_PAINTS",
+    "SYS_CATEGORY_METAL_PAINTS",
+    "SYS_CATEGORY_PRIMERS_PUTTY",
+    "SYS_CATEGORY_WALLPAPERS",
+    "SYS_CATEGORY_WALL_TEXTURES",
+    "SYS_CATEGORY_WOOD_COATINGS",
+    "SYS_SUBCATEGORY_INTERIOR_WALL_COATINGS_CEILING_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_ROLLER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_SANDPAPER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_EXTERIOR_EMULSION",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_PREMIUM_EXTERIOR_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_WEATHER_RESISTANT_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_COATINGS_CONCRETE_COATING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_COATINGS_EPOXY_FLOORING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_FLOOR_COATINGS_FLOOR_PAINT",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_ANTI_CORROSION_COATING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_EPOXY_COATING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_HEAT_RESISTANT_COATING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INDUSTRIAL_COATINGS_PROTECTIVE_COATING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_DISTEMPER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_ECONOMY_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_EMULSION_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_LUXURY_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_PREMIUM_PAINTS",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_ANTI_CORROSION_PAINT",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_DECORATIVE_METAL_PAINT",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_ENAMEL_PAINT",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_METAL_PAINTS_PROTECTIVE_COATING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_EXTERIOR_WALL_PRIMER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_INTERIOR_WALL_PRIMER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_WALL_PUTTY",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_PRIMERS_PUTTY_WOOD_PRIMER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_DESIGNER_WALLPAPER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_NON_WOVEN_WALLPAPER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_PAPER_WALLPAPER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALLPAPERS_VINYL_WALLPAPER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_3D_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_CONCRETE_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_DESIGNER_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_MARBLE_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_METALLIC_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_STONE_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_STUCCO_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WALL_TEXTURES_VELVET_TEXTURE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_BATHROOM_WATERPROOFING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_CRACK_REPAIR",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_DAMP_PROOFING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_TERRACE_WATERPROOFING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WATERPROOFING_WALL_WATERPROOFING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_MELAMINE",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_PU_COATING",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_WOOD_POLISH",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_WOOD_SEALER",
+    "SYS_SUBCATEGORY_SYS_CATEGORY_WOOD_COATINGS_WOOD_STAIN",
+    "SYS_SUBCATEGORY_WATERPROOFING_BASEMENT"
+  ],
+  "legacyQueries": [
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null,
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_CATEGORY_ACCESSORIES"
+      ]
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:30.683249Z",
+      "lastAttemptAt": "2026-10-02T13:53:45.431825Z",
+      "lastError": "Quota exceeded. (HTTP 429)",
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_CATEGORY_EXTERIOR_WALL_PAINTS"
+      ]
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null,
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_CATEGORY_ACCESSORIES"
+      ]
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:31.066930Z",
+      "lastAttemptAt": "2026-10-02T13:53:45.769679Z",
+      "lastError": "Quota exceeded. (HTTP 429)",
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_CATEGORY_EXTERIOR_WALL_PAINTS"
+      ]
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": "2026-10-02T13:53:53.309316Z",
+      "lastError": "Quota exceeded. (HTTP 429)",
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "PM_SUBCATEGORY_ce0bf39843417fca"
+      ]
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null,
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH"
+      ]
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:37.720967Z",
+      "lastAttemptAt": "2026-10-02T13:53:51.598416Z",
+      "lastError": "Quota exceeded. (HTTP 429)",
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS"
+      ]
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": "2026-10-02T13:53:52.969366Z",
+      "lastError": "Quota exceeded. (HTTP 429)",
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "PM_SUBCATEGORY_ce0bf39843417fca"
+      ]
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null,
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH"
+      ]
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:31.956359Z",
+      "lastAttemptAt": "2026-10-02T13:53:46.451190Z",
+      "lastError": "Quota exceeded. (HTTP 429)",
+      "active": 0,
+      "cursor": null,
+      "catalogueVersion": null,
+      "legacyIds": [
+        "SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS"
+      ]
+    }
+  ],
+  "localReleases": [
+    {
+      "documentId": "PAINT_V1",
+      "fields": {
+        "catalogueId": "PAINT_V1",
+        "businessSubTypeId": "PAINTS",
+        "status": "ACTIVE",
+        "createdBy": "SYSTEM_SEED",
+        "businessTypeId": "HARDWARE",
+        "updatedBy": "SYSTEM_SEED",
+        "scopeType": "SYSTEM",
+        "published": true,
+        "releaseId": "PAINT_V1",
+        "createdAt": "2026-10-03T08:01:58.333755Z",
+        "notes": "v3 incremental Nerolac normalization patch. Adds confirmed normalized subcategories, aliases and templates without rebuilding v2 master data.",
+        "publishedAt": "2026-10-03T08:17:12.255935Z",
+        "catalogueVersion": 3,
+        "updatedAt": "2026-10-03T08:17:12.255935Z",
+        "localMetadataRevision": 5,
+        "scopeAliases": {
+          "businessTypeId": {
+            "BT-HARDWARE": "HARDWARE"
+          },
+          "businessSubTypeId": {
+            "BST-PAINTS": "PAINTS"
+          }
+        }
+      }
+    }
+  ],
+  "rowMetadataRevisions": {
+    "local_product_attribute_options": {
+      "None": 130,
+      "5": 85,
+      "1": 1,
+      "2": 5
+    },
+    "local_product_attributes": {
+      "2": 22,
+      "None": 24,
+      "5": 4
+    },
+    "local_product_categories": {
+      "None": 34
+    },
+    "local_product_subcategories": {
+      "None": 52,
+      "5": 121,
+      "2": 25
+    },
+    "local_subcategory_attribute_templates": {
+      "None": 1985,
+      "2": 890,
+      "5": 464,
+      "3": 30,
+      "1": 8
+    },
+    "local_units": {
+      "None": 16,
+      "5": 11
+    }
+  },
+  "liveMutation": false,
+  "equivalentDuplicateQueryGroups": [],
+  "productionConcurrencyEvidence": {
+    "processId": 92086,
+    "executable": "build/macos/Build/Products/Debug/testflutter.app/Contents/MacOS/testflutter",
+    "openHandle": "21u (read/write), observed with lsof",
+    "fullSuiteAuditFailure": "SQLITE_BUSY database is locked in the existing read-only audit",
+    "capturedCatalogueTablesChangedRows": {
+      "local_product_categories": 0,
+      "local_product_subcategories": 0,
+      "local_subcategory_attribute_templates": 0,
+      "local_product_catalogue_releases": 0
+    },
+    "syncQueriesChangedRows": 40,
+    "agentProductionAccess": "read-only; no app launch, live import, query maintenance or migration execution",
+    "changedQueryColumns": {
+      "lastSyncedAt": 40,
+      "lastAttemptAt": 40,
+      "cursor": 39
+    }
+  },
+  "productionChecksumsBefore": [
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+      "sha256": "e0f621fc7271325e8378b4d6b677c98e1d9ce07d5c028d2b990612978a870580",
+      "size": 9728000
+    },
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db.bak",
+      "sha256": "853c9fd6dd9a9032a25bfb0e742f1a3b5acb30fb60cb6211f7218b2783cdf651",
+      "size": 9728000
+    },
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-public-config.db",
+      "sha256": "20cf0f320c9cbe6a62bcf8e6d1cc4e4a190bb13060522bbd8286d42e03be23e0",
+      "size": 937984
+    }
+  ],
+  "productionChecksumsAfter": [
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+      "sha256": "5d7ea26300c6542932cf4cfdf9617ed1a68a74e4866470d9723b9254c87c7d95",
+      "size": 9728000
+    },
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db.bak",
+      "sha256": "853c9fd6dd9a9032a25bfb0e742f1a3b5acb30fb60cb6211f7218b2783cdf651",
+      "size": 9728000
+    },
+    {
+      "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-public-config.db",
+      "sha256": "20cf0f320c9cbe6a62bcf8e6d1cc4e4a190bb13060522bbd8286d42e03be23e0",
+      "size": 937984
+    }
+  ]
+}

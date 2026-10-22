@@ -1,0 +1,75 @@
+{
+  "phase": "PHASE_10H_CATALOGUE_PROVENANCE_CONTRACT",
+  "status": "CONTRACT_DESIGNED_BACKFILL_BLOCKED",
+  "approvedForProductionMigration": false,
+  "releaseInstallationAllowed": false,
+  "firestoreAllowed": false,
+  "provenance": {
+    "minimumPersistedProductField": {
+      "name": "catalogueFingerprint",
+      "type": "string",
+      "nullable": true,
+      "format": "sha256:<64 lowercase hex characters>",
+      "meaning": "SHA-256 of the canonical, complete SYSTEM metadata snapshot used to resolve the Product form. Snapshot input is deterministically ordered by collection and document ID and includes exact decoded metadata fields; excludes transport timestamps, local sync bookkeeping, and the catalogueFingerprint field itself on the release marker to avoid a self-referential hash, but includes semantic values, statuses, and document identities.",
+      "immutableByDefault": true
+    },
+    "notPersistedOnProduct": ["catalogueId", "catalogueDataVersion", "catalogueSchemaRevision", "catalogueCompilerRevision"],
+    "whyNotPersisted": "The complete-content SHA-256 identifies the exact metadata snapshot without repeating release descriptor fields. Keep catalogueId/dataVersion/schemaRevision/compilerRevision in the immutable snapshot archive manifest for diagnostics and compatibility checks, not in every Product payload.",
+    "variantPolicy": "No independent Variant token. Variant metadata is interpreted through its immutable parent productId and the parent Product catalogueFingerprint. Any standalone Variant resolution must first resolve the owning Product; orphan Variants fail closed.",
+    "historyPolicy": "No transaction/history field is proposed. Current local history tables have zero rows in the read-only inventory; existing transaction documents are not rewritten. Future audit snapshots that persist template-dependent fields must carry the parent Product fingerprint at creation, in that snapshot only.",
+    "backwardCompatibility": "Missing/null/invalid fingerprint is LEGACY_PROVENANCE_UNKNOWN. Do not choose current metadata automatically. Read-only/manual fallback may display stored values without catalogue interpretation."
+  },
+  "canonicalFingerprintRules": {
+    "algorithm": "SHA-256",
+    "canonicalEncoding": "UTF-8 JSON of ordered collection -> ordered document list -> recursively key-sorted decoded fields; stable JSON scalar encoding; preserve array order where semantically significant.",
+    "inputCollections": "The full installed SYSTEM catalogue snapshot, including the published release marker and all compiler input collections; exclude only the catalogueFingerprint field being computed from the release marker itself; no BUSINESS metadata.",
+    "sourceToken": "Persist catalogueFingerprint in the installed release marker payload when a complete snapshot is installed. A Product form captures that marker token together with its resolved template; Product creation requires both to match.",
+    "collisionPolicy": "Two distinct canonical snapshots must not share a key. SHA-256 is the exact archive identity; legacy FNV-1a contentFingerprint remains a change-detection/compatibility field and is not sufficient as the Phase 10H archive key.",
+    "sameVersionDifferentContent": "Rejected; the immutable full-content fingerprint changes only for a new complete release/snapshot."
+  },
+  "persistenceContract": {
+    "model": "ProductModel.catalogueFingerprint: String? (null when absent or invalid). ProductModel.fromData reads only this exact key; no inference from other fields.",
+    "sqlite": "No new dedicated SQL column. The existing local_products.payloadJson is the authoritative serialized Firestore document and already carries arbitrary fields. Adding a mirrored SQL column would duplicate state without enabling a required query.",
+    "remotePayload": "A future Product document carries catalogueFingerprint as a string field. Existing records without it remain unchanged. No live request was made.",
+    "productVariantPayload": "Do not duplicate fingerprint. Existing Variant payload remains unchanged; resolve via productId -> Product.catalogueFingerprint.",
+    "outbox": "The Product JSON field is included in the CREATE write fields and therefore in the same SQLite transaction's local_products.payloadJson and sync_outbox.payloadJson. The existing transaction mechanism preserves local pending payloads on remote pulls.",
+    "atomicity": "Resolve/capture the installed marker token, then write Product, Variants, uniqueness/code reservations, and outbox batch through the existing runAtomicOperation transaction. If the marker token is missing, Product creation fails closed before creating records.",
+    "edit": "Normal edit leaves catalogueFingerprint untouched. Do not include it in mutable form data or patch fields. Only a separately approved semantic metadata migration may replace it, atomically with reviewed value transformations; that workflow is not implemented here.",
+    "duplicate": "A duplicate is a new Product and receives the exact currently installed snapshot token used for its newly resolved canonical form, not the source Product token.",
+    "classificationChange": "A normal edit/reclassification does not silently retag provenance. If canonical migration is separately approved, update fingerprint only with that explicit migration decision; never remap Basement by similarity."
+  },
+  "archiveContract": {
+    "primaryKey": ["catalogueFingerprint", "collection", "documentId"],
+    "immutable": true,
+    "documentIdAndPayloadId": "Store both independently and verbatim: documentId is the source Firestore/local row identity; payloadId is the collection's decoded identity field (e.g. subcategoryId). Do not normalize, alias, or require equality for a retained historical preimage.",
+    "releaseDescriptor": ["catalogueId", "catalogueDataVersion", "catalogueSchemaRevision", "catalogueCompilerRevision", "catalogueFingerprint", "installedAt"],
+    "conflict": "A repeated insert with the same key and identical canonical payload is idempotent. Same key with different content is a hard collision and aborts the enclosing transaction; never overwrite.",
+    "transaction": "Archive exact before-images and new release marker in the same SQLite transaction as approved catalogue snapshot reconciliation, before reconciliation changes source metadata.",
+    "no_schema_mirror": "Dedicated snapshot table is separate from Product payload persistence; its composite primary key prevents cross-release overwrite. This archive table is prospective and is not created or populated in Phase 10H."
+  },
+  "resolutionRules": {
+    "newProduct": "Canonical selector/template only; capture exact installed fingerprint with the canonical resolution.",
+    "historicalProduct": "Requires non-null valid fingerprint and exact (fingerprint, collection, documentId) metadata lookup, then exact payload identity check. No name search, alias, fallback, or nearest version.",
+    "ceiling": "The shared document ID alone is ambiguous. Historical and Release 4 rows have distinct full-snapshot fingerprints, so the archive composite key selects the correct row while retaining historical payload subcategoryId separately. This is a contract test vector only; no production old fingerprint is assigned.",
+    "basement": "The old document/payload identities remain historical and unretagged. Release 4 Liquid/Cementitious rows have the Release 4 fingerprint only. Old records with null/unproven provenance are never assigned either new token.",
+    "missingOrUnknown": "Fail closed; retain raw saved fields and route for manual review. Never use catalogueId alone, IDs alone, timestamps, display names, options, or unit labels as substitute provenance."
+  },
+  "migrationDesign": {
+    "productionExecuted": false,
+    "productionSchemaChange": false,
+    "productionBackfill": false,
+    "prospectiveLocalPayloadField": "Nullable optional field in Product payload; old app/schema opens unchanged and old documents decode as null.",
+    "futureArchiveSchema": "Separate STRICT local table with composite primary key (catalogueFingerprint, collection, documentId); create in a versioned onUpgrade transaction only when snapshot archival is implemented.",
+    "rollback": "Use an app-maintenance barrier for the future schema/archive bootstrap. SQLite DDL and archive inserts share one transaction. Inject failures after table/index creation and after each staged row; verify database version, sqlite_master, release marker, source payloads, sync_queries, Product/Variant tables and outbox exactly match preimage. Retry is idempotent.",
+    "compatibility": "Do not make catalogueFingerprint non-null in schema or model constructors. Older app versions and existing rows remain readable; creation requires a token only after the marker-generation capability exists."
+  },
+  "productionSafety": {
+    "accountDbReadOnly": true,
+    "publicConfigDbReadOnly": true,
+    "productVariantWrites": false,
+    "backfillExecuted": false,
+    "releaseInstalled": false,
+    "syncQueriesChanged": false,
+    "firestoreCalls": 0
+  }
+}

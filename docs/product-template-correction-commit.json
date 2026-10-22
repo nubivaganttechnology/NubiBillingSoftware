@@ -1,0 +1,346 @@
+{
+  "writes": [
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Exterior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Exterior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:46:27.005949Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_EXTERIOR_EMULSION_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Exterior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Exterior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:46:31.995964Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_PREMIUM_EXTERIOR_PAINTS_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Exterior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Exterior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:46:21.958675Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_WEATHER_RESISTANT_PAINTS_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Exterior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Exterior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:46:17.004246Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_DISTEMPER_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Interior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Interior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:46:12.029959Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_ECONOMY_PAINTS_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Interior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Interior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:46:02.132348Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_EMULSION_PAINTS_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Interior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Interior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:46:07.094642Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_LUXURY_PAINTS_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Interior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Interior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:45:39.525817Z"
+      }
+    },
+    {
+      "update": {
+        "name": "projects/test1-bcebe/databases/(default)/documents/subcategory_attribute_templates/SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_INTERIOR_WALL_PAINTS_PREMIUM_PAINTS_USAGE",
+        "fields": {
+          "defaultValue": {
+            "stringValue": "Interior"
+          },
+          "options": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "Interior"
+                }
+              ]
+            }
+          },
+          "allowAddNewOption": {
+            "booleanValue": false
+          }
+        }
+      },
+      "updateMask": {
+        "fieldPaths": [
+          "defaultValue",
+          "options",
+          "allowAddNewOption"
+        ]
+      },
+      "updateTransforms": [
+        {
+          "fieldPath": "updatedAt",
+          "setToServerValue": "REQUEST_TIME"
+        }
+      ],
+      "currentDocument": {
+        "updateTime": "2026-10-02T10:45:51.370310Z"
+      }
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "phase": "PHASE_10L_LEGACY_RETENTION_POLICY_APPROVAL",
+  "policyVersion": "1.0.0",
+  "policyName": "RETAIN_LEGACY_NO_AUTOMATIC_MIGRATION_NO_RETIREMENT",
+  "retentionPolicyApproved": true,
+  "migrationApproved": false,
+  "retirementApproved": false,
+  "productionInstallationApproved": false,
+  "executionAuthorized": false,
+  "approval": {
+    "decision": "APPROVE_RETENTION_ONLY",
+    "approvalBasis": "Explicit Phase 10L governance instruction",
+    "approvedBy": "Phase 10L governance decision; individual approver identity not supplied",
+    "approvedOn": "2026-10-05",
+    "rationale": "Close the former Phase 10F governance blocker by authorizing least-destructive preservation and exclusion from new Release-4 Product creation, without certifying semantic correctness or authorizing migration, remapping, retirement, installation, or execution."
+  },
+  "sourceInventory": {
+    "path": "docs/phase10e-installed-v3-v4-diff.json",
+    "sha256": "3af5a17dd23b8aae66385c75519ca01bd007e4b9e742138317d053f9b553b50f",
+    "rowCount": 4958,
+    "identityKey": ["collection", "documentId"],
+    "classificationCounts": {
+      "CANONICAL_KEEP": 1128,
+      "LEGACY_RETAIN_REQUIRED": 242,
+      "MIGRATION_REQUIRED": 2,
+      "NEW_CANONICAL": 1055,
+      "REVIEW_REQUIRED": 2506,
+      "SAFE_UNREFERENCED_RETIREMENT_CANDIDATE": 25
+    },
+    "syncQueryCount": 195,
+    "protectedSyncQueryCount": 10,
+    "syncQueriesDigest": "311e4bd99435b5efb23d4f20192abc7677336169e6451787188f52e4e49fe303"
+  },
+  "coveredDispositionRows": {
+    "selectionMode": "EXACT_SOURCE_ROWS_BY_MUTUALLY_EXCLUSIVE_CLASSIFICATION",
+    "rowKey": ["collection", "documentId"],
+    "coverageRequirement": "Each source ledger row in the four listed classifications is covered exactly once; classification is a single-valued source field and the selectors are disjoint. Preserve each selected source row and its original disposition/evidence verbatim; this policy is a separate governance overlay.",
+    "expectedTotalRows": 2775,
+    "classifications": [
+      {
+        "classification": "LEGACY_RETAIN_REQUIRED",
+        "expectedRows": 242,
+        "decision": "APPROVE_RETENTION_ONLY",
+        "migrationApproved": false,
+        "retirementApproved": false
+      },
+      {
+        "classification": "REVIEW_REQUIRED",
+        "expectedRows": 2506,
+        "decision": "APPROVE_RETENTION_PENDING_FUTURE_REVIEW",
+        "migrationApproved": false,
+        "retirementApproved": false,
+        "semanticCorrectnessCertified": false
+      },
+      {
+        "classification": "MIGRATION_REQUIRED",
+        "expectedRows": 2,
+        "decision": "NO_AUTOMATIC_MIGRATION_RETAIN_HISTORICAL_IDENTITY",
+        "migrationApproved": false,
+        "retirementApproved": false
+      },
+      {
+        "classification": "SAFE_UNREFERENCED_RETIREMENT_CANDIDATE",
+        "expectedRows": 25,
+        "decision": "RETAIN_FOR_THIS_RELEASE",
+        "migrationApproved": false,
+        "retirementApproved": false
+      }
+    ],
+    "additionalReferenceOnlyIdentityCount": 2,
+    "additionalReferenceOnlyIdentityRule": "Preserve both referenceOnlyIdentities from the source inventory independently from ledger-row accounting; do not conflate their documentId or payloadId identities with ledger rows or assign targets."
+  },
+  "policyRules": [
+    "Release 4 is authoritative only for new Product creation.",
+    "Historical SYSTEM metadata is preserved in the immutable legacy catalogue archive.",
+    "Historical Products and Variants are not reclassified or remapped.",
+    "Null catalogueFingerprint values are never backfilled or guessed.",
+    "Null-provenance historical Products remain fail-closed.",
+    "Saved historical Product and Variant values remain readable at raw-value level.",
+    "Archived legacy metadata is not selectable in Release-4 Create Product flows.",
+    "No REVIEW_REQUIRED row is approved for deletion.",
+    "No LEGACY_RETAIN_REQUIRED row is deleted.",
+    "No MIGRATION_REQUIRED identity is automatically mapped.",
+    "No SAFE_UNREFERENCED_RETIREMENT_CANDIDATE is retired in this release.",
+    "Ceiling historical documentId and payloadId identity remain independently preserved.",
+    "Basement historical identity remains separate from Release-4 Liquid and Cementitious forms.",
+    "All ten protected legacy sync queries remain unchanged.",
+    "Future legacy cleanup requires separate explicit cleanup approval."
+  ],
+  "identitySpecificRules": [
+    {
+      "identity": "Ceiling",
+      "rule": "Do not map the historical Ceiling payload identity to Release 4 by ID similarity; preserve source documentId and payloadId independently in historical evidence/archive."
+    },
+    {
+      "identity": "Basement",
+      "rule": "Do not map historical Basement to either Liquid or Cementitious automatically; preserve source documentId and payloadId independently."
+    },
+    {
+      "identity": "Ten legacy duplicate pairs",
+      "rule": "Do not automatically merge any of the ten legacy duplicate pairs."
+    }
+  ],
+  "productVariantPolicy": {
+    "existingProductCount": 4,
+    "existingVariantCount": 7,
+    "mutationsProposed": false,
+    "existingNullCatalogueFingerprintsRemainNull": true,
+    "historicalRelease4ProvenanceAssigned": false,
+    "skuOrBarcodeChangesProposed": false
+  },
+  "syncPolicy": {
+    "totalQueryCount": 195,
+    "protectedQueryCount": 10,
+    "allQueriesRemainUnchanged": true,
+    "queryDeletion": false,
+    "queryReactivation": false,
+    "migrationTimeCursorOrTrackingMutation": false,
+    "phase10kTechnicalEvidenceModified": false
+  },
+  "productionSafety": {
+    "productionDatabaseWrites": false,
+    "release4ProductionInstallation": false,
+    "firestoreAccess": false,
+    "productOrVariantWrites": false,
+    "catalogueMigrationExecution": false,
+    "phase11Work": false
+  },
+  "futureCleanup": "Requires a separate explicit cleanup approval with its own reviewed scope and evidence."
+}

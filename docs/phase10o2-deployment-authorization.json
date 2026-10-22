@@ -1,0 +1,169 @@
+{
+  "phase": "PHASE_10O5_IMMUTABLE_CANDIDATE_COMMIT_AND_POSTCOMMIT_FULL_SUITE",
+  "revision": 5,
+  "status": "DEPLOYMENT_CANDIDATE_READY",
+  "productionExecutionAuthorized": true,
+  "authorizationScope": {
+    "catalogueId": "PAINT_V1",
+    "dataVersion": 4,
+    "schemaRevision": 1,
+    "compilerRevision": 6,
+    "catalogueFingerprint": "sha256:cfc96ca97f343ea5593813e28cc38a22c85fbd1d5c1e3d52d4fdfa52f5bb1f88",
+    "accountPreimageSha256": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8",
+    "publicConfigPreimageSha256": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289",
+    "installationOnly": true,
+    "productionMigrationExecutionInThisPhase": false
+  },
+  "approvals": {
+    "businessOperator": {
+      "status": "APPROVED",
+      "authorization": "I authorize the controlled production deployment, provided every preflight and backup gate passes.",
+      "source": "Operator-provided approval in this conversation",
+      "name": "SK SUMAN",
+      "signature": null,
+      "timestamp": null
+    },
+    "independentVerifier": {
+      "name": "Arnab",
+      "role": "Senior Developer",
+      "status": "APPROVED",
+      "approval": "I independently reviewed the Release 4 deployment evidence and approve proceeding with the controlled production deployment, subject to all pre-write and post-deployment verification gates passing.",
+      "source": "Operator-provided approval in this conversation",
+      "signature": null,
+      "timestamp": null
+    }
+  },
+  "phase10O3Evidence": {
+    "roleCombination": {
+      "result": "VALID",
+    "productionExecutionAuthorizedInThisPhase": false,
+      "basis": "The runbook/checklist define separate operational functions but do not require Release Commander, Database Operator, Rollback Authority, and Business Owner to be different people. They require an independent verifier; Arnab remains separate.",
+      "source": "Review of docs/phase10j-production-deployment-runbook.md and docs/phase10j-go-no-go-checklist.json"
+    },
+    "maintenanceAttestation": {
+      "status": "ATTESTED",
+      "statement": "I confirm all NubiBill/Flutter production app instances, background sync workers, scheduled jobs, and automatic restarts are stopped. Maintenance mode is active and will remain active until post-deployment verification is complete.",
+      "source": "Operator-provided evidence in this conversation",
+      "name": "SK SUMAN",
+      "role": "Database Operator",
+      "signature": null,
+      "timestamp": null
+    },
+    "deploymentRoles": {
+      "releaseCommander": {"name":"SK SUMAN","role":"Project Owner / Release Commander"},
+      "databaseOperator": {"name":"SK SUMAN","role":"Database Operator"},
+      "rollbackAuthority": {"name":"SK SUMAN","role":"Project Owner / Rollback Authority"},
+      "businessOwnerApprover": {"name":"SK SUMAN","role":"Business Owner / Project Owner"},
+      "independentVerifier": {"name":"Arnab","role":"Senior Developer"}
+    },
+    "deploymentWindowContact": {
+      "name": "SK SUMAN",
+      "role": "Project Owner",
+      "phone": "9035714708",
+      "email": "sksuman66@gmail.com",
+      "window": "Maintenance mode active; remains in force until post-deployment verification completes. No calendar end time was supplied."
+    },
+    "rollbackAuthorization": {
+      "statement": "I approve restoring the verified paired backup if post-commit verification fails or the deployment is declared ROLLBACK_REQUIRED.",
+      "source": "Operator-provided evidence in this conversation",
+      "name": "SK SUMAN",
+      "role": "Project Owner / Rollback Authority",
+      "signature": null,
+      "timestamp": null
+    },
+    "rollbackReadiness": {
+      "pairedBackupExistsAndHashesMatch": true,
+      "phase10N3StagingRestoreReadabilityDrill": "PASS for both databases in the exact paired backup set",
+      "rollbackAuthorizationSatisfied": true,
+      "documentedPostRestoreIntegrityAndIdentityChecks": true,
+      "pairedReplacementCrashRecoveryProcedure": "IMPLEMENTED_AND_REHEARSED_ON_DISPOSABLE_CLONES",
+      "candidateCommitGate": "STOP_CANDIDATE_COMMIT_AND_FULL_TESTS_PENDING"
+    },
+    "semanticDeploymentApproval": {
+      "statement": "I approve installation of the exact reviewed Release 4 catalogue under the existing retention policy: RETAIN_LEGACY_NO_AUTOMATIC_MIGRATION_NO_RETIREMENT. No historical Product/Variant will be automatically remapped, merged, retired, deleted, reclassified, or backfilled.",
+      "source": "Operator-provided evidence in this conversation",
+      "name": "SK SUMAN",
+      "role": "Business Owner / Project Owner",
+      "signature": null,
+      "timestamp": null,
+      "scope": "Exact Release 4 installation only; all Phase 10F row-level migration/retirement approvals remain false and target IDs null."
+    }
+  },
+  "productionPreimage": {
+    "products": 4,
+    "variants": 7,
+    "syncQueries": 195,
+    "protectedQueries": 10,
+    "outbox": 0,
+    "archiveRows": 0,
+    "legacyRows": 3903,
+    "queryDigest": "f0b396bab4b0855bb119c7a0d9f7ed3a5e21f42e71e1d691afad777aad17c756",
+    "legacyFingerprint": "sha256:1557b7d098f0ae5f829853fb798c86152282af67776cbb525063e2055387e74b"
+  },
+  "approvedBackupSet": {
+    "root": "/Users/sksuman/StudioProjects/backup/nubibill-release4-20261005T141929Z",
+    "account": {
+      "path": "/Users/sksuman/StudioProjects/backup/nubibill-release4-20261005T141929Z/account-production.db",
+      "sha256": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8"
+    },
+    "publicConfig": {
+      "path": "/Users/sksuman/StudioProjects/backup/nubibill-release4-20261005T141929Z/public-config-production.db",
+      "sha256": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289"
+    }
+  },
+  "retentionPolicy": {
+    "name": "RETAIN_LEGACY_NO_AUTOMATIC_MIGRATION_NO_RETIREMENT",
+    "automaticRemapAllowed": false,
+    "automaticCleanupAllowed": false,
+    "automaticRetirementAllowed": false,
+    "historicalBackfillAllowed": false,
+    "rowLevelMigrationApprovalsChanged": false,
+    "rowLevelRetirementApprovalsChanged": false,
+    "preapprovedHistoricalMappings": []
+  },
+  "validationState": {
+    "productionDryRun": {
+      "report": "phase10N7.md",
+      "mode": "DRY_RUN",
+      "result": "GO",
+      "success": true,
+      "shellExitCode": 0
+    },
+    "immutableCandidateCommit": "8e3658690ddb142717c7e9a75246a27fcb2bb877",
+    "writerFreeze": "VERIFIED_OPERATOR_ATTESTATION_AND_LOCAL_OBSERVATIONS",
+    "focusedTests": "PASS: phase10j_runbook_gate_test.dart 5/5",
+    "focusedReleaseTests": "PASS: 35 passed, 0 failed; Phase 10F unittest proof: 17 passed",
+    "fullWorkspaceTests": "PASS at candidate 8e3658690ddb142717c7e9a75246a27fcb2bb877: 698 passed, 0 failed, 1 environment-gated Phase 10I/10IB legacy clone test skipped, exit 0; all five PHASE10I_* variables were unset as required. Current v4/R3 clone runner and CLI paths passed in Phase 10M/N4 tests.",
+    "analyzer": {"command":"flutter analyze --no-pub","errors":0,"warnings":5,"infos":42},
+    "freshReadOnlyPostflight": {
+      "checkedAtUtc": "2026-10-05T20:41:48Z",
+      "account": {
+        "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+        "sha256": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8",
+        "bytes": 9748480,
+        "integrityCheck": "ok"
+      },
+      "publicConfig": {
+        "path": "/Users/sksuman/Documents/nubibill-test1-bcebe-public-config.db",
+        "sha256": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289",
+        "bytes": 946176,
+        "integrityCheck": "ok"
+      },
+      "accountBackupSha256": "2a0474f4bdda64b7bb31614bd983d7f730f9595fdafcae8bea9385bbd7122fa8",
+      "publicConfigBackupSha256": "9b9e4d0abeadcd9d0783f07888137a5021cfb183ab4b5922e4886dfce0590289",
+      "accountBackupIntegrityCheck": "ok",
+      "publicConfigBackupIntegrityCheck": "ok",
+      "allFourIntegrityChecksOk": true,
+      "sidecarsFound": [],
+      "openHandlesFound": [],
+      "productionMigrationOrDryRunExecuted": false
+    },
+    "finalDeploymentGoPacket": "DEPLOYMENT_CANDIDATE_READY"
+  },
+  "executionGuard": {
+    "executeFlagPermittedInThisPhase": false,
+    "firestoreOrNetworkAccessPermitted": false,
+    "maintenanceModeMustRemainActive": true,
+    "requiredIndependentPostDeploymentVerification": true
+  }
+}

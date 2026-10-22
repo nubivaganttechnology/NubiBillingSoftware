@@ -1,0 +1,1 @@
+PASS: 16 A4 pages, repeated scope/fixture labels, all 180 evidence rows, no certification claims

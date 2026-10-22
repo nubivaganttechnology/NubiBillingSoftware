@@ -1,0 +1,28 @@
+{
+  "syntheticOnly": true,
+  "cameraOpened": false,
+  "productionTouched": false,
+  "checks": {
+    "clockRequiresOwnerConfirmation": true,
+    "confirmedClockAccepted": true,
+    "consentRequired": true,
+    "syntheticEnrollmentRoundTrip": true,
+    "duplicateEnrollmentRejected": true,
+    "casCreate": true,
+    "casRejectsStaleValue": true,
+    "casUpdate": true,
+    "casPersisted": true,
+    "otherTenantRefused": true
+  },
+  "environment": {
+    "packageId": "com.example.testflutter.attendancefixture",
+    "androidApi": 37,
+    "model": "Pixel 6a"
+  },
+  "phase": "BEFORE_PROCESS_RESTART",
+  "keyInfo": {
+    "insideSecureHardware": true,
+    "securityLevel": 1
+  },
+  "result": "READY_FOR_PROCESS_RESTART"
+}

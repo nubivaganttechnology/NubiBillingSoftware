@@ -1,0 +1,791 @@
+{
+  "readOnlyDatabase": "/Users/sksuman/Documents/nubibill-test1-bcebe-C6btLkx5SyZvUQOzOeUUd7XxsFh2.db",
+  "queryCount": 98,
+  "semanticDuplicates": 0,
+  "queries": [
+    {
+      "queryKey": "user:{\"id\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}",
+      "collectionName": "user",
+      "queryJson": "{\"id\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}",
+      "lastSyncedAt": "2026-10-02T13:51:51.414707Z",
+      "lastAttemptAt": "2026-10-02T13:53:19.657621Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "businesses:{\"filters\":[{\"field\":\"ownerUid\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "collectionName": "businesses",
+      "queryJson": "{\"filters\":[{\"field\":\"ownerUid\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:52.748411Z",
+      "lastAttemptAt": "2026-10-02T13:53:19.996581Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_catalogue_releases:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_catalogue_releases",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:53.182312Z",
+      "lastAttemptAt": "2026-10-02T13:53:21.336834Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_catalogue_releases:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_catalogue_releases",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:54.609467Z",
+      "lastAttemptAt": "2026-10-02T13:53:21.677637Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "brands",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:55.070774Z",
+      "lastAttemptAt": "2026-10-02T13:53:22.989523Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "brands",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:56.649784Z",
+      "lastAttemptAt": "2026-10-02T13:53:23.372648Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_categories",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:57.075608Z",
+      "lastAttemptAt": "2026-10-02T13:53:24.681518Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_categories",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:58.377886Z",
+      "lastAttemptAt": "2026-10-02T13:53:25.061216Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:51:58.878502Z",
+      "lastAttemptAt": "2026-10-02T13:53:25.406345Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:52:00.128303Z",
+      "lastAttemptAt": "2026-10-02T13:53:25.751457Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "units",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:52:00.598013Z",
+      "lastAttemptAt": "2026-10-02T13:53:26.091132Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "units",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:52:01.872199Z",
+      "lastAttemptAt": "2026-10-02T13:53:26.427183Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attributes",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:52:02.343598Z",
+      "lastAttemptAt": "2026-10-02T13:53:26.762242Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_attributes",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:52:03.585216Z",
+      "lastAttemptAt": "2026-10-02T13:53:27.097152Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:52:04.125334Z",
+      "lastAttemptAt": "2026-10-02T13:53:27.432044Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:53.448212Z",
+      "lastAttemptAt": "2026-10-02T13:53:27.769804Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:54.802688Z",
+      "lastAttemptAt": "2026-10-02T13:53:28.098796Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:10.963216Z",
+      "lastAttemptAt": "2026-10-02T13:53:28.455586Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "products:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "products",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:11.359392Z",
+      "lastAttemptAt": "2026-10-02T13:53:28.790828Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_variants:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_variants",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:11.744Z",
+      "lastAttemptAt": "2026-10-02T13:53:29.129210Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "document_sequences:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "document_sequences",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:12.136970Z",
+      "lastAttemptAt": "2026-10-02T13:53:29.476295Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_unique_keys:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_unique_keys",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:12.523857Z",
+      "lastAttemptAt": "2026-10-02T13:53:29.818072Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "supplier_businesses:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "supplier_businesses",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:13.448141Z",
+      "lastAttemptAt": "2026-10-02T13:53:30.146788Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "supplier_products:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "supplier_products",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:13.845639Z",
+      "lastAttemptAt": "2026-10-02T13:53:30.479200Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "supplier_balances:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "supplier_balances",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:14.208609Z",
+      "lastAttemptAt": "2026-10-02T13:53:30.815051Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "supplier_ledger_entries:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "supplier_ledger_entries",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:14.572650Z",
+      "lastAttemptAt": "2026-10-02T13:53:31.153525Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "godowns:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "godowns",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:14.950625Z",
+      "lastAttemptAt": "2026-10-02T13:53:31.491793Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "racks:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "racks",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:15.379978Z",
+      "lastAttemptAt": "2026-10-02T13:53:31.827180Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "shelves:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "shelves",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:15.791866Z",
+      "lastAttemptAt": "2026-10-02T13:53:32.158162Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "stock_balances:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "stock_balances",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:16.174255Z",
+      "lastAttemptAt": "2026-10-02T13:53:32.490726Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "inventory_transactions:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "inventory_transactions",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:16.547356Z",
+      "lastAttemptAt": "2026-10-02T13:53:32.825199Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "suppliers:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "collectionName": "suppliers",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:16.920247Z",
+      "lastAttemptAt": "2026-10-02T13:53:33.168137Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "outlets:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "outlets",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:17.374275Z",
+      "lastAttemptAt": "2026-10-02T13:53:33.511371Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "outlets:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "outlets",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:17.748411Z",
+      "lastAttemptAt": "2026-10-02T13:53:33.856594Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "purchase_bills:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "purchase_bills",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:18.119816Z",
+      "lastAttemptAt": "2026-10-02T13:53:34.187229Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "purchase_orders:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "purchase_orders",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:18.485286Z",
+      "lastAttemptAt": "2026-10-02T13:53:34.522266Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "purchase_order_items:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "purchase_order_items",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:18.856474Z",
+      "lastAttemptAt": "2026-10-02T13:53:34.855529Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "goods_receipts:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "goods_receipts",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:19.242298Z",
+      "lastAttemptAt": "2026-10-02T13:53:35.195684Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "goods_receipt_items:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "goods_receipt_items",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:19.606723Z",
+      "lastAttemptAt": "2026-10-02T13:53:35.543624Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "supplier_payments:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "supplier_payments",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:19.975012Z",
+      "lastAttemptAt": "2026-10-02T13:53:35.885920Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "supplier_credits:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "supplier_credits",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:20.346098Z",
+      "lastAttemptAt": "2026-10-02T13:53:36.261010Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "payment_allocations:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "payment_allocations",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:20.741444Z",
+      "lastAttemptAt": "2026-10-02T13:53:36.598376Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "purchase_returns:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "purchase_returns",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:21.126465Z",
+      "lastAttemptAt": "2026-10-02T13:53:36.934236Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "purchases:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "purchases",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:21.514447Z",
+      "lastAttemptAt": "2026-10-02T13:53:37.275602Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:21.910009Z",
+      "lastAttemptAt": "2026-10-02T13:53:37.612630Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "customers:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "customers",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:22.285308Z",
+      "lastAttemptAt": "2026-10-02T13:53:37.942710Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:22.646439Z",
+      "lastAttemptAt": "2026-10-02T13:53:38.274534Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "purchases:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "purchases",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:23.014702Z",
+      "lastAttemptAt": "2026-10-02T13:53:38.616806Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "products:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"active\"}}]}",
+      "collectionName": "products",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"active\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:23.387805Z",
+      "lastAttemptAt": "2026-10-02T13:53:38.955220Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "customers:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "customers",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:23.783123Z",
+      "lastAttemptAt": "2026-10-02T13:53:39.295110Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-25T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-26T18:30:00.000Z\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-25T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-26T18:30:00.000Z\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:24.171599Z",
+      "lastAttemptAt": "2026-10-02T13:53:39.632784Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-26T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-27T18:30:00.000Z\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-26T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-27T18:30:00.000Z\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:24.542898Z",
+      "lastAttemptAt": "2026-10-02T13:53:39.975503Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-27T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-28T18:30:00.000Z\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-27T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-28T18:30:00.000Z\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:24.950425Z",
+      "lastAttemptAt": "2026-10-02T13:53:40.319348Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-28T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-29T18:30:00.000Z\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-28T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-29T18:30:00.000Z\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:25.319099Z",
+      "lastAttemptAt": "2026-10-02T13:53:40.653560Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-29T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-30T18:30:00.000Z\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-29T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-09-30T18:30:00.000Z\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:25.698371Z",
+      "lastAttemptAt": "2026-10-02T13:53:40.992092Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-30T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-10-01T18:30:00.000Z\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-09-30T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-10-01T18:30:00.000Z\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:26.046936Z",
+      "lastAttemptAt": "2026-10-02T13:53:41.356958Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "invoices:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-10-01T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-10-02T18:30:00.000Z\"}}]}",
+      "collectionName": "invoices",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}},{\"field\":\"createdAt\",\"operation\":\"GREATER_THAN_OR_EQUAL\",\"value\":{\"timestampValue\":\"2026-10-01T18:30:00.000Z\"}},{\"field\":\"createdAt\",\"operation\":\"LESS_THAN\",\"value\":{\"timestampValue\":\"2026-10-02T18:30:00.000Z\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:26.447656Z",
+      "lastAttemptAt": "2026-10-02T13:53:41.690686Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_variants:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_variants",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:26.838946Z",
+      "lastAttemptAt": "2026-10-02T13:53:42.027818Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "products:{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "products",
+      "queryJson": "{\"filters\":[{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:27.218442Z",
+      "lastAttemptAt": "2026-10-02T13:53:42.363170Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "brands",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:27.598591Z",
+      "lastAttemptAt": "2026-10-02T13:53:42.700631Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "product_categories",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:27.974884Z",
+      "lastAttemptAt": "2026-10-02T13:53:43.041500Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "units",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:28.358142Z",
+      "lastAttemptAt": "2026-10-02T13:53:43.384314Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "brands:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "brands",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:28.751638Z",
+      "lastAttemptAt": "2026-10-02T13:53:43.750297Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_categories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "product_categories",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:29.168950Z",
+      "lastAttemptAt": "2026-10-02T13:53:44.086840Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "units:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "units",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:29.548267Z",
+      "lastAttemptAt": "2026-10-02T13:53:44.420273Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "businesses:{\"id\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}",
+      "collectionName": "businesses",
+      "queryJson": "{\"id\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}",
+      "lastSyncedAt": "2026-10-02T13:27:29.929495Z",
+      "lastAttemptAt": "2026-10-02T13:53:44.751577Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "outlets:{\"id\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}",
+      "collectionName": "outlets",
+      "queryJson": "{\"id\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}",
+      "lastSyncedAt": "2026-10-02T13:27:30.310603Z",
+      "lastAttemptAt": "2026-10-02T13:53:45.087438Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:30.683249Z",
+      "lastAttemptAt": "2026-10-02T13:53:45.431825Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_EXTERIOR_WALL_PAINTS\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:31.066930Z",
+      "lastAttemptAt": "2026-10-02T13:53:45.769679Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "product_attributes",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:31.472549Z",
+      "lastAttemptAt": "2026-10-02T13:53:46.107527Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:31.956359Z",
+      "lastAttemptAt": "2026-10-02T13:53:46.451190Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"baseType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"baseType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:32.326437Z",
+      "lastAttemptAt": "2026-10-02T13:53:46.782302Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"colourFamily\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"colourFamily\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:32.679021Z",
+      "lastAttemptAt": "2026-10-02T13:53:47.117260Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"dilutionType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"dilutionType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:33.042177Z",
+      "lastAttemptAt": "2026-10-02T13:53:47.464750Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"finish\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"finish\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:33.423737Z",
+      "lastAttemptAt": "2026-10-02T13:53:47.808161Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"hsnCode\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"hsnCode\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:33.772402Z",
+      "lastAttemptAt": "2026-10-02T13:53:48.153767Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"numberOfCoats\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"numberOfCoats\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:34.138900Z",
+      "lastAttemptAt": "2026-10-02T13:53:48.495499Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"packSize\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"packSize\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:34.567391Z",
+      "lastAttemptAt": "2026-10-02T13:53:48.851186Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"segment\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"segment\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:34.919892Z",
+      "lastAttemptAt": "2026-10-02T13:53:49.179870Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"shade\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"shade\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:35.300325Z",
+      "lastAttemptAt": "2026-10-02T13:53:49.510504Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"shadeCode\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"shadeCode\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:35.743177Z",
+      "lastAttemptAt": "2026-10-02T13:53:49.848117Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"surface\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"surface\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:36.137055Z",
+      "lastAttemptAt": "2026-10-02T13:53:50.185192Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"unit\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"unit\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:36.532090Z",
+      "lastAttemptAt": "2026-10-02T13:53:50.554370Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"usage\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"usage\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:36.916823Z",
+      "lastAttemptAt": "2026-10-02T13:53:50.888321Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attributes:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "product_attributes",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:37.288228Z",
+      "lastAttemptAt": "2026-10-02T13:53:51.254575Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_EXTERIOR_WALL_PAINTS_ECONOMY_EXTERIOR_PAINTS\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:37.720967Z",
+      "lastAttemptAt": "2026-10-02T13:53:51.598416Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:38.135476Z",
+      "lastAttemptAt": "2026-10-02T13:53:51.943104Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}}]}",
+      "lastSyncedAt": "2026-10-02T13:27:38.512225Z",
+      "lastAttemptAt": "2026-10-02T13:53:52.279585Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "stock_balances:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "collectionName": "stock_balances",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"outletId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"OUT-2D8F9EAFF55D45418F2C97E5867A8DBE\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": "2026-10-02T13:53:52.614143Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": "2026-10-02T13:53:52.969366Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"PM_SUBCATEGORY_ce0bf39843417fca\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": "2026-10-02T13:53:53.309316Z",
+      "lastError": "Quota exceeded. (HTTP 429)"
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null
+    },
+    {
+      "queryKey": "product_subcategories:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}}]}",
+      "collectionName": "product_subcategories",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"categoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_CATEGORY_ACCESSORIES\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"bristleMaterial\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"bristleMaterial\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"brushSize\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"brushSize\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null
+    },
+    {
+      "queryKey": "product_attribute_options:{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"brushType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "collectionName": "product_attribute_options",
+      "queryJson": "{\"filters\":[{\"field\":\"attributeId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"brushType\"}},{\"field\":\"status\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"ACTIVE\"}},{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYSTEM\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null
+    },
+    {
+      "queryKey": "subcategory_attribute_templates:{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}}]}",
+      "collectionName": "subcategory_attribute_templates",
+      "queryJson": "{\"filters\":[{\"field\":\"scopeType\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUSINESS\"}},{\"field\":\"tenantId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"C6btLkx5SyZvUQOzOeUUd7XxsFh2\"}},{\"field\":\"businessId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"BUS-6CB1F7443C2142159B8EBE3F9303839B\"}},{\"field\":\"subcategoryId\",\"operation\":\"EQUAL\",\"value\":{\"stringValue\":\"SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH\"}}]}",
+      "lastSyncedAt": null,
+      "lastAttemptAt": null,
+      "lastError": null
+    }
+  ]
+}

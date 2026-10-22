@@ -1,0 +1,31 @@
+{
+  "syntheticOnly": true,
+  "cameraOpened": false,
+  "productionTouched": false,
+  "checks": {
+    "encryptedValueSurvivesRestart": true,
+    "deviceIdSurvivesRestart": true,
+    "enrollmentSurvivesRestart": true,
+    "clockAnchorSurvivesAppRestart": true,
+    "withdrawalRemovesTemplate": true,
+    "nativeRetentionPurge": true,
+    "tamperedCiphertextRejected": true,
+    "recordAadTransplantRejected": true,
+    "lostKeyReadFailsClosed": true,
+    "lostKeyWriteDoesNotReplaceKey": true,
+    "lostKeyResetRecoversVault": true,
+    "oldTemplateAbsentAfterReset": true,
+    "syntheticReenrollmentAfterKeyLoss": true
+  },
+  "environment": {
+    "packageId": "com.example.testflutter.attendancefixture",
+    "androidApi": 37,
+    "model": "Pixel 6a"
+  },
+  "phase": "AFTER_PROCESS_RESTART",
+  "keyInfo": {
+    "insideSecureHardware": true,
+    "securityLevel": 1
+  },
+  "result": "PASS"
+}

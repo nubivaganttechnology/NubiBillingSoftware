@@ -1,0 +1,478 @@
+{
+  "instructions": "Administrator reference only. Match/reuse existing attribute IDs and option records. Replace the Brush subcategory placeholder with its existing Firestore document ID before any seeding. This file is not loaded by Flutter and does not seed Firestore automatically.",
+  "records": {
+    "product_attributes": [
+      {
+        "documentId": "brushType",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "name": "Brush Type",
+          "attributeLevel": "PRODUCT",
+          "dataType": "SELECT",
+          "required": false,
+          "sortOrder": 10,
+          "allowAddNewOption": true,
+          "hintText": "Select brush type"
+        }
+      },
+      {
+        "documentId": "bristleMaterial",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "bristleMaterial",
+          "name": "Bristle Material",
+          "attributeLevel": "PRODUCT",
+          "dataType": "SELECT",
+          "required": false,
+          "sortOrder": 20,
+          "allowAddNewOption": true,
+          "hintText": "Select bristle material"
+        }
+      },
+      {
+        "documentId": "SYS_ATTR_handleMaterial",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "handleMaterial",
+          "name": "Handle Material",
+          "attributeLevel": "PRODUCT",
+          "dataType": "SELECT",
+          "required": false,
+          "sortOrder": 30,
+          "allowAddNewOption": false
+        }
+      },
+      {
+        "documentId": "SYS_ATTR_suitableSurface",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "suitableSurface",
+          "name": "Suitable Surface",
+          "attributeLevel": "PRODUCT",
+          "dataType": "MULTI_SELECT",
+          "required": false,
+          "sortOrder": 40,
+          "allowAddNewOption": false
+        }
+      },
+      {
+        "documentId": "SYS_ATTR_brushSize",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushSize",
+          "name": "Brush Size",
+          "attributeLevel": "VARIANT",
+          "dataType": "NUMBER",
+          "required": true,
+          "sortOrder": 50,
+          "allowAddNewOption": false,
+          "measurementUnitAttributeId": "brushSizeUnit",
+          "measurementDimension": "LENGTH",
+          "exampleValue": 2,
+          "hintText": "e.g. 2"
+        }
+      },
+      {
+        "documentId": "SYS_ATTR_brushSizeUnit",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushSizeUnit",
+          "name": "Size unit",
+          "attributeLevel": "VARIANT",
+          "dataType": "SELECT",
+          "required": true,
+          "sortOrder": 60,
+          "allowAddNewOption": false,
+          "defaultValue": "inch",
+          "measurementDimension": "LENGTH",
+          "hintText": "Select size unit"
+        }
+      }
+    ],
+    "product_attribute_options": [
+      {
+        "documentId": "SYS_OPT_brushType_1",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "optionId": "SYS_OPT_brushType_1",
+          "name": "Flat",
+          "sortOrder": 1
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushType_2",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "optionId": "SYS_OPT_brushType_2",
+          "name": "Angle",
+          "sortOrder": 2
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushType_3",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "optionId": "SYS_OPT_brushType_3",
+          "name": "Round",
+          "sortOrder": 3
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushType_4",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "optionId": "SYS_OPT_brushType_4",
+          "name": "Wall Brush",
+          "sortOrder": 4
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushType_5",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "optionId": "SYS_OPT_brushType_5",
+          "name": "Varnish Brush",
+          "sortOrder": 5
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushType_6",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "optionId": "SYS_OPT_brushType_6",
+          "name": "Utility Brush",
+          "sortOrder": 6
+        }
+      },
+      {
+        "documentId": "SYS_OPT_bristleMaterial_1",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "bristleMaterial",
+          "optionId": "SYS_OPT_bristleMaterial_1",
+          "name": "Synthetic",
+          "sortOrder": 1
+        }
+      },
+      {
+        "documentId": "SYS_OPT_bristleMaterial_2",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "bristleMaterial",
+          "optionId": "SYS_OPT_bristleMaterial_2",
+          "name": "Nylon",
+          "sortOrder": 2
+        }
+      },
+      {
+        "documentId": "SYS_OPT_bristleMaterial_3",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "bristleMaterial",
+          "optionId": "SYS_OPT_bristleMaterial_3",
+          "name": "Polyester",
+          "sortOrder": 3
+        }
+      },
+      {
+        "documentId": "SYS_OPT_bristleMaterial_4",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "bristleMaterial",
+          "optionId": "SYS_OPT_bristleMaterial_4",
+          "name": "Natural Bristle",
+          "sortOrder": 4
+        }
+      },
+      {
+        "documentId": "SYS_OPT_bristleMaterial_5",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "bristleMaterial",
+          "optionId": "SYS_OPT_bristleMaterial_5",
+          "name": "Mixed Bristle",
+          "sortOrder": 5
+        }
+      },
+      {
+        "documentId": "SYS_OPT_handleMaterial_1",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "handleMaterial",
+          "optionId": "SYS_OPT_handleMaterial_1",
+          "name": "Plastic",
+          "sortOrder": 1
+        }
+      },
+      {
+        "documentId": "SYS_OPT_handleMaterial_2",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "handleMaterial",
+          "optionId": "SYS_OPT_handleMaterial_2",
+          "name": "Wood",
+          "sortOrder": 2
+        }
+      },
+      {
+        "documentId": "SYS_OPT_handleMaterial_3",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "handleMaterial",
+          "optionId": "SYS_OPT_handleMaterial_3",
+          "name": "Rubber Grip",
+          "sortOrder": 3
+        }
+      },
+      {
+        "documentId": "SYS_OPT_suitableSurface_1",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "suitableSurface",
+          "optionId": "SYS_OPT_suitableSurface_1",
+          "name": "Wall",
+          "sortOrder": 1
+        }
+      },
+      {
+        "documentId": "SYS_OPT_suitableSurface_2",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "suitableSurface",
+          "optionId": "SYS_OPT_suitableSurface_2",
+          "name": "Wood",
+          "sortOrder": 2
+        }
+      },
+      {
+        "documentId": "SYS_OPT_suitableSurface_3",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "suitableSurface",
+          "optionId": "SYS_OPT_suitableSurface_3",
+          "name": "Metal",
+          "sortOrder": 3
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushSizeUnit_1",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushSizeUnit",
+          "optionId": "SYS_OPT_brushSizeUnit_1",
+          "name": "inch",
+          "sortOrder": 1
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushSizeUnit_2",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushSizeUnit",
+          "optionId": "SYS_OPT_brushSizeUnit_2",
+          "name": "mm",
+          "sortOrder": 2
+        }
+      },
+      {
+        "documentId": "SYS_OPT_brushSizeUnit_3",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushSizeUnit",
+          "optionId": "SYS_OPT_brushSizeUnit_3",
+          "name": "cm",
+          "sortOrder": 3
+        }
+      }
+    ],
+    "subcategory_attribute_templates": [
+      {
+        "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH_BRUSHTYPE",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushType",
+          "name": "Brush Type",
+          "attributeLevel": "PRODUCT",
+          "dataType": "SELECT",
+          "required": false,
+          "sortOrder": 10,
+          "allowAddNewOption": true,
+          "subcategoryId": "__EXISTING_BRUSH_SUBCATEGORY_ID__",
+          "hintText": "Select brush type"
+        }
+      },
+      {
+        "documentId": "SYS_TEMPLATE_SYS_SUBCATEGORY_SYS_CATEGORY_ACCESSORIES_BRUSH_BRISTLEMATERIAL",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "bristleMaterial",
+          "name": "Bristle Material",
+          "attributeLevel": "PRODUCT",
+          "dataType": "SELECT",
+          "required": false,
+          "sortOrder": 20,
+          "allowAddNewOption": true,
+          "subcategoryId": "__EXISTING_BRUSH_SUBCATEGORY_ID__",
+          "hintText": "Select bristle material"
+        }
+      },
+      {
+        "documentId": "SYS_TPL_BRUSH_handleMaterial",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "handleMaterial",
+          "name": "Handle Material",
+          "attributeLevel": "PRODUCT",
+          "dataType": "SELECT",
+          "required": false,
+          "sortOrder": 30,
+          "allowAddNewOption": false,
+          "subcategoryId": "__EXISTING_BRUSH_SUBCATEGORY_ID__"
+        }
+      },
+      {
+        "documentId": "SYS_TPL_BRUSH_suitableSurface",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "suitableSurface",
+          "name": "Suitable Surface",
+          "attributeLevel": "PRODUCT",
+          "dataType": "MULTI_SELECT",
+          "required": false,
+          "sortOrder": 40,
+          "allowAddNewOption": false,
+          "subcategoryId": "__EXISTING_BRUSH_SUBCATEGORY_ID__"
+        }
+      },
+      {
+        "documentId": "SYS_TPL_BRUSH_brushSize",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushSize",
+          "name": "Brush Size",
+          "attributeLevel": "VARIANT",
+          "dataType": "NUMBER",
+          "required": true,
+          "sortOrder": 50,
+          "allowAddNewOption": false,
+          "measurementUnitAttributeId": "brushSizeUnit",
+          "subcategoryId": "__EXISTING_BRUSH_SUBCATEGORY_ID__",
+          "measurementDimension": "LENGTH",
+          "exampleValue": 2,
+          "hintText": "e.g. 2"
+        }
+      },
+      {
+        "documentId": "SYS_TPL_BRUSH_brushSizeUnit",
+        "fields": {
+          "catalogueId": "PAINT_V1",
+          "scopeType": "SYSTEM",
+          "status": "ACTIVE",
+          "attributeId": "brushSizeUnit",
+          "name": "Size unit",
+          "attributeLevel": "VARIANT",
+          "dataType": "SELECT",
+          "required": true,
+          "sortOrder": 60,
+          "allowAddNewOption": false,
+          "defaultValue": "inch",
+          "subcategoryId": "__EXISTING_BRUSH_SUBCATEGORY_ID__",
+          "measurementDimension": "LENGTH",
+          "hintText": "Select size unit"
+        }
+      }
+    ]
+  },
+  "unitsToVerify": [
+    "Piece",
+    "Pack",
+    "Box",
+    "Carton"
+  ],
+  "measurementUnitMetadataToVerify": {
+    "instruction": "Match existing synchronized unit IDs/names. Dimensional choices require measurementDimension LENGTH on their units records; Piece must remain a count/selling unit. Reuse existing records rather than duplicating them.",
+    "units": [
+      {
+        "name": "inch",
+        "measurementDimension": "LENGTH"
+      },
+      {
+        "name": "mm",
+        "measurementDimension": "LENGTH"
+      },
+      {
+        "name": "cm",
+        "measurementDimension": "LENGTH"
+      }
+    ]
+  }
+}

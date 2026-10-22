@@ -1,0 +1,8 @@
+lib/main.dart:41:  final remote = FirestoreRestService(api);
+lib/data/sync/sync_engine.dart:163:                await remote.getDocument(
+lib/data/sync/sync_engine.dart:175:            documents = await remote.queryDocuments(
+lib/data/sync/sync_engine.dart:265:        final doc = await remote.getDocument(collection, id, idToken: token);
+lib/data/sync/sync_engine.dart:358:        await remote.commitAtomicWrites(commit, idToken: token);
+lib/data/services/offline_firestore_service.dart:303:      final doc = await remote.getDocument(collection, id, idToken: idToken);
+lib/data/services/offline_firestore_service.dart:333:        final docs = await remote.queryDocuments(
+lib/data/services/firestore_rest_service.dart:14:  FirestoreRestService(this.api);
