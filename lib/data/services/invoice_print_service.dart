@@ -1026,6 +1026,9 @@ class InvoicePrintService {
               _thermalMetaRow('Customer:', data.customerName!, isMini58),
             if (data.customerPhone?.isNotEmpty == true)
               _thermalMetaRow('Mobile:', data.customerPhone!, isMini58),
+            if (data.customerGstin != null &&
+                data.customerGstin!.trim().isNotEmpty)
+              _thermalMetaRow('GSTIN:', data.customerGstin!.trim(), isMini58),
 
             _thermalDashedDivider(),
 

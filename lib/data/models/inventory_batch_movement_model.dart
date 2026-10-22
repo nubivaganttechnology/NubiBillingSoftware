@@ -26,6 +26,7 @@ class InventoryBatchMovementModel {
 
   static const movementDirections = <String, String>{
     'PURCHASE_RECEIPT': 'IN',
+    'OPENING_STOCK': 'IN',
     'SALE': 'OUT',
     'SALE_RETURN': 'IN',
     'PURCHASE_RETURN': 'OUT',

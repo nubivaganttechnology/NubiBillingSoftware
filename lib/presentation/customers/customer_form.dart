@@ -38,6 +38,9 @@ class _CustomerFormState extends State<CustomerForm> {
   final _address = TextEditingController();
   final _creditLimit = TextEditingController();
   final _opening = TextEditingController(text: '0');
+
+  String _customerType = CustomerModel.typeIndividual;
+  bool _isGstRegistered = false;
   bool _saving = false;
 
   @override
@@ -56,6 +59,19 @@ class _CustomerFormState extends State<CustomerForm> {
             ? rupees.toInt().toString()
             : rupees.toStringAsFixed(2);
       }
+      if (customer.customerType == CustomerModel.typeBusiness) {
+        _customerType = CustomerModel.typeBusiness;
+      } else if (customer.customerType == CustomerModel.typeIndividual) {
+        _customerType = CustomerModel.typeIndividual;
+      } else {
+        _customerType = (customer.gstin != null && customer.gstin!.trim().isNotEmpty)
+            ? CustomerModel.typeBusiness
+            : CustomerModel.typeIndividual;
+      }
+      _isGstRegistered = customer.isGstRegistered;
+    } else {
+      _customerType = CustomerModel.typeIndividual;
+      _isGstRegistered = false;
     }
   }
 
@@ -80,6 +96,7 @@ class _CustomerFormState extends State<CustomerForm> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final isEditing = widget.initialCustomer != null;
+    final isBusiness = _customerType == CustomerModel.typeBusiness;
 
     return Form(
       key: _formKey,
@@ -87,14 +104,53 @@ class _CustomerFormState extends State<CustomerForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Section 1: Basic Information
+          // Section 1: Basic Information & Classification
           _buildSectionHeader(
             context,
             icon: Icons.person_outline_rounded,
-            title: isEditing ? (l10n?.editCustomer ?? 'Edit Customer') : (l10n?.addCustomer ?? 'New Customer Profile'),
+            title: isEditing
+                ? (l10n?.editCustomer ?? 'Edit Customer')
+                : (l10n?.addCustomer ?? 'New Customer Profile'),
             subtitle: 'Contact and basic identity details',
           ),
           const SizedBox(height: 12),
+
+          // Customer Classification Selector
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Customer Classification',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment<String>(
+                    value: CustomerModel.typeIndividual,
+                    label: Text('Individual'),
+                    icon: Icon(Icons.person_outline, size: 18),
+                  ),
+                  ButtonSegment<String>(
+                    value: CustomerModel.typeBusiness,
+                    label: Text('Business'),
+                    icon: Icon(Icons.business_outlined, size: 18),
+                  ),
+                ],
+                selected: {_customerType},
+                onSelectionChanged: (selected) {
+                  setState(() {
+                    _customerType = selected.first;
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -104,12 +160,24 @@ class _CustomerFormState extends State<CustomerForm> {
                   controller: _name,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: l10n?.customerName ?? 'Customer name',
-                    hintText: 'e.g. John Doe / Sharma Traders',
-                    prefixIcon: const Icon(Icons.badge_outlined),
+                    labelText: isBusiness
+                        ? 'Business Name *'
+                        : '${l10n?.customerName ?? 'Customer name'} *',
+                    hintText: isBusiness
+                        ? 'e.g. Sharma Traders / Acme Corp'
+                        : 'e.g. John Doe',
+                    prefixIcon: Icon(
+                      isBusiness ? Icons.business_outlined : Icons.badge_outlined,
+                    ),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                   ),
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? (isBusiness
+                          ? 'Enter business name.'
+                          : 'Enter customer name.')
+                      : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -124,7 +192,8 @@ class _CustomerFormState extends State<CustomerForm> {
                     hintText: '10-digit mobile',
                     prefixIcon: const Icon(Icons.phone_outlined),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                   ),
                   validator: (value) => CustomerValidators.isValidPhone(value ?? '')
                       ? null
@@ -143,34 +212,88 @@ class _CustomerFormState extends State<CustomerForm> {
             subtitle: 'GST compliance and location for state tax calculations',
           ),
           const SizedBox(height: 12),
+
+          // GST Registration Status Selector
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'GST Registration Status',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment<bool>(
+                    value: false,
+                    label: Text('Unregistered'),
+                    icon: Icon(Icons.person_off_outlined, size: 18),
+                  ),
+                  ButtonSegment<bool>(
+                    value: true,
+                    label: Text('GST Registered'),
+                    icon: Icon(Icons.verified_outlined, size: 18),
+                  ),
+                ],
+                selected: {_isGstRegistered},
+                onSelectionChanged: (selected) {
+                  setState(() {
+                    _isGstRegistered = selected.first;
+                    if (!_isGstRegistered) {
+                      _gstin.clear();
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          if (_isGstRegistered) ...[
+            TextFormField(
+              controller: _gstin,
+              textCapitalization: TextCapitalization.characters,
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                labelText: 'Recipient GSTIN *',
+                hintText: '15-character GSTIN (e.g. 27AAPFU0939F1ZV)',
+                prefixIcon: const Icon(Icons.verified_user_outlined),
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.3),
+              ),
+              onChanged: (value) {
+                final normalized = CustomerValidators.normalizeGstin(value);
+                if (normalized != value) {
+                  _gstin.value = _gstin.value.copyWith(
+                    text: normalized,
+                    selection:
+                        TextSelection.collapsed(offset: normalized.length),
+                  );
+                }
+                final stateCode =
+                    CustomerValidators.stateCodeFromGstin(normalized);
+                // Autofill state code ONLY if empty - do not overwrite customer's actual state!
+                if (stateCode != null && _state.text.trim().isEmpty) {
+                  _state.text = stateCode;
+                }
+              },
+              validator: (value) {
+                if (_isGstRegistered) {
+                  return CustomerValidators.validateGstinForRegistration(value);
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                flex: 3,
-                child: TextFormField(
-                  controller: _gstin,
-                  textCapitalization: TextCapitalization.characters,
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    labelText: l10n?.gstinOptionalLabel ?? 'GSTIN (optional)',
-                    hintText: '22AAAAA0000A1Z5',
-                    prefixIcon: const Icon(Icons.verified_user_outlined),
-                    filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  ),
-                  onChanged: (value) {
-                    final stateCode = CustomerValidators.stateCodeFromGstin(value);
-                    if (stateCode != null && _state.text.isEmpty) {
-                      _state.text = stateCode;
-                    }
-                  },
-                  validator: (value) => CustomerValidators.isValidGstin(value)
-                      ? null
-                      : 'Enter a valid GSTIN.',
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 flex: 2,
                 child: TextFormField(
@@ -179,27 +302,32 @@ class _CustomerFormState extends State<CustomerForm> {
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n?.stateCode ?? 'State code',
-                    hintText: 'e.g. 19 or WB',
+                    hintText: 'e.g. 19 or 27',
                     prefixIcon: const Icon(Icons.map_outlined),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: TextFormField(
+                  controller: _address,
+                  maxLines: 2,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: l10n?.billingAddress ?? 'Billing Address',
+                    hintText: 'Street, area, city, pin code...',
+                    prefixIcon: const Icon(Icons.location_on_outlined),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                   ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _address,
-            maxLines: 2,
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-              labelText: l10n?.billingAddress ?? 'Billing Address',
-              hintText: 'Street, area, city, pin code...',
-              prefixIcon: const Icon(Icons.location_on_outlined),
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            ),
           ),
           const SizedBox(height: 16),
 
@@ -217,14 +345,16 @@ class _CustomerFormState extends State<CustomerForm> {
               Expanded(
                 child: TextFormField(
                   controller: _creditLimit,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
                     labelText: '${l10n?.creditLimit ?? 'Credit limit'} (₹)',
                     prefixText: '₹ ',
                     hintText: 'e.g. 25000',
                     prefixIcon: const Icon(Icons.credit_score_outlined),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -233,35 +363,43 @@ class _CustomerFormState extends State<CustomerForm> {
                 Expanded(
                   child: TextFormField(
                     controller: _opening,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: true,
+                    ),
                     decoration: InputDecoration(
-                      labelText: '${l10n?.openingBalance ?? 'Opening balance'} (₹)',
+                      labelText:
+                          '${l10n?.openingBalance ?? 'Opening balance'} (₹)',
                       prefixText: '₹ ',
                       hintText: '0.00',
                       prefixIcon: const Icon(Icons.account_balance_outlined),
                       filled: true,
-                      fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      fillColor: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                     ),
                   ),
                 )
               else
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: (widget.initialCustomer!.duePaise > 0
                               ? Colors.red
                               : widget.initialCustomer!.advancePaise > 0
-                                  ? Colors.green
-                                  : Colors.grey)
+                              ? Colors.green
+                              : Colors.grey)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: (widget.initialCustomer!.duePaise > 0
                                 ? Colors.red
                                 : widget.initialCustomer!.advancePaise > 0
-                                    ? Colors.green
-                                    : Colors.grey)
+                                ? Colors.green
+                                : Colors.grey)
                             .withValues(alpha: 0.3),
                       ),
                     ),
@@ -271,23 +409,24 @@ class _CustomerFormState extends State<CustomerForm> {
                       children: [
                         Text(
                           l10n?.currentBalance ?? 'Current Balance',
-                          style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey.shade700),
+                          style: theme.textTheme.labelSmall
+                              ?.copyWith(color: Colors.grey.shade700),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           widget.initialCustomer!.duePaise > 0
                               ? 'Due: ₹${(widget.initialCustomer!.duePaise / 100).toStringAsFixed(2)}'
                               : widget.initialCustomer!.advancePaise > 0
-                                  ? 'Advance: ₹${(widget.initialCustomer!.advancePaise / 100).toStringAsFixed(2)}'
-                                  : '₹0.00 (Settled)',
+                              ? 'Advance: ₹${(widget.initialCustomer!.advancePaise / 100).toStringAsFixed(2)}'
+                              : '₹0.00 (Settled)',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                             color: widget.initialCustomer!.duePaise > 0
                                 ? Colors.red.shade700
                                 : widget.initialCustomer!.advancePaise > 0
-                                    ? Colors.green.shade700
-                                    : Colors.grey.shade700,
+                                ? Colors.green.shade700
+                                : Colors.grey.shade700,
                           ),
                         ),
                       ],
@@ -301,7 +440,8 @@ class _CustomerFormState extends State<CustomerForm> {
             Text(
               l10n?.openingBalanceHelper ??
                   'Positive (+) = customer owes you (Due). Negative (-) = advance customer already paid.',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: Colors.grey.shade600),
             ),
           ],
           const SizedBox(height: 24),
@@ -322,15 +462,22 @@ class _CustomerFormState extends State<CustomerForm> {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : Icon(isEditing ? Icons.save_outlined : Icons.person_add_alt_1_outlined),
+                    : Icon(
+                        isEditing
+                            ? Icons.save_outlined
+                            : Icons.person_add_alt_1_outlined,
+                      ),
                 label: Text(
                   _saving
                       ? 'Saving...'
                       : isEditing
-                          ? (l10n?.editCustomer ?? 'Update Customer')
-                          : (l10n?.addCustomer ?? 'Save Customer'),
+                      ? (l10n?.editCustomer ?? 'Update Customer')
+                      : (l10n?.addCustomer ?? 'Save Customer'),
                 ),
               ),
             ],
@@ -362,7 +509,8 @@ class _CustomerFormState extends State<CustomerForm> {
         Expanded(
           child: Text(
             '• $subtitle',
-            style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey.shade600),
+            style: theme.textTheme.labelSmall
+                ?.copyWith(color: Colors.grey.shade600),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -392,6 +540,10 @@ class _CustomerFormState extends State<CustomerForm> {
         }
       }
 
+      final effectiveGstin = _isGstRegistered && _gstin.text.trim().isNotEmpty
+          ? CustomerValidators.normalizeGstin(_gstin.text)
+          : null;
+
       final customer = widget.initialCustomer == null
           ? await widget.repository.create(
               tenantId: widget.tenantId,
@@ -399,9 +551,14 @@ class _CustomerFormState extends State<CustomerForm> {
               token: widget.token,
               name: _name.text,
               phone: _phone.text,
-              gstin: _gstin.text.trim().isEmpty ? null : _gstin.text.trim().toUpperCase(),
-              stateCode: _state.text.trim().isEmpty ? null : _state.text.trim(),
-              address: _address.text.trim().isEmpty ? null : _address.text.trim(),
+              customerType: _customerType,
+              isGstRegistered: _isGstRegistered,
+              gstin: effectiveGstin,
+              stateCode: _state.text.trim().isEmpty
+                  ? null
+                  : _state.text.trim().toUpperCase(),
+              address:
+                  _address.text.trim().isEmpty ? null : _address.text.trim(),
               creditLimitPaise: creditLimitPaise,
               openingBalancePaise: openingBalancePaise,
             )
@@ -412,15 +569,21 @@ class _CustomerFormState extends State<CustomerForm> {
               customer: widget.initialCustomer!,
               name: _name.text,
               phone: _phone.text,
-              gstin: _gstin.text.trim().isEmpty ? null : _gstin.text.trim().toUpperCase(),
-              stateCode: _state.text.trim().isEmpty ? null : _state.text.trim(),
-              address: _address.text.trim().isEmpty ? null : _address.text.trim(),
+              customerType: _customerType,
+              isGstRegistered: _isGstRegistered,
+              gstin: effectiveGstin,
+              stateCode: _state.text.trim().isEmpty
+                  ? null
+                  : _state.text.trim().toUpperCase(),
+              address:
+                  _address.text.trim().isEmpty ? null : _address.text.trim(),
               creditLimitPaise: creditLimitPaise,
             );
       if (mounted) widget.onSaved?.call(customer);
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
     } finally {
       if (mounted) setState(() => _saving = false);

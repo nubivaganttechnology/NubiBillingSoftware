@@ -17,6 +17,8 @@ class FinalizeBillRequest {
     required this.customerPhone,
     required this.customerStateCode,
     required this.customerGstin,
+    this.customerAddress,
+    this.customerType,
     required this.cashPaise,
     required this.upiPaise,
     required this.advancePaise,
@@ -35,7 +37,9 @@ class FinalizeBillRequest {
       customerName,
       customerPhone,
       customerStateCode,
-      customerGstin;
+      customerGstin,
+      customerAddress,
+      customerType;
   final int cashPaise, upiPaise, advancePaise, duePaise;
   final DateTime? dueDate;
   final PaymentMode? paymentMode;

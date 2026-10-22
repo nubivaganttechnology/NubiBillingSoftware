@@ -1615,6 +1615,25 @@ class _BillingPageState extends State<BillingPage> {
       );
     }
 
+    if (_gst &&
+        _gstin.text.trim().isEmpty &&
+        total.taxableTotalPaise >= 5000000) {
+      final hasName = _selectedCustomer != null &&
+          _selectedCustomer!.name.trim().isNotEmpty &&
+          _selectedCustomer!.name != 'Walk-in Customer';
+      final hasAddress = _selectedCustomer?.address != null &&
+          _selectedCustomer!.address!.trim().isNotEmpty;
+      final hasState = _selectedCustomer?.stateCode != null &&
+          _selectedCustomer!.stateCode!.trim().isNotEmpty;
+      if (!hasName || !hasAddress || !hasState) {
+        return const _PaymentValidationResult(
+          isValid: false,
+          warningMessage:
+              'For GST invoices with taxable supply ?50,000 or more to an unregistered customer, recipient name, address, and state code are mandatory under GST Rule 46.',
+        );
+      }
+    }
+
     switch (_paymentMode) {
       case PaymentMode.cash:
         final cashReceived = _parseMoney(_cash.text);
@@ -2343,14 +2362,54 @@ class _BillingPageState extends State<BillingPage> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _selectedCustomer!.name.isEmpty
-                                ? 'Customer'
-                                : _selectedCustomer!.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  _selectedCustomer!.name.isEmpty
+                                      ? 'Customer'
+                                      : _selectedCustomer!.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              if (_selectedCustomer!.customerType == CustomerModel.typeBusiness)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: Colors.purple.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Business',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.purple.shade700,
+                                    ),
+                                  ),
+                                )
+                              else if (_selectedCustomer!.customerType == CustomerModel.typeIndividual)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: Colors.teal.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Individual',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.teal.shade700,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           Text(
                             _selectedCustomer!.phone,
@@ -2452,7 +2511,8 @@ class _BillingPageState extends State<BillingPage> {
                       ),
                     ),
                   ),
-                if (_selectedCustomer!.gstin != null &&
+                if (_selectedCustomer!.isGstRegistered &&
+                    _selectedCustomer!.gstin != null &&
                     _selectedCustomer!.gstin!.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -2460,7 +2520,7 @@ class _BillingPageState extends State<BillingPage> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: Colors.blue.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -2468,7 +2528,7 @@ class _BillingPageState extends State<BillingPage> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
+                        color: Colors.blue.shade800,
                       ),
                     ),
                   ),
@@ -2628,7 +2688,14 @@ class _BillingPageState extends State<BillingPage> {
     if (selected != null && mounted) {
       setState(() {
         _selectedCustomer = selected;
-        _gstin.text = selected.gstin ?? '';
+        if (selected.isGstRegistered &&
+            selected.gstin != null &&
+            selected.gstin!.trim().isNotEmpty &&
+            CustomerValidators.isValidGstin(selected.gstin)) {
+          _gstin.text = CustomerValidators.normalizeGstin(selected.gstin);
+        } else {
+          _gstin.clear();
+        }
       });
     }
   }
@@ -3297,9 +3364,11 @@ class _BillingPageState extends State<BillingPage> {
           customerName: _selectedCustomer?.name,
           customerPhone: _selectedCustomer?.phone,
           customerStateCode: _selectedCustomer?.stateCode,
+          customerAddress: _selectedCustomer?.address,
+          customerType: _selectedCustomer?.customerType,
           customerGstin: _gstin.text.trim().isEmpty
               ? null
-              : _gstin.text.trim().toUpperCase(),
+              : CustomerValidators.normalizeGstin(_gstin.text),
           cashPaise: cash,
           upiPaise: upi,
           advancePaise: 0,
@@ -3352,8 +3421,9 @@ class _BillingPageState extends State<BillingPage> {
               : 'Walk-in customer',
           customerPhone: _selectedCustomer?.phone,
           customerAddress: _selectedCustomer?.address,
+          customerStateCode: _selectedCustomer?.stateCode,
           customerGstin: _gstin.text.trim().isNotEmpty
-              ? _gstin.text.trim().toUpperCase()
+              ? CustomerValidators.normalizeGstin(_gstin.text)
               : null,
           lines: printLines,
           subtotalPaise: total.subtotalPaise,

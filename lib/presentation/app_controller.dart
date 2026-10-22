@@ -60,6 +60,8 @@ import '../data/repositories/purchase_repository.dart';
 import '../data/repositories/product_repository.dart';
 import '../data/repositories/role_repository.dart';
 import '../data/repositories/supplier_repository.dart';
+import '../data/repositories/inventory_repository.dart';
+import '../data/models/stock_transaction_audit_model.dart';
 import '../data/repositories/sales_repository.dart';
 import '../domain/services/storage_service.dart';
 import '../data/repositories/user_repository.dart';
@@ -126,6 +128,7 @@ class AppController extends ChangeNotifier {
     this.expenseRepository,
     this.staffSalaryRepository,
     this.settingsRepository,
+    this.inventoryRepositoryOverride,
   }) {
     sync?.addListener(_syncStateChanged);
     _syncSubscription = sync?.changes.stream.listen((_) => _refreshAfterSync());
@@ -137,6 +140,13 @@ class AppController extends ChangeNotifier {
   final ExpenseRepository? expenseRepository;
   final StaffSalaryRepository? staffSalaryRepository;
   final SettingsRepository? settingsRepository;
+  final InventoryRepository? inventoryRepositoryOverride;
+  InventoryRepository get inventoryRepository =>
+      inventoryRepositoryOverride ??
+      InventoryRepository(
+        firestore: offline ?? productRepository.firestore,
+        transactions: productRepository.transactions,
+      );
   String? get idToken => auth.currentSession?.idToken;
   StreamSubscription<void>? _syncSubscription;
   bool _refreshingSync = false;
@@ -441,6 +451,41 @@ class AppController extends ChangeNotifier {
       throw const AppException('Offline sales storage is unavailable.');
     }
     return SalesRepository(source);
+  }
+
+  bool canViewInventory() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('inventory.view', context.permissions) ||
+            PermissionCatalog.allows('inventory', context.permissions));
+  }
+
+  bool canAddOpeningStock() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows(
+              'inventory.opening_stock',
+              context.permissions,
+            ));
+  }
+
+  bool canAdjustStock() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows('inventory.adjust', context.permissions));
+  }
+
+  bool canApproveAdjustment() {
+    final context = appContext;
+    return context != null &&
+        (context.accountType == 'owner' ||
+            PermissionCatalog.allows(
+              'inventory.approve_adjustment',
+              context.permissions,
+            ));
   }
 
   bool canManageSales() {
@@ -2134,6 +2179,195 @@ class AppController extends ChangeNotifier {
       productsLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<StockTransactionAuditModel> addOpeningStock({
+    required String productId,
+    required String variantId,
+    required int quantity,
+    required String reason,
+    int? unitCostPaise,
+    String? unit,
+    String? transactionId,
+  }) async {
+    final context = appContext;
+    final session = await _getUsableSession();
+    if (context == null ||
+        session == null ||
+        context.outletId == null ||
+        context.businessId == null) {
+      throw const AppException('Active outlet workspace session required.');
+    }
+    final result = await inventoryRepository.addOpeningStock(
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      productId: productId,
+      variantId: variantId,
+      quantity: quantity,
+      reason: reason,
+      userId: user?.uid ?? context.uid,
+      token: session.idToken,
+      permissions: context.permissions,
+      isOwner: context.accountType == 'owner',
+      unitCostPaise: unitCostPaise,
+      unit: unit,
+      transactionId: transactionId,
+    );
+    await loadProducts();
+    return result;
+  }
+
+  Future<StockTransactionAuditModel> requestOrApplyAdjustment({
+    required String productId,
+    required String variantId,
+    required int quantity,
+    required bool isIncrease,
+    required String transactionType,
+    required String reason,
+    String? unit,
+    int? unitCostPaise,
+    String? transactionId,
+  }) async {
+    final context = appContext;
+    final session = await _getUsableSession();
+    if (context == null ||
+        session == null ||
+        context.outletId == null ||
+        context.businessId == null) {
+      throw const AppException('Active outlet workspace session required.');
+    }
+    final result = await inventoryRepository.requestOrApplyAdjustment(
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      productId: productId,
+      variantId: variantId,
+      quantity: quantity,
+      isIncrease: isIncrease,
+      transactionType: transactionType,
+      reason: reason,
+      userId: user?.uid ?? context.uid,
+      token: session.idToken,
+      permissions: context.permissions,
+      isOwner: context.accountType == 'owner',
+      unit: unit,
+      unitCostPaise: unitCostPaise,
+      transactionId: transactionId,
+    );
+    await loadProducts();
+    return result;
+  }
+
+  Future<StockTransactionAuditModel> approveAdjustment(
+    String transactionId,
+  ) async {
+    final context = appContext;
+    final session = await _getUsableSession();
+    if (context == null ||
+        session == null ||
+        context.outletId == null ||
+        context.businessId == null) {
+      throw const AppException('Active outlet workspace session required.');
+    }
+    final result = await inventoryRepository.approveAdjustment(
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      transactionId: transactionId,
+      userId: user?.uid ?? context.uid,
+      token: session.idToken,
+      permissions: context.permissions,
+      isOwner: context.accountType == 'owner',
+    );
+    await loadProducts();
+    return result;
+  }
+
+  Future<StockTransactionAuditModel> rejectAdjustment(
+    String transactionId, {
+    String? rejectionReason,
+  }) async {
+    final context = appContext;
+    final session = await _getUsableSession();
+    if (context == null ||
+        session == null ||
+        context.outletId == null ||
+        context.businessId == null) {
+      throw const AppException('Active outlet workspace session required.');
+    }
+    final result = await inventoryRepository.rejectAdjustment(
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      transactionId: transactionId,
+      userId: user?.uid ?? context.uid,
+      token: session.idToken,
+      permissions: context.permissions,
+      isOwner: context.accountType == 'owner',
+      rejectionReason: rejectionReason,
+    );
+    await loadProducts();
+    return result;
+  }
+
+  Future<List<StockTransactionAuditModel>> getStockHistory({
+    String? variantId,
+  }) async {
+    final context = appContext;
+    final session = await _getUsableSession();
+    if (context == null ||
+        session == null ||
+        context.outletId == null ||
+        context.businessId == null) {
+      return const [];
+    }
+    return inventoryRepository.getStockHistory(
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      token: session.idToken,
+      variantId: variantId,
+      permissions: context.permissions,
+      isOwner: context.accountType == 'owner',
+    );
+  }
+
+  Future<List<StockTransactionAuditModel>> getPendingAdjustments() async {
+    final context = appContext;
+    final session = await _getUsableSession();
+    if (context == null ||
+        session == null ||
+        context.outletId == null ||
+        context.businessId == null) {
+      return const [];
+    }
+    return inventoryRepository.getPendingAdjustments(
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      token: session.idToken,
+      permissions: context.permissions,
+      isOwner: context.accountType == 'owner',
+    );
+  }
+
+  Future<bool> hasOpeningStockBeenInitialized(String variantId) async {
+    final context = appContext;
+    final session = await _getUsableSession();
+    if (context == null ||
+        session == null ||
+        context.outletId == null ||
+        context.businessId == null) {
+      return false;
+    }
+    return inventoryRepository.hasOpeningStockBeenInitialized(
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      variantId: variantId,
+      token: session.idToken,
+    );
   }
 
   /// Offline-only eligibility check used by Barcode label actions.

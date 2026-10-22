@@ -146,6 +146,7 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
           query.isEmpty ||
           customer.nameLower.contains(query) ||
           customer.phone.contains(query) ||
+          customer.customerType.toLowerCase().contains(query) ||
           (customer.gstin?.toLowerCase().contains(query) ?? false) ||
           (customer.address?.toLowerCase().contains(query) ?? false) ||
           (customer.stateCode?.toLowerCase().contains(query) ?? false);
@@ -764,20 +765,50 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (customer.gstin != null &&
-                              customer.gstin!.isNotEmpty) ...[
-                            const SizedBox(width: 8),
+                          const SizedBox(width: 8),
+                          if (customer.customerType == CustomerModel.typeBusiness)
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                              margin: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.purple.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
                               ),
+                              child: Text(
+                                'Business',
+                                style: TextStyle(
+                                  color: Colors.purple.shade700,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          else if (customer.customerType == CustomerModel.typeIndividual)
+                            Container(
+                              margin: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.teal.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Individual',
+                                style: TextStyle(
+                                  color: Colors.teal.shade700,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          if (customer.isGstRegistered && customer.gstin != null && customer.gstin!.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: Colors.blue.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                'GSTIN',
+                                'GSTIN: ${customer.gstin}',
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontSize: 10,
@@ -785,7 +816,6 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
                                 ),
                               ),
                             ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: 4),

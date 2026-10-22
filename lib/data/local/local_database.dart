@@ -15,7 +15,7 @@ class LocalDatabase {
     : factory = factory ?? databaseFactory;
   final DatabaseFactory factory;
   final String? directory;
-  static const schemaVersion = 13;
+  static const schemaVersion = 14;
   static const tables = LocalDatabaseTables.tables;
   final Map<String, Future<Database>> _opened = {};
   Future<Database> open(String project, String uid) =>
@@ -341,6 +341,13 @@ class LocalDatabase {
           'CREATE INDEX IF NOT EXISTS ${table}_reconcile ON $table(syncStatus,isDeleted)',
         );
       }
+    }
+    if (old < 14 && next >= 14) {
+      final table = tables['customers']!;
+      await _createDocumentTable(db, table);
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS ${table}_reconcile ON ${table}(syncStatus,isDeleted)',
+      );
     }
   }
 

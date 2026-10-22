@@ -32,6 +32,13 @@ class PermissionCatalog {
 
   static const staffKhataPermissions = <String>['STAFF_KHATA_CHARGE'];
 
+  static const inventoryPermissions = <String>[
+    'inventory.view',
+    'inventory.opening_stock',
+    'inventory.adjust',
+    'inventory.approve_adjustment',
+  ];
+
   static const modules = <AdminModule>[
     AdminModule(
       'dashboard',
@@ -92,6 +99,7 @@ class PermissionCatalog {
     for (final permission in permissions) {
       final key = PermissionIdMatcher.normalize(permission);
       if (key == '*' || key == 'all' || key == moduleKey) return true;
+      if (moduleKey.startsWith('$key.') || moduleKey.startsWith('${key}_')) return true;
       if (key.startsWith('$moduleKey.') || key.startsWith('${moduleKey}_')) {
         return true;
       }

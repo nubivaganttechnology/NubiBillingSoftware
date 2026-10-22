@@ -1,6 +1,7 @@
 import '../../core/constants/firebase_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
+import '../../domain/customers/customer_validators.dart';
 import '../models/customer_model.dart';
 import '../services/firestore_data_service.dart';
 import '../services/firestore_rest_service.dart';
@@ -44,6 +45,8 @@ class CustomerRepository {
     required String token,
     required String name,
     required String phone,
+    String customerType = CustomerModel.typeIndividual,
+    bool isGstRegistered = false,
     String? gstin,
     String? stateCode,
     String? address,
@@ -66,16 +69,32 @@ class CustomerRepository {
     if (duplicates.isNotEmpty) {
       throw const AppException('A customer with this phone already exists.');
     }
+
+    final String? effectiveGstin;
+    if (isGstRegistered) {
+      final validationError =
+          CustomerValidators.validateGstinForRegistration(gstin);
+      if (validationError != null) {
+        throw AppException(validationError);
+      }
+      effectiveGstin = CustomerValidators.normalizeGstin(gstin);
+    } else {
+      effectiveGstin = null;
+    }
+
     final id = IdGenerator.create('CUS');
     final customer = CustomerModel(
       customerId: id,
       businessId: businessId,
+      tenantId: tenantId,
       name: name.trim(),
       phone: normalizedPhone,
       nameLower: name.trim().toLowerCase(),
-      gstin: gstin,
-      stateCode: stateCode,
-      address: address,
+      customerType: customerType,
+      isGstRegistered: isGstRegistered,
+      gstin: effectiveGstin,
+      stateCode: stateCode?.trim().isEmpty == true ? null : stateCode?.trim().toUpperCase(),
+      address: address?.trim().isEmpty == true ? null : address?.trim(),
       creditLimitPaise: creditLimitPaise,
       duePaise: openingBalancePaise > 0 ? openingBalancePaise : 0,
       advancePaise: openingBalancePaise < 0 ? -openingBalancePaise : 0,
@@ -87,6 +106,8 @@ class CustomerRepository {
       'name': customer.name,
       'nameLower': customer.nameLower,
       'phone': customer.phone,
+      'customerType': customer.customerType,
+      'isGstRegistered': customer.isGstRegistered,
       'gstin': customer.gstin,
       'stateCode': customer.stateCode,
       'address': customer.address,
@@ -105,6 +126,8 @@ class CustomerRepository {
     required CustomerModel customer,
     required String name,
     required String phone,
+    String? customerType,
+    bool? isGstRegistered,
     String? gstin,
     String? stateCode,
     String? address,
@@ -130,15 +153,34 @@ class CustomerRepository {
     })) {
       throw const AppException('A customer with this phone already exists.');
     }
+
+    final effectiveCustomerType = customerType ?? customer.customerType;
+    final effectiveIsGstRegistered = isGstRegistered ?? customer.isGstRegistered;
+    final String? effectiveGstin;
+    if (effectiveIsGstRegistered) {
+      final gstinCandidate = gstin ?? customer.gstin;
+      final validationError =
+          CustomerValidators.validateGstinForRegistration(gstinCandidate);
+      if (validationError != null) {
+        throw AppException(validationError);
+      }
+      effectiveGstin = CustomerValidators.normalizeGstin(gstinCandidate);
+    } else {
+      effectiveGstin = null;
+    }
+
     final updated = CustomerModel(
       customerId: customer.customerId,
       businessId: businessId,
+      tenantId: tenantId,
       name: name.trim(),
       phone: normalizedPhone,
       nameLower: name.trim().toLowerCase(),
-      gstin: gstin,
-      stateCode: stateCode,
-      address: address,
+      customerType: effectiveCustomerType,
+      isGstRegistered: effectiveIsGstRegistered,
+      gstin: effectiveGstin,
+      stateCode: stateCode?.trim().isEmpty == true ? null : stateCode?.trim().toUpperCase(),
+      address: address?.trim().isEmpty == true ? null : address?.trim(),
       creditLimitPaise: creditLimitPaise,
       duePaise: customer.duePaise,
       advancePaise: customer.advancePaise,
@@ -154,6 +196,8 @@ class CustomerRepository {
         'name': updated.name,
         'nameLower': updated.nameLower,
         'phone': updated.phone,
+        'customerType': updated.customerType,
+        'isGstRegistered': updated.isGstRegistered,
         'gstin': updated.gstin,
         'stateCode': updated.stateCode,
         'address': updated.address,

@@ -371,6 +371,13 @@ class BillingRepository {
         'customerNameLower': request.customerName?.toLowerCase(),
         'customerPhone': request.customerPhone,
         'customerGstin': request.customerGstin,
+        'customerStateCode': request.customerStateCode,
+        'customerAddress': request.customerAddress,
+        'customerType': request.customerType,
+        'invoiceGstType': (request.customerGstin != null &&
+                request.customerGstin!.trim().isNotEmpty)
+            ? 'B2B'
+            : 'B2C',
         'subtotalPaise': calculated.subtotalPaise,
         'discountPaise': calculated.totalDiscountPaise,
         'taxablePaise': calculated.taxableTotalPaise,
