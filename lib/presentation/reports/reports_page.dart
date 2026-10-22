@@ -238,10 +238,11 @@ class _ReportsPageState extends State<ReportsPage> {
         token: widget.controller.idToken ?? '',
       );
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Report scope unavailable: $e')));
+      }
       return null;
     }
     if (!mounted) return null;
@@ -2416,10 +2417,242 @@ class _RevenueExpenseBarChartPainter extends CustomPainter {
 }
 
 // -----------------------------------------------------------------------------
-// COLLECTION STATUS DONUT / RING CHART
+// 3D PIE CHART & COLLECTION / CATEGORY VISUALIZATIONS
 // -----------------------------------------------------------------------------
 
-class _CollectionDonutChart extends StatelessWidget {
+const List<Color> _kExcel3dPalette = [
+  Color(0xFF5B84B1), // Slate Blue (slice 1)
+  Color(0xFF82B366), // Soft Apple Green (slice 2)
+  Color(0xFFFFC000), // Warm Gold / Yellow (slice 3)
+  Color(0xFFED7D31), // Amber Orange / Tangerine (slice 4)
+  Color(0xFFA05A2C), // Cinnamon / Bronze Brown (slice 5)
+  Color(0xFF8FAADC), // Cool Silver Grey / Periwinkle (slice 6)
+];
+
+enum _CollectionChartType { pie3d, bar, donut }
+
+enum _CategoryChartType { bar, pie3d }
+
+class _Pie3DSlice {
+  const _Pie3DSlice({
+    required this.label,
+    required this.value,
+    required this.percentage,
+    required this.color,
+    required this.formattedAmount,
+  });
+
+  final String label;
+  final double value;
+  final double percentage; // 0.0 to 1.0
+  final Color color;
+  final String formattedAmount;
+}
+
+class _Pie3DChartPainter extends CustomPainter {
+  _Pie3DChartPainter({
+    required this.slices,
+  });
+
+  final List<_Pie3DSlice> slices;
+  static const double depth = 18.0;
+  static const double yRatio = 0.52;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (slices.isEmpty) return;
+    if (size.width <= 20 || size.height <= depth + 10) return;
+
+    final cx = size.width / 2;
+    final cy = (size.height - depth) / 2;
+    final rx = math.max(
+      10.0,
+      math.min(size.width / 2 - 12, (size.height - depth) / (2 * yRatio) - 4),
+    );
+    final ry = rx * yRatio;
+    if (rx <= 0 || rx.isNaN || !rx.isFinite) return;
+
+    final topRect = Rect.fromCenter(
+      center: Offset(cx, cy),
+      width: rx * 2,
+      height: ry * 2,
+    );
+    final bottomRect = Rect.fromCenter(
+      center: Offset(cx, cy + depth),
+      width: rx * 2,
+      height: ry * 2,
+    );
+
+    // 1. Soft blurred drop shadow beneath the 3D pie base
+    final shadowPaint = Paint()
+      ..color = const Color(0xFF0F172A).withValues(alpha: 0.14)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(cx, cy + depth + 4),
+        width: rx * 1.95,
+        height: ry * 1.95,
+      ),
+      shadowPaint,
+    );
+
+    // Filter positive slices and calculate normalized arc angles
+    final validSlices = slices.where((s) => s.value > 0).toList();
+    if (validSlices.isEmpty) return;
+
+    final totalVal = validSlices.fold<double>(0.0, (acc, s) => acc + s.value);
+    if (totalVal <= 0) return;
+
+    // Start angle at -0.70 * pi so primary slices sweep across the front rim
+    const startAngle = -math.pi * 0.70;
+
+    final sliceAngles = <Map<String, dynamic>>[];
+    var currentAngle = startAngle;
+    for (final slice in validSlices) {
+      final sweep = (slice.value / totalVal) * (2 * math.pi);
+      sliceAngles.add({
+        'slice': slice,
+        'pct': slice.value / totalVal,
+        'a1': currentAngle,
+        'a2': currentAngle + sweep,
+        'sweep': sweep,
+      });
+      currentAngle += sweep;
+    }
+
+    // 2. Draw front rim extrusion walls
+    // Rim is visible in the front half where sin(theta) >= 0 (theta in [0, pi] mod 2*pi)
+    for (final item in sliceAngles) {
+      final slice = item['slice'] as _Pie3DSlice;
+      final a1 = item['a1'] as double;
+      final a2 = item['a2'] as double;
+
+      void checkInterval(double fStart, double fEnd) {
+        final start = math.max(a1, fStart);
+        final end = math.min(a2, fEnd);
+        if (start < end) {
+          final wallPath = Path();
+          wallPath.arcTo(topRect, start, end - start, true);
+          wallPath.arcTo(bottomRect, end, -(end - start), false);
+          wallPath.close();
+
+          final wallPaint = Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.lerp(slice.color, Colors.black, 0.12)!,
+                Color.lerp(slice.color, Colors.black, 0.35)!,
+              ],
+            ).createShader(Rect.fromLTWH(cx - rx, cy, rx * 2, depth))
+            ..style = PaintingStyle.fill;
+
+          canvas.drawPath(wallPath, wallPaint);
+
+          final rimBorder = Paint()
+            ..color = Colors.white.withValues(alpha: 0.30)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 0.8;
+          canvas.drawPath(wallPath, rimBorder);
+        }
+      }
+
+      checkInterval(-2 * math.pi, -math.pi);
+      checkInterval(0.0, math.pi);
+      checkInterval(2 * math.pi, 3 * math.pi);
+      checkInterval(4 * math.pi, 5 * math.pi);
+    }
+
+    // 3. Draw top elliptical slices
+    for (final item in sliceAngles) {
+      final slice = item['slice'] as _Pie3DSlice;
+      final a1 = item['a1'] as double;
+      final sweep = item['sweep'] as double;
+
+      final slicePath = Path();
+      slicePath.moveTo(cx, cy);
+      slicePath.arcTo(topRect, a1, sweep, false);
+      slicePath.close();
+
+      final topPaint = Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-0.35, -0.4),
+          radius: 1.15,
+          colors: [
+            Color.lerp(slice.color, Colors.white, 0.18)!,
+            slice.color,
+            Color.lerp(slice.color, Colors.black, 0.08)!,
+          ],
+        ).createShader(topRect)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawPath(slicePath, topPaint);
+
+      // Clean white separator border between slices
+      final borderPaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.90)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2;
+      canvas.drawPath(slicePath, borderPaint);
+    }
+
+    // 4. Draw slice percentage labels printed directly on top of the slices
+    for (final item in sliceAngles) {
+      final pct = item['pct'] as double;
+      if (pct < 0.045) continue; // Skip tiny slivers to prevent crowding
+
+      final a1 = item['a1'] as double;
+      final sweep = item['sweep'] as double;
+      final midAngle = a1 + sweep / 2;
+
+      final px = cx + rx * 0.62 * math.cos(midAngle);
+      final py = cy + ry * 0.62 * math.sin(midAngle);
+
+      final pctStr = '${(pct * 100).round()}%';
+      final textSpan = TextSpan(
+        text: pctStr,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.2,
+          shadows: [
+            Shadow(
+              color: Color(0xCC000000),
+              blurRadius: 3,
+              offset: Offset(0, 1),
+            ),
+          ],
+        ),
+      );
+      final tp = TextPainter(
+        text: textSpan,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      tp.paint(canvas, Offset(px - tp.width / 2, py - tp.height / 2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _Pie3DChartPainter oldDelegate) {
+    if (oldDelegate.slices.length != slices.length) return true;
+    for (int i = 0; i < slices.length; i++) {
+      if (oldDelegate.slices[i].value != slices[i].value ||
+          oldDelegate.slices[i].color != slices[i].color) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// COLLECTION STATUS DASHBOARD CARD (3D PIE / BAR / DONUT MULTI-VIEW)
+// -----------------------------------------------------------------------------
+
+class _CollectionDonutChart extends StatefulWidget {
   const _CollectionDonutChart({
     required this.collectedPaise,
     required this.outstandingPaise,
@@ -2431,6 +2664,13 @@ class _CollectionDonutChart extends StatelessWidget {
   final int outstandingPaise;
   final int overduePaise;
   final VoidCallback onViewReceivables;
+
+  @override
+  State<_CollectionDonutChart> createState() => _CollectionDonutChartState();
+}
+
+class _CollectionDonutChartState extends State<_CollectionDonutChart> {
+  _CollectionChartType _selectedChart = _CollectionChartType.pie3d;
 
   String _formatCurrency(int paise) {
     final abs = (paise.abs() ~/ 100).toString();
@@ -2447,15 +2687,45 @@ class _CollectionDonutChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = collectedPaise + outstandingPaise;
-    final double collectedRatio = total > 0 ? (collectedPaise / total) : 0.0;
-    final double outstandingRatio = total > 0
-        ? ((outstandingPaise - overduePaise) / total).clamp(0.0, 1.0)
-        : 0.0;
-    final double overdueRatio = total > 0
-        ? (overduePaise / total).clamp(0.0, 1.0)
-        : 0.0;
+    final total = widget.collectedPaise + widget.outstandingPaise;
+    final currentDuePaise = math.max(
+      0,
+      widget.outstandingPaise - widget.overduePaise,
+    );
+    final double collectedRatio = total > 0 ? (widget.collectedPaise / total) : 0.0;
+    final double outstandingRatio = total > 0 ? (currentDuePaise / total).clamp(0.0, 1.0) : 0.0;
+    final double overdueRatio = total > 0 ? (widget.overduePaise / total).clamp(0.0, 1.0) : 0.0;
     final collectedPct = total > 0 ? (collectedRatio * 100).round() : 0;
+
+    // Build slices for 3D pie and horizontal bar
+    final slices = <_Pie3DSlice>[];
+    if (widget.collectedPaise > 0) {
+      slices.add(_Pie3DSlice(
+        label: 'Collected',
+        value: widget.collectedPaise.toDouble(),
+        percentage: total > 0 ? widget.collectedPaise / total : 0.0,
+        color: _kExcel3dPalette[0], // Slate Blue
+        formattedAmount: _formatCurrency(widget.collectedPaise),
+      ));
+    }
+    if (currentDuePaise > 0) {
+      slices.add(_Pie3DSlice(
+        label: 'Current Due',
+        value: currentDuePaise.toDouble(),
+        percentage: total > 0 ? currentDuePaise / total : 0.0,
+        color: _kExcel3dPalette[1], // Apple Green
+        formattedAmount: _formatCurrency(currentDuePaise),
+      ));
+    }
+    if (widget.overduePaise > 0) {
+      slices.add(_Pie3DSlice(
+        label: 'Overdue',
+        value: widget.overduePaise.toDouble(),
+        percentage: total > 0 ? widget.overduePaise / total : 0.0,
+        color: _kExcel3dPalette[3], // Tangerine / Amber
+        formattedAmount: _formatCurrency(widget.overduePaise),
+      ));
+    }
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -2474,103 +2744,56 @@ class _CollectionDonutChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Collection Status',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
-              letterSpacing: -0.3,
-            ),
-          ),
-          const SizedBox(height: 2),
-          const Text(
-            'Invoice reconciliation breakdown',
-            style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+          // Header with Title and Mode Switcher
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Collection Status',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Invoice reconciliation breakdown',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _buildViewModeToggle(),
+            ],
           ),
           const SizedBox(height: 18),
 
-          // Donut Ring Canvas with Center Label
-          Center(
-            child: SizedBox(
-              width: 140,
-              height: 140,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CustomPaint(
-                    size: const Size(140, 140),
-                    painter: _DonutChartPainter(
-                      collectedRatio: collectedRatio,
-                      outstandingRatio: outstandingRatio,
-                      overdueRatio: overdueRatio,
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '$collectedPct%',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A),
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const Text(
-                        'Collected',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+          // Chart Content based on selected mode
+          if (_selectedChart == _CollectionChartType.pie3d)
+            _buildPie3DView(slices: slices, total: total)
+          else if (_selectedChart == _CollectionChartType.bar)
+            _buildBarView(slices: slices, total: total)
+          else
+            _buildDonutView(
+              collectedRatio: collectedRatio,
+              outstandingRatio: outstandingRatio,
+              overdueRatio: overdueRatio,
+              collectedPct: collectedPct,
+              currentDuePaise: currentDuePaise,
             ),
-          ),
-          const SizedBox(height: 20),
 
-          // Legend breakdown rows (constrained width so it looks compact and proportional)
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                children: [
-                  _buildLegendRow(
-                    color: const Color(0xFF0D9488),
-                    label: 'Collected',
-                    amount: _formatCurrency(collectedPaise),
-                    pct: '${(collectedRatio * 100).toStringAsFixed(0)}%',
-                  ),
-                  const SizedBox(height: 8),
-                  _buildLegendRow(
-                    color: const Color(0xFF4E45D5),
-                    label: 'Outstanding',
-                    amount: _formatCurrency(
-                      math.max(0, outstandingPaise - overduePaise),
-                    ),
-                    pct: '${(outstandingRatio * 100).toStringAsFixed(0)}%',
-                  ),
-                  const SizedBox(height: 8),
-                  _buildLegendRow(
-                    color: const Color(0xFFEF4444),
-                    label: 'Overdue Due',
-                    amount: _formatCurrency(overduePaise),
-                    pct: '${(overdueRatio * 100).toStringAsFixed(0)}%',
-                  ),
-                ],
-              ),
-            ),
-          ),
           const SizedBox(height: 16),
 
           // Link to report
           InkWell(
-            onTap: onViewReceivables,
+            onTap: widget.onViewReceivables,
             borderRadius: BorderRadius.circular(6),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
@@ -2600,7 +2823,373 @@ class _CollectionDonutChart extends StatelessWidget {
     );
   }
 
-  Widget _buildLegendRow({
+  Widget _buildViewModeToggle() {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildToggleItem(
+            type: _CollectionChartType.pie3d,
+            label: '3D Pie',
+          ),
+          _buildToggleItem(
+            type: _CollectionChartType.bar,
+            label: 'Bar',
+          ),
+          _buildToggleItem(
+            type: _CollectionChartType.donut,
+            label: 'Donut',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleItem({
+    required _CollectionChartType type,
+    required String label,
+  }) {
+    final isSelected = _selectedChart == type;
+    return InkWell(
+      onTap: () {
+        if (_selectedChart != type) {
+          setState(() {
+            _selectedChart = type;
+          });
+        }
+      },
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPie3DView({
+    required List<_Pie3DSlice> slices,
+    required int total,
+  }) {
+    if (slices.isEmpty || total <= 0) {
+      return _buildEmptyState();
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 320;
+        if (isNarrow) {
+          return Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 145,
+                child: CustomPaint(
+                  painter: _Pie3DChartPainter(slices: slices),
+                ),
+              ),
+              const SizedBox(height: 14),
+              _build3DLegend(slices),
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 155,
+              height: 155,
+              child: CustomPaint(
+                painter: _Pie3DChartPainter(slices: slices),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _build3DLegend(slices),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _build3DLegend(List<_Pie3DSlice> slices) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < slices.length; i++) ...[
+          if (i > 0) const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 3D beveled square chiclet matching the reference image
+              Container(
+                width: 13,
+                height: 13,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2.5),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color.lerp(slices[i].color, Colors.white, 0.35)!,
+                      slices[i].color,
+                      Color.lerp(slices[i].color, Colors.black, 0.25)!,
+                    ],
+                  ),
+                  border: Border.all(
+                    color: Color.lerp(slices[i].color, Colors.black, 0.35)!,
+                    width: 0.8,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 1.5,
+                      offset: const Offset(0.5, 1.0),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  slices[i].label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                slices[i].formattedAmount,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '(${(slices[i].percentage * 100).round()}%)',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildBarView({
+    required List<_Pie3DSlice> slices,
+    required int total,
+  }) {
+    if (slices.isEmpty || total <= 0) {
+      return _buildEmptyState();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < slices.length; i++) ...[
+          if (i > 0) const SizedBox(height: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: slices[i].color,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        slices[i].label,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        slices[i].formattedAmount,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '(${(slices[i].percentage * 100).round()}%)',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Stack(
+                children: [
+                  Container(
+                    height: 9,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(4.5),
+                    ),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: slices[i].percentage.clamp(0.02, 1.0),
+                    child: Container(
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: slices[i].color,
+                        borderRadius: BorderRadius.circular(4.5),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDonutView({
+    required double collectedRatio,
+    required double outstandingRatio,
+    required double overdueRatio,
+    required int collectedPct,
+    required int currentDuePaise,
+  }) {
+    return Column(
+      children: [
+        Center(
+          child: SizedBox(
+            width: 140,
+            height: 140,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: const Size(140, 140),
+                  painter: _DonutChartPainter(
+                    collectedRatio: collectedRatio,
+                    outstandingRatio: outstandingRatio,
+                    overdueRatio: overdueRatio,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$collectedPct%',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const Text(
+                      'Collected',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              children: [
+                _buildDonutLegendRow(
+                  color: _kExcel3dPalette[0],
+                  label: 'Collected',
+                  amount: _formatCurrency(widget.collectedPaise),
+                  pct: '${(collectedRatio * 100).toStringAsFixed(0)}%',
+                ),
+                const SizedBox(height: 8),
+                _buildDonutLegendRow(
+                  color: _kExcel3dPalette[1],
+                  label: 'Current Due',
+                  amount: _formatCurrency(currentDuePaise),
+                  pct: '${(outstandingRatio * 100).toStringAsFixed(0)}%',
+                ),
+                const SizedBox(height: 8),
+                _buildDonutLegendRow(
+                  color: _kExcel3dPalette[3],
+                  label: 'Overdue Due',
+                  amount: _formatCurrency(widget.overduePaise),
+                  pct: '${(overdueRatio * 100).toStringAsFixed(0)}%',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDonutLegendRow({
     required Color color,
     required String label,
     required String amount,
@@ -2647,6 +3236,37 @@ class _CollectionDonutChart extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 28),
+      child: Center(
+        child: Column(
+          children: const [
+            Icon(
+              Icons.pie_chart_outline_rounded,
+              size: 36,
+              color: Color(0xFFCBD5E1),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'No collection data in period',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF64748B),
+              ),
+            ),
+            SizedBox(height: 2),
+            Text(
+              'Invoices and settlements will populate breakdown',
+              style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _DonutChartPainter extends CustomPainter {
@@ -2662,7 +3282,7 @@ class _DonutChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = 16.0;
+    const strokeWidth = 16.0;
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
     if (radius <= 0 || !radius.isFinite || radius.isNaN) return;
@@ -2692,7 +3312,7 @@ class _DonutChartPainter extends CustomPainter {
     if (safeCollected > 0) {
       final sweepAngle = 2 * math.pi * safeCollected;
       final p = Paint()
-        ..color = const Color(0xFF0D9488)
+        ..color = _kExcel3dPalette[0]
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = safeCollected >= 0.999
@@ -2706,7 +3326,7 @@ class _DonutChartPainter extends CustomPainter {
     if (safeOutstanding > 0) {
       final sweepAngle = 2 * math.pi * safeOutstanding;
       final p = Paint()
-        ..color = const Color(0xFF4E45D5)
+        ..color = _kExcel3dPalette[1]
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.butt;
@@ -2718,7 +3338,7 @@ class _DonutChartPainter extends CustomPainter {
     if (safeOverdue > 0) {
       final sweepAngle = 2 * math.pi * safeOverdue;
       final p = Paint()
-        ..color = const Color(0xFFEF4444)
+        ..color = _kExcel3dPalette[3]
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round;
@@ -2735,10 +3355,10 @@ class _DonutChartPainter extends CustomPainter {
 }
 
 // -----------------------------------------------------------------------------
-// TOP PRODUCT CATEGORIES HORIZONTAL BAR CHART
+// TOP PRODUCT CATEGORIES CHART (HORIZONTAL BARS & 3D PIE MULTI-VIEW)
 // -----------------------------------------------------------------------------
 
-class _CategorySalesBarChart extends StatelessWidget {
+class _CategorySalesBarChart extends StatefulWidget {
   const _CategorySalesBarChart({
     required this.categories,
     required this.onViewProductSales,
@@ -2746,6 +3366,13 @@ class _CategorySalesBarChart extends StatelessWidget {
 
   final List<ReportCategoryDistribution> categories;
   final VoidCallback onViewProductSales;
+
+  @override
+  State<_CategorySalesBarChart> createState() => _CategorySalesBarChartState();
+}
+
+class _CategorySalesBarChartState extends State<_CategorySalesBarChart> {
+  _CategoryChartType _selectedChart = _CategoryChartType.bar;
 
   String _formatCurrency(int paise) {
     final abs = (paise.abs() ~/ 100).toString();
@@ -2762,12 +3389,26 @@ class _CategorySalesBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const barColors = [
-      Color(0xFF0D9488),
-      Color(0xFF4E45D5),
-      Color(0xFF0284C7),
-      Color(0xFFD97706),
-    ];
+    final categories = widget.categories;
+    final totalCatAmount = categories.fold<int>(
+      0,
+      (sum, c) => sum + c.amountPaise,
+    );
+
+    // Map categories to 3D pie slices
+    final slices = <_Pie3DSlice>[];
+    for (int i = 0; i < categories.length; i++) {
+      final cat = categories[i];
+      if (cat.amountPaise <= 0) continue;
+      final pct = totalCatAmount > 0 ? (cat.amountPaise / totalCatAmount) : 0.0;
+      slices.add(_Pie3DSlice(
+        label: cat.name,
+        value: cat.amountPaise.toDouble(),
+        percentage: pct,
+        color: _kExcel3dPalette[i % _kExcel3dPalette.length],
+        formattedAmount: _formatCurrency(cat.amountPaise),
+      ));
+    }
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -2786,19 +3427,34 @@ class _CategorySalesBarChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Top Product Categories',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
-              letterSpacing: -0.3,
-            ),
-          ),
-          const SizedBox(height: 2),
-          const Text(
-            'Sales distribution across catalog departments',
-            style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+          // Header with Title and Mode Switcher
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Top Product Categories',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Sales distribution across catalog departments',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (categories.isNotEmpty) _buildViewModeToggle(),
+            ],
           ),
           const SizedBox(height: 18),
 
@@ -2831,77 +3487,16 @@ class _CategorySalesBarChart extends StatelessWidget {
                 ),
               ),
             )
-          else ...[
-            for (int i = 0; i < categories.length; i++) ...[
-              if (i > 0) const SizedBox(height: 14),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          categories[i].name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1E293B),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatCurrency(categories[i].amountPaise),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Stack(
-                    children: [
-                      Container(
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      Builder(
-                        builder: (context) {
-                          final pct = categories[i].percentage;
-                          final safeWidth = (pct.isFinite && !pct.isNaN)
-                              ? (pct / 100).clamp(0.04, 1.0)
-                              : 0.04;
-                          return FractionallySizedBox(
-                            widthFactor: safeWidth,
-                            child: Container(
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: barColors[i % barColors.length],
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ],
+          else if (_selectedChart == _CategoryChartType.pie3d)
+            _buildPie3DView(slices: slices)
+          else
+            _buildBarView(categories: categories),
+
           const SizedBox(height: 18),
 
           // Link to Product Sales
           InkWell(
-            onTap: onViewProductSales,
+            onTap: widget.onViewProductSales,
             borderRadius: BorderRadius.circular(6),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
@@ -2928,6 +3523,257 @@ class _CategorySalesBarChart extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildViewModeToggle() {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildToggleItem(
+            type: _CategoryChartType.bar,
+            label: 'Bar',
+          ),
+          _buildToggleItem(
+            type: _CategoryChartType.pie3d,
+            label: '3D Pie',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleItem({
+    required _CategoryChartType type,
+    required String label,
+  }) {
+    final isSelected = _selectedChart == type;
+    return InkWell(
+      onTap: () {
+        if (_selectedChart != type) {
+          setState(() {
+            _selectedChart = type;
+          });
+        }
+      },
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPie3DView({required List<_Pie3DSlice> slices}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 320;
+        if (isNarrow) {
+          return Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 145,
+                child: CustomPaint(
+                  painter: _Pie3DChartPainter(slices: slices),
+                ),
+              ),
+              const SizedBox(height: 14),
+              _build3DLegend(slices),
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 155,
+              height: 155,
+              child: CustomPaint(
+                painter: _Pie3DChartPainter(slices: slices),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _build3DLegend(slices),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _build3DLegend(List<_Pie3DSlice> slices) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < slices.length; i++) ...[
+          if (i > 0) const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 13,
+                height: 13,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2.5),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color.lerp(slices[i].color, Colors.white, 0.35)!,
+                      slices[i].color,
+                      Color.lerp(slices[i].color, Colors.black, 0.25)!,
+                    ],
+                  ),
+                  border: Border.all(
+                    color: Color.lerp(slices[i].color, Colors.black, 0.35)!,
+                    width: 0.8,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 1.5,
+                      offset: const Offset(0.5, 1.0),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  slices[i].label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                slices[i].formattedAmount,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '(${(slices[i].percentage * 100).round()}%)',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildBarView({required List<ReportCategoryDistribution> categories}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < categories.length; i++) ...[
+          if (i > 0) const SizedBox(height: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      categories[i].name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _formatCurrency(categories[i].amountPaise),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Stack(
+                children: [
+                  Container(
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Builder(
+                    builder: (context) {
+                      final pct = categories[i].percentage;
+                      final safeWidth = (pct.isFinite && !pct.isNaN)
+                          ? (pct / 100).clamp(0.04, 1.0)
+                          : 0.04;
+                      return FractionallySizedBox(
+                        widthFactor: safeWidth,
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _kExcel3dPalette[i % _kExcel3dPalette.length],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }
