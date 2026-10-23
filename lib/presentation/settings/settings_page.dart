@@ -5,6 +5,7 @@ import '../../core/config/environment_config.dart';
 import '../../data/models/business_settings_model.dart';
 import '../../data/services/error_analytics_service.dart';
 import '../../data/sync/sync_engine.dart';
+import '../../l10n/app_localizations.dart';
 import '../about/about_page.dart';
 import '../app_controller.dart';
 
@@ -209,6 +210,7 @@ class _SettingsPageState extends State<SettingsPage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final business = controller.businesses.where(
       (item) => item.businessId == controller.appContext?.businessId,
     );
@@ -246,7 +248,7 @@ class _SettingsPageState extends State<SettingsPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Settings & Preferences',
+                              l10n?.settingsAndPreferences ?? 'Settings & Preferences',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge
@@ -279,7 +281,7 @@ class _SettingsPageState extends State<SettingsPage>
                                 ),
                               )
                             : const Icon(Icons.check, size: 18),
-                        label: Text(_saving ? 'Saving...' : 'Save Changes'),
+                        label: Text(_saving ? (l10n?.saving ?? 'Saving...') : (l10n?.saveChanges ?? 'Save Changes')),
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFF10263D),
                           padding: const EdgeInsets.symmetric(
@@ -341,26 +343,26 @@ class _SettingsPageState extends State<SettingsPage>
                     indicatorColor: const Color(0xFF10263D),
                     indicatorWeight: 3,
                     labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    tabs: const [
+                    tabs: [
                       Tab(
-                        icon: Icon(Icons.storefront_outlined, size: 20),
-                        text: 'Store Profile',
+                        icon: const Icon(Icons.storefront_outlined, size: 20),
+                        text: l10n?.storeProfile ?? 'Store Profile',
                       ),
                       Tab(
-                        icon: Icon(Icons.receipt_long_outlined, size: 20),
-                        text: 'Billing & Invoice',
+                        icon: const Icon(Icons.receipt_long_outlined, size: 20),
+                        text: l10n?.billingAndInvoice ?? 'Billing & Invoice',
                       ),
                       Tab(
-                        icon: Icon(Icons.account_balance_outlined, size: 20),
-                        text: 'GST & Tax',
+                        icon: const Icon(Icons.account_balance_outlined, size: 20),
+                        text: l10n?.gstAndTax ?? 'GST & Tax',
                       ),
                       Tab(
-                        icon: Icon(Icons.inventory_2_outlined, size: 20),
-                        text: 'Inventory Policies',
+                        icon: const Icon(Icons.inventory_2_outlined, size: 20),
+                        text: l10n?.inventoryPolicies ?? 'Inventory Policies',
                       ),
                       Tab(
-                        icon: Icon(Icons.sync_outlined, size: 20),
-                        text: 'Sync & Diagnostics',
+                        icon: const Icon(Icons.sync_outlined, size: 20),
+                        text: l10n?.syncAndDiagnostics ?? 'Sync & Diagnostics',
                       ),
                     ],
                   ),
@@ -388,11 +390,44 @@ class _SettingsPageState extends State<SettingsPage>
 
   // 1. STORE PROFILE TAB
   Widget _buildStoreProfileTab(dynamic currentBiz) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         _SectionCard(
-          title: 'Business Information',
+          title: l10n?.languageAndAppearance ?? 'Language & Appearance',
+          subtitle: l10n?.selectLanguage ?? 'Select Language',
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('🇬🇧 English'),
+                selected: controller.currentLocale.languageCode == 'en',
+                onSelected: (val) {
+                  if (val) controller.setLocale(const Locale('en'));
+                },
+              ),
+              ChoiceChip(
+                label: const Text('🇮🇳 हिंदी (Hindi)'),
+                selected: controller.currentLocale.languageCode == 'hi',
+                onSelected: (val) {
+                  if (val) controller.setLocale(const Locale('hi'));
+                },
+              ),
+              ChoiceChip(
+                label: const Text('🇮🇳 বাংলা (Bengali)'),
+                selected: controller.currentLocale.languageCode == 'bn',
+                onSelected: (val) {
+                  if (val) controller.setLocale(const Locale('bn'));
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        _SectionCard(
+          title: l10n?.businessInformation ?? 'Business Information',
           subtitle: 'Store identity and identification details',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,7 +456,7 @@ class _SettingsPageState extends State<SettingsPage>
         ),
         const SizedBox(height: 20),
         _SectionCard(
-          title: 'Bank & Payment Details for Invoices',
+          title: AppLocalizations.of(context)?.bankAndPaymentDetails ?? 'Bank & Payment Details for Invoices',
           subtitle:
               'These details appear at the bottom of customer bills for direct bank transfer and QR payment',
           child: Column(
@@ -499,7 +534,7 @@ class _SettingsPageState extends State<SettingsPage>
       padding: const EdgeInsets.all(24),
       children: [
         _SectionCard(
-          title: 'Invoice Printing Layout',
+          title: AppLocalizations.of(context)?.invoicePrintingLayout ?? 'Invoice Printing Layout',
           subtitle: 'Choose your default receipt and print document geometry',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -600,7 +635,7 @@ class _SettingsPageState extends State<SettingsPage>
         ),
         const SizedBox(height: 20),
         _SectionCard(
-          title: 'Numbering & Content Options',
+          title: AppLocalizations.of(context)?.numberingAndContentOptions ?? 'Numbering & Content Options',
           subtitle: 'Configure invoice identifiers and printed sections',
           child: Column(
             children: [
@@ -662,7 +697,7 @@ class _SettingsPageState extends State<SettingsPage>
       padding: const EdgeInsets.all(24),
       children: [
         _SectionCard(
-          title: 'GST Filing Scheme',
+          title: AppLocalizations.of(context)?.gstFilingScheme ?? 'GST Filing Scheme',
           subtitle: 'Configure tax regime applicable to your business',
           child: Column(
             children: [
@@ -689,7 +724,7 @@ class _SettingsPageState extends State<SettingsPage>
         ),
         const SizedBox(height: 20),
         _SectionCard(
-          title: 'Tax Slabs & Reporting Options',
+          title: AppLocalizations.of(context)?.taxSlabsAndReporting ?? 'Tax Slabs & Reporting Options',
           subtitle: 'Default rates applied when creating products or new bills',
           child: Column(
             children: [
@@ -732,7 +767,7 @@ class _SettingsPageState extends State<SettingsPage>
       padding: const EdgeInsets.all(24),
       children: [
         _SectionCard(
-          title: 'Stock Availability & Safety Rules',
+          title: AppLocalizations.of(context)?.stockAvailabilityRules ?? 'Stock Availability & Safety Rules',
           subtitle: 'Control billing behavior when stock levels are low or zero',
           child: Column(
             children: [
@@ -766,7 +801,7 @@ class _SettingsPageState extends State<SettingsPage>
         ),
         const SizedBox(height: 20),
         _SectionCard(
-          title: 'Barcoding & Item Identification',
+          title: AppLocalizations.of(context)?.barcodingAndItemIdentification ?? 'Barcoding & Item Identification',
           subtitle: 'Automation preferences when registering new items',
           child: Column(
             children: [
@@ -794,7 +829,7 @@ class _SettingsPageState extends State<SettingsPage>
       padding: const EdgeInsets.all(24),
       children: [
         _SectionCard(
-          title: 'Cloud Synchronization Engine Status',
+          title: AppLocalizations.of(context)?.cloudSyncEngineStatus ?? 'Cloud Synchronization Engine Status',
           subtitle: 'Local SQLite to Google Cloud Firestore sync health',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -955,7 +990,7 @@ class _SettingsPageState extends State<SettingsPage>
         ],
         const SizedBox(height: 20),
         _SectionCard(
-          title: 'Application Information',
+          title: AppLocalizations.of(context)?.applicationInformation ?? 'Application Information',
           subtitle: 'NubiBill Business ERP build and architecture details',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1007,7 +1042,7 @@ class _SettingsPageState extends State<SettingsPage>
     final collection = recentReport?.collection ?? (raw.contains('collection=') ? raw.split('collection=').last.split(' ').first : null);
 
     return _SectionCard(
-      title: 'Cloud Diagnostics & Error Analytics',
+      title: AppLocalizations.of(context)?.cloudDiagnosticsAndAnalytics ?? 'Cloud Diagnostics & Error Analytics',
       subtitle: 'Technical telemetry automatically recorded to Firestore analytics',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

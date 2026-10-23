@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 
 class MaintenancePage extends StatelessWidget {
@@ -8,6 +9,7 @@ class MaintenancePage extends StatelessWidget {
   @override
   Widget build(BuildContext c) {
     final cfg = controller.appConfig;
+    final l10n = AppLocalizations.of(c);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
@@ -34,7 +36,7 @@ class MaintenancePage extends StatelessWidget {
               Text(
                 cfg?.maintenanceTitle?.isNotEmpty == true
                     ? cfg!.maintenanceTitle!
-                    : 'System Maintenance',
+                    : (l10n?.systemMaintenance ?? 'System Maintenance'),
                 style: Theme.of(c).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
@@ -42,14 +44,15 @@ class MaintenancePage extends StatelessWidget {
               Text(
                 cfg?.maintenanceMessage?.isNotEmpty == true
                     ? cfg!.maintenanceMessage!
-                    : 'We are making a few improvements. Please check back shortly.',
+                    : (l10n?.maintenanceMessage ??
+                        'We are making a few improvements. Please check back shortly.'),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: controller.retry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(l10n?.retry ?? 'Retry'),
               ),
             ],
           ),

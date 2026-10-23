@@ -185,8 +185,22 @@ class PurchaseBillModel {
       roundOff: (data['roundOff'] as num?)?.toInt() ?? 0,
       grandTotal: (data['grandTotal'] as num?)?.toInt() ?? 0,
       paidAmount: (data['paidAmount'] as num?)?.toInt() ?? 0,
-      outstandingAmount: (data['outstandingAmount'] as num?)?.toInt() ?? 0,
-      paymentStatus: data['paymentStatus'] as String? ?? 'UNPAID',
+      outstandingAmount: () {
+        final g = (data['grandTotal'] as num?)?.toInt() ?? 0;
+        final p = (data['paidAmount'] as num?)?.toInt() ?? 0;
+        final raw = (data['outstandingAmount'] as num?)?.toInt();
+        if (raw != null && (raw > 0 || p >= g)) return raw;
+        return (g - p).clamp(0, g);
+      }(),
+      paymentStatus: () {
+        final raw = data['paymentStatus'] as String?;
+        if (raw != null && raw.isNotEmpty && raw != 'UNPAID') return raw;
+        final g = (data['grandTotal'] as num?)?.toInt() ?? 0;
+        final p = (data['paidAmount'] as num?)?.toInt() ?? 0;
+        if (p >= g && g > 0) return 'PAID';
+        if (p > 0) return 'PARTIAL';
+        return raw ?? 'UNPAID';
+      }(),
       version: (data['version'] as num?)?.toInt() ?? 1,
       items: rawItems
           .whereType<Map>()

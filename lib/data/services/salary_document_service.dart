@@ -109,6 +109,11 @@ class SalaryDocumentService {
       SalaryDocumentLanguage.bengali => 'ফোন',
       SalaryDocumentLanguage.hindi => 'फोन',
     };
+    final storeOffsetLabel = switch (language) {
+      SalaryDocumentLanguage.english => 'Store credit offset',
+      SalaryDocumentLanguage.bengali => 'দোকান ক্রেডিট সমন্বয়',
+      SalaryDocumentLanguage.hindi => 'दुकान क्रेडिट समायोजन',
+    };
     final doc = pw.Document(
       theme: pw.ThemeData.withFont(
         base: font,
@@ -123,7 +128,9 @@ class SalaryDocumentService {
     final net = (period['netEarnedPaise'] as num?)?.toInt() ?? 0;
     final paid = (period['paidAmountPaise'] as num?)?.toInt() ?? 0;
     final adjusted = (period['advanceAdjustedPaise'] as num?)?.toInt() ?? 0;
-    final balance = net - paid - adjusted;
+    final storeOffset =
+        (period['staffPurchaseAdjustedPaise'] as num?)?.toInt() ?? 0;
+    final balance = (net - paid - adjusted - storeOffset).clamp(0, 1 << 30);
     String transactionLabel(Object? value) {
       final key = value?.toString() ?? '';
       const english = {
@@ -266,7 +273,8 @@ class SalaryDocumentService {
                 (labels.$4, money(period['grossEarningsPaise'])),
                 (labels.$5, money(period['approvedDeductionsPaise'])),
                 (labels.$6, money(period['netEarnedPaise'])),
-                (labels.$7, money(period['advanceAdjustedPaise'])),
+                if (adjusted > 0) (labels.$7, money(adjusted)),
+                if (storeOffset > 0) (storeOffsetLabel, money(storeOffset)),
                 (labels.$8, money(period['paidAmountPaise'])),
                 (labels.$9, money(balance)),
               ])

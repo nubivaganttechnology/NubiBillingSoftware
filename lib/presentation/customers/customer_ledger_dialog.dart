@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/customer_ledger_entry_model.dart';
 import '../../data/models/customer_model.dart';
 import '../../data/sync/sync_engine.dart';
+import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 
 class CustomerLedgerDialog extends StatefulWidget {
@@ -71,6 +72,7 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -102,13 +104,13 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Unified Customer Ledger',
+                          l10n?.unifiedCustomerLedger ?? 'Unified Customer Ledger',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          '${widget.customer.name} • Phone: ${widget.customer.phone}',
+                          '${widget.customer.name} • ${l10n?.phone ?? 'Phone'}: ${widget.customer.phone}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.grey.shade600,
                           ),
@@ -134,14 +136,15 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.amber.shade300),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.cloud_off, size: 16, color: Color(0xFFB45309)),
-                      SizedBox(width: 8),
+                      const Icon(Icons.cloud_off, size: 16, color: Color(0xFFB45309)),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Offline Mode: Displaying locally cached ledger. Real-time balance and entries may be outdated until connected to server.',
-                          style: TextStyle(
+                          l10n?.offlineCustomerLedgerNotice ??
+                              'Offline Mode: Displaying locally cached ledger. Real-time balance and entries may be outdated until connected to server.',
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF92400E),
                             fontWeight: FontWeight.w600,
@@ -168,7 +171,7 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Outstanding Due',
+                            l10n?.outstandingDue ?? 'Outstanding Due',
                             style: theme.textTheme.labelSmall
                                 ?.copyWith(color: Colors.grey.shade600),
                           ),
@@ -188,7 +191,7 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Advance Credit',
+                            l10n?.advanceBalance ?? 'Advance Credit',
                             style: theme.textTheme.labelSmall
                                 ?.copyWith(color: Colors.grey.shade600),
                           ),
@@ -208,7 +211,7 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Total Ledger Entries',
+                            l10n?.totalEntries ?? 'Total Ledger Entries',
                             style: theme.textTheme.labelSmall
                                 ?.copyWith(color: Colors.grey.shade600),
                           ),
@@ -248,7 +251,8 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'No ledger transactions recorded yet.',
+                              l10n?.noLedgerTransactions ??
+                                  'No ledger transactions recorded yet.',
                               style: TextStyle(color: Colors.grey.shade600),
                             ),
                           ],
@@ -269,6 +273,15 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
 
                           final dateStr =
                               '${entry.createdAt.year}-${entry.createdAt.month.toString().padLeft(2, '0')}-${entry.createdAt.day.toString().padLeft(2, '0')}';
+
+                          final badgeLabel = isCreditSale
+                              ? (l10n?.creditSale ?? 'Credit Sale')
+                              : isPayment
+                              ? (l10n?.recordPayment ?? 'Payment')
+                              : isOpening
+                              ? (l10n?.openingBalance ?? 'Opening Balance')
+                              : (l10n?.adjustment ??
+                                  entry.transactionType.replaceAll('_', ' '));
 
                           return Padding(
                             padding: const EdgeInsets.symmetric(
@@ -321,7 +334,7 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    entry.transactionType.replaceAll('_', ' '),
+                                    badgeLabel,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 11,
@@ -345,10 +358,21 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                                       if (entry.invoiceId != null &&
                                           entry.invoiceId!.isNotEmpty)
                                         Text(
-                                          'Invoice: ${entry.invoiceId}',
+                                          '${l10n?.supplierBill ?? 'Invoice'}: ${entry.invoiceId}',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
+                                          ),
+                                        ),
+                                      if (entry.originalOutletId != null &&
+                                          entry.originalOutletId!.isNotEmpty &&
+                                          entry.originalOutletId != entry.outletId)
+                                        Text(
+                                          'Collected at: ${entry.outletId} • Bill Origin: ${entry.originalOutletId}',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Color(0xFF1D4ED8),
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
                                       if (entry.notes != null &&
@@ -411,7 +435,7 @@ class _CustomerLedgerDialogState extends State<CustomerLedgerDialog> {
                 alignment: Alignment.centerRight,
                 child: FilledButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
+                  child: Text(l10n?.close ?? 'Close'),
                 ),
               ),
             ],

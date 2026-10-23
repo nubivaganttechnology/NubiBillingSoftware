@@ -3621,6 +3621,1068 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'High-performance, offline-first enterprise management solution engineered for retail, wholesale, godown logistics, and commercial trade operations.'**
   String get aboutAppDescription;
+
+  /// No description provided for @staffSalaryKhata.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff Salary Khata'**
+  String get staffSalaryKhata;
+
+  /// No description provided for @staffSalarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance ledger, attendance reconciliation & payroll settlements'**
+  String get staffSalarySubtitle;
+
+  /// No description provided for @selectStaffMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Staff Member'**
+  String get selectStaffMember;
+
+  /// No description provided for @addDailyWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add Daily Worker'**
+  String get addDailyWorker;
+
+  /// No description provided for @searchStaffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search staff by name or code...'**
+  String get searchStaffHint;
+
+  /// No description provided for @noStaffMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff members match the criteria.'**
+  String get noStaffMatched;
+
+  /// No description provided for @noRoleAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No role assigned'**
+  String get noRoleAssigned;
+
+  /// No description provided for @salaryBaseRateAndType.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Rate & Type'**
+  String get salaryBaseRateAndType;
+
+  /// No description provided for @salaryNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Configured'**
+  String get salaryNotConfigured;
+
+  /// No description provided for @tapToConfigureRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to configure rate'**
+  String get tapToConfigureRate;
+
+  /// No description provided for @outstandingAdvances.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding Advances'**
+  String get outstandingAdvances;
+
+  /// No description provided for @midMonthAdvancesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mid-month cash/UPI advances'**
+  String get midMonthAdvancesSubtitle;
+
+  /// No description provided for @noAdvanceDue.
+  ///
+  /// In en, this message translates to:
+  /// **'No advance due'**
+  String get noAdvanceDue;
+
+  /// No description provided for @storePurchasesCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Purchases Credit'**
+  String get storePurchasesCredit;
+
+  /// No description provided for @storeGoodsOnCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Store goods on credit'**
+  String get storeGoodsOnCredit;
+
+  /// No description provided for @noStoreCreditDue.
+  ///
+  /// In en, this message translates to:
+  /// **'No store credit due'**
+  String get noStoreCreditDue;
+
+  /// No description provided for @netSalaryPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Salary Payable'**
+  String get netSalaryPayable;
+
+  /// No description provided for @acrossUnpaidPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Across unpaid approved periods'**
+  String get acrossUnpaidPeriods;
+
+  /// No description provided for @allPeriodsSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All periods settled'**
+  String get allPeriodsSettled;
+
+  /// No description provided for @giveAdvancePeshgi.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Give Advance (Peshgi)'**
+  String get giveAdvancePeshgi;
+
+  /// No description provided for @approvePeriodSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Period Salary'**
+  String get approvePeriodSalary;
+
+  /// No description provided for @salaryProfileAndRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary Profile & Rate'**
+  String get salaryProfileAndRate;
+
+  /// No description provided for @outletAllocationSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Outlet Allocation Split'**
+  String get outletAllocationSplit;
+
+  /// No description provided for @salaryPeriodsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary Periods'**
+  String get salaryPeriodsTab;
+
+  /// No description provided for @khataPassbookTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Khata Passbook'**
+  String get khataPassbookTab;
+
+  /// No description provided for @salaryProfileAndSplitsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary Profile & Splits'**
+  String get salaryProfileAndSplitsTab;
+
+  /// No description provided for @noSalaryPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'No salary periods calculated yet.'**
+  String get noSalaryPeriods;
+
+  /// No description provided for @salaryRateHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary Rate History'**
+  String get salaryRateHistory;
+
+  /// No description provided for @updateRateAddProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Rate / Add Profile'**
+  String get updateRateAddProfile;
+
+  /// No description provided for @noSalaryProfileConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'No salary rate profile configured.'**
+  String get noSalaryProfileConfigured;
+
+  /// No description provided for @configureSalaryRateProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Salary Rate Profile'**
+  String get configureSalaryRateProfile;
+
+  /// No description provided for @baseSalaryRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Salary Rate'**
+  String get baseSalaryRate;
+
+  /// No description provided for @wageType.
+  ///
+  /// In en, this message translates to:
+  /// **'Wage Type'**
+  String get wageType;
+
+  /// No description provided for @monthlyFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Fixed'**
+  String get monthlyFixed;
+
+  /// No description provided for @dailyWage.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Wage'**
+  String get dailyWage;
+
+  /// No description provided for @hourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly Rate'**
+  String get hourlyRate;
+
+  /// No description provided for @shiftBased.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift-based'**
+  String get shiftBased;
+
+  /// No description provided for @paymentCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Cycle'**
+  String get paymentCycle;
+
+  /// No description provided for @monthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get monthly;
+
+  /// No description provided for @fourteenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'14 Days'**
+  String get fourteenDays;
+
+  /// No description provided for @weekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get weekly;
+
+  /// No description provided for @saveSalaryProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Salary Profile'**
+  String get saveSalaryProfile;
+
+  /// No description provided for @outletAllocationPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Outlet Allocation (%)'**
+  String get outletAllocationPercent;
+
+  /// No description provided for @outletAllocationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Specify the percentage split of salary expense across outlets. Must total exactly 100%.'**
+  String get outletAllocationDesc;
+
+  /// No description provided for @totalAllocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Allocation:'**
+  String get totalAllocation;
+
+  /// No description provided for @saveHundredPercentSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Save 100% Split'**
+  String get saveHundredPercentSplit;
+
+  /// No description provided for @allocatedOutlet.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated Outlet'**
+  String get allocatedOutlet;
+
+  /// No description provided for @noOutletsAssignedToEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'This staff member has no assigned outlet under this business. Please assign an outlet under Staff Management first.'**
+  String get noOutletsAssignedToEmployee;
+
+  /// No description provided for @disburseStaffAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Disburse Staff Advance (Peshgi)'**
+  String get disburseStaffAdvance;
+
+  /// No description provided for @advanceAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance Amount (₹)'**
+  String get advanceAmount;
+
+  /// No description provided for @paymentMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Mode'**
+  String get paymentMode;
+
+  /// No description provided for @referenceNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference No (Optional)'**
+  String get referenceNumber;
+
+  /// No description provided for @notesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes / Reason (Optional)'**
+  String get notesOptional;
+
+  /// No description provided for @disburseAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Disburse Advance'**
+  String get disburseAdvance;
+
+  /// No description provided for @approveSalaryPeriodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Salary Period'**
+  String get approveSalaryPeriodTitle;
+
+  /// No description provided for @grossEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Earned'**
+  String get grossEarned;
+
+  /// No description provided for @paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paid;
+
+  /// No description provided for @advanceAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance Adjusted'**
+  String get advanceAdjusted;
+
+  /// No description provided for @storePurchaseAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Purchase Adjusted'**
+  String get storePurchaseAdjusted;
+
+  /// No description provided for @balanceDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Due'**
+  String get balanceDue;
+
+  /// No description provided for @generateSalarySlip.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Salary Slip'**
+  String get generateSalarySlip;
+
+  /// No description provided for @salaryAcknowledged.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged'**
+  String get salaryAcknowledged;
+
+  /// No description provided for @salaryAcknowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge'**
+  String get salaryAcknowledge;
+
+  /// No description provided for @selectSalarySlipLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Salary Slip Language'**
+  String get selectSalarySlipLanguage;
+
+  /// No description provided for @salaryRateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary rate saved successfully.'**
+  String get salaryRateSaved;
+
+  /// No description provided for @advanceRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance recorded successfully.'**
+  String get advanceRecorded;
+
+  /// No description provided for @salaryPeriodApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary period approved successfully.'**
+  String get salaryPeriodApproved;
+
+  /// No description provided for @selectPrintFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Print Format'**
+  String get selectPrintFormat;
+
+  /// No description provided for @paperWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper Width:'**
+  String get paperWidth;
+
+  /// No description provided for @saveAsDefaultFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Default Format'**
+  String get saveAsDefaultFormat;
+
+  /// No description provided for @confirmUpiReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm UPI receipt manually before finalizing.'**
+  String get confirmUpiReceipt;
+
+  /// No description provided for @scanToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to Pay'**
+  String get scanToPay;
+
+  /// No description provided for @payUsingUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay using Google Pay, PhonePe, Paytm or BHIM'**
+  String get payUsingUpi;
+
+  /// No description provided for @allOutlets.
+  ///
+  /// In en, this message translates to:
+  /// **'All Outlets'**
+  String get allOutlets;
+
+  /// No description provided for @stepByStepDateSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Step-by-Step Date Selection'**
+  String get stepByStepDateSelection;
+
+  /// No description provided for @fromDateStep.
+  ///
+  /// In en, this message translates to:
+  /// **'1. From Date'**
+  String get fromDateStep;
+
+  /// No description provided for @toDateStep.
+  ///
+  /// In en, this message translates to:
+  /// **'2. To Date'**
+  String get toDateStep;
+
+  /// No description provided for @step1Instruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select starting date from the calendar'**
+  String get step1Instruction;
+
+  /// No description provided for @step2Instruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select ending date from the calendar'**
+  String get step2Instruction;
+
+  /// No description provided for @applyRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Range'**
+  String get applyRange;
+
+  /// No description provided for @addEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Employee'**
+  String get addEmployee;
+
+  /// No description provided for @addGodown.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Godown'**
+  String get addGodown;
+
+  /// No description provided for @addRack.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Rack'**
+  String get addRack;
+
+  /// No description provided for @adjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment'**
+  String get adjustment;
+
+  /// No description provided for @advanceBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance Credit'**
+  String get advanceBalance;
+
+  /// No description provided for @applicationInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Information'**
+  String get applicationInformation;
+
+  /// No description provided for @attendanceCheckInRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance check-in is already recorded for today.'**
+  String get attendanceCheckInRecorded;
+
+  /// No description provided for @bankAndPaymentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank & Payment Details for Invoices'**
+  String get bankAndPaymentDetails;
+
+  /// No description provided for @barcodingAndItemIdentification.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcoding & Item Identification'**
+  String get barcodingAndItemIdentification;
+
+  /// No description provided for @billingAndInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing & Invoice'**
+  String get billingAndInvoice;
+
+  /// No description provided for @businessInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Information'**
+  String get businessInformation;
+
+  /// No description provided for @checkoutCompletedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout is already completed for today. Only 1 checkout allowed per day.'**
+  String get checkoutCompletedToday;
+
+  /// No description provided for @cloudDiagnosticsAndAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Diagnostics & Error Analytics'**
+  String get cloudDiagnosticsAndAnalytics;
+
+  /// No description provided for @cloudSyncEngineStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Synchronization Engine Status'**
+  String get cloudSyncEngineStatus;
+
+  /// No description provided for @creditSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Sale'**
+  String get creditSale;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @discardUnsavedPurchaseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current spreadsheet edits have not been saved.'**
+  String get discardUnsavedPurchaseSubtitle;
+
+  /// No description provided for @discardUnsavedPurchaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved Purchase?'**
+  String get discardUnsavedPurchaseTitle;
+
+  /// No description provided for @earlyCheckoutNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Early Checkout Notice'**
+  String get earlyCheckoutNotice;
+
+  /// No description provided for @editEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Employee'**
+  String get editEmployee;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get email;
+
+  /// No description provided for @employees.
+  ///
+  /// In en, this message translates to:
+  /// **'Employees'**
+  String get employees;
+
+  /// No description provided for @enterpriseProcurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise Procurement · Invoice inwarding & item entry'**
+  String get enterpriseProcurement;
+
+  /// No description provided for @excelGridMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel Grid Mode'**
+  String get excelGridMode;
+
+  /// No description provided for @expiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get expiryDate;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPassword;
+
+  /// No description provided for @godownManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Godown Management'**
+  String get godownManagement;
+
+  /// No description provided for @gstAndTax.
+  ///
+  /// In en, this message translates to:
+  /// **'GST & Tax'**
+  String get gstAndTax;
+
+  /// No description provided for @gstFilingScheme.
+  ///
+  /// In en, this message translates to:
+  /// **'GST Filing Scheme'**
+  String get gstFilingScheme;
+
+  /// No description provided for @internalBatchNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal Batch No'**
+  String get internalBatchNo;
+
+  /// No description provided for @inventoryPolicies.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Policies'**
+  String get inventoryPolicies;
+
+  /// No description provided for @invoicePrintingLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice Printing Layout'**
+  String get invoicePrintingLayout;
+
+  /// No description provided for @languageAndAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Language & Appearance'**
+  String get languageAndAppearance;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @maintenanceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We are making a few improvements. Please check back shortly.'**
+  String get maintenanceMessage;
+
+  /// No description provided for @mfgDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Mfg Date'**
+  String get mfgDate;
+
+  /// No description provided for @noLedgerTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No Ledger Transactions Found'**
+  String get noLedgerTransactions;
+
+  /// No description provided for @noStoragePermission.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to view storage locations.'**
+  String get noStoragePermission;
+
+  /// No description provided for @numberingAndContentOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbering & Content Options'**
+  String get numberingAndContentOptions;
+
+  /// No description provided for @offlineCustomerLedgerNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Mode: Displaying locally cached ledger. Real-time balance and entries may be outdated until connected to server.'**
+  String get offlineCustomerLedgerNotice;
+
+  /// No description provided for @onlyOwnerCanManageEmployees.
+  ///
+  /// In en, this message translates to:
+  /// **'Only an owner can manage employees.'**
+  String get onlyOwnerCanManageEmployees;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @product.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
+  String get product;
+
+  /// No description provided for @receiving.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving'**
+  String get receiving;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @scrollLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll table left'**
+  String get scrollLeft;
+
+  /// No description provided for @scrollRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll table right'**
+  String get scrollRight;
+
+  /// No description provided for @selectBusinessToManageGodowns.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a business to manage its optional Godowns.'**
+  String get selectBusinessToManageGodowns;
+
+  /// No description provided for @settingsAndPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings & Preferences'**
+  String get settingsAndPreferences;
+
+  /// No description provided for @signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get signIn;
+
+  /// No description provided for @stay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get stay;
+
+  /// No description provided for @stockAvailabilityRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Availability & Safety Rules'**
+  String get stockAvailabilityRules;
+
+  /// No description provided for @storeAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Store At'**
+  String get storeAt;
+
+  /// No description provided for @storeProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Profile'**
+  String get storeProfile;
+
+  /// No description provided for @supplierLot.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier Lot'**
+  String get supplierLot;
+
+  /// No description provided for @syncAndDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync & Diagnostics'**
+  String get syncAndDiagnostics;
+
+  /// No description provided for @systemMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'System Maintenance'**
+  String get systemMaintenance;
+
+  /// No description provided for @taxRate.
+  ///
+  /// In en, this message translates to:
+  /// **'GST %'**
+  String get taxRate;
+
+  /// No description provided for @taxSlabsAndReporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Slabs & Reporting Options'**
+  String get taxSlabsAndReporting;
+
+  /// No description provided for @totalEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Ledger Entries'**
+  String get totalEntries;
+
+  /// No description provided for @unifiedCustomerLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Unified Customer Ledger'**
+  String get unifiedCustomerLedger;
+
+  /// No description provided for @variantSpecification.
+  ///
+  /// In en, this message translates to:
+  /// **'Variant / Specification'**
+  String get variantSpecification;
+
+  /// No description provided for @allEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'All Events'**
+  String get allEvents;
+
+  /// No description provided for @advancesFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Advances'**
+  String get advancesFilter;
+
+  /// No description provided for @storePurchasesFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Purchases'**
+  String get storePurchasesFilter;
+
+  /// No description provided for @paymentsAndOffsetsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments & Offsets'**
+  String get paymentsAndOffsetsFilter;
+
+  /// No description provided for @noLedgerTransactionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No cash advances, purchase debits, or payments recorded for this staff member.'**
+  String get noLedgerTransactionsDesc;
+
+  /// No description provided for @cashAdvanceGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Advance Given'**
+  String get cashAdvanceGiven;
+
+  /// No description provided for @upiAdvanceGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'UPI Advance Given'**
+  String get upiAdvanceGiven;
+
+  /// No description provided for @bankAdvanceGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Advance Given'**
+  String get bankAdvanceGiven;
+
+  /// No description provided for @storeGoodsCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Goods Credit'**
+  String get storeGoodsCredit;
+
+  /// No description provided for @salaryPaymentPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary Payment Paid'**
+  String get salaryPaymentPaid;
+
+  /// No description provided for @advanceAdjustedInSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance Adjusted in Salary'**
+  String get advanceAdjustedInSalary;
+
+  /// No description provided for @storeCreditOffsetInSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Credit Offset in Salary'**
+  String get storeCreditOffsetInSalary;
+
+  /// No description provided for @staffInvoiceDirectPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff Invoice Direct Paid'**
+  String get staffInvoiceDirectPaid;
+
+  /// No description provided for @recordSalaryPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Salary Payment'**
+  String get recordSalaryPaymentTitle;
+
+  /// No description provided for @remainingNetPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Net Payable:'**
+  String get remainingNetPayable;
+
+  /// No description provided for @disbursePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Disburse Payment'**
+  String get disbursePayment;
+
+  /// No description provided for @adjustMidMonthAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Mid-Month Advance'**
+  String get adjustMidMonthAdvance;
+
+  /// No description provided for @adjustMidMonthAdvanceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduct mid-month cash/UPI advances against this approved salary period.'**
+  String get adjustMidMonthAdvanceDesc;
+
+  /// No description provided for @offsetStorePurchaseCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Offset Store Purchase Credit'**
+  String get offsetStorePurchaseCredit;
+
+  /// No description provided for @offsetStorePurchaseCreditDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduct shop goods taken on credit by this staff member against their salary.'**
+  String get offsetStorePurchaseCreditDesc;
+
+  /// No description provided for @storeCreditDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Credit Due:'**
+  String get storeCreditDue;
+
+  /// No description provided for @applyPurchaseOffset.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Purchase Offset'**
+  String get applyPurchaseOffset;
+
+  /// No description provided for @confirmAndApproveSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Approve Salary'**
+  String get confirmAndApproveSalary;
+
+  /// No description provided for @calculatedNetEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated Net Earned:'**
+  String get calculatedNetEarned;
+
+  /// No description provided for @bonusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus (₹)'**
+  String get bonusLabel;
+
+  /// No description provided for @extraOvertimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Overtime (₹)'**
+  String get extraOvertimeLabel;
+
+  /// No description provided for @deductionPerAbsentDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction per Absent Day (₹)'**
+  String get deductionPerAbsentDay;
+
+  /// No description provided for @otherDeductionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Deductions (₹)'**
+  String get otherDeductionsLabel;
+
+  /// No description provided for @approvedWorkUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved Work Units'**
+  String get approvedWorkUnits;
+
+  /// No description provided for @lockedFromApprovedAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated from approved attendance records'**
+  String get lockedFromApprovedAttendance;
+
+  /// No description provided for @noSalaryPeriodsApprovedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Salary Periods Approved Yet'**
+  String get noSalaryPeriodsApprovedYet;
+
+  /// No description provided for @approvePeriodSalaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Click \"Approve Period Salary\" above to calculate and lock this month’s earnings.'**
+  String get approvePeriodSalaryDesc;
+
+  /// No description provided for @approveCurrentPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Current Period'**
+  String get approveCurrentPeriod;
 }
 
 class _AppLocalizationsDelegate

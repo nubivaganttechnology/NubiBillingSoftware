@@ -8,6 +8,8 @@ import '../../data/models/business_settings_model.dart';
 import '../../data/models/customer_model.dart';
 import '../../data/models/invoice_model.dart';
 import '../../data/models/product_variant_model.dart';
+import '../../data/repositories/product_repository.dart'
+    show VariantBatchPriceOption;
 import '../../data/services/invoice_print_service.dart';
 import '../../domain/billing/bill_calculator.dart';
 import '../../domain/billing/billing_models.dart';
@@ -48,6 +50,7 @@ class _BillingPageState extends State<BillingPage> {
 
   final _quantity = TextEditingController(text: '1');
   final _discount = TextEditingController(text: '0.00');
+  final _billDiscount = TextEditingController(text: '0.00');
   final _cash = TextEditingController(text: '0.00');
   final _upi = TextEditingController(text: '0.00');
   final _sellingPrice = TextEditingController();
@@ -55,6 +58,7 @@ class _BillingPageState extends State<BillingPage> {
   final _gstRate = TextEditingController();
   final _gstin = TextEditingController();
   ProductVariantModel? _selected;
+  VariantBatchPriceOption? _selectedBatch;
   CustomerModel? _selectedCustomer;
   List<CustomerModel> _customers = const [];
   final _lines = <BillLineInput>[];
@@ -62,6 +66,7 @@ class _BillingPageState extends State<BillingPage> {
   int? _billGstRateBps;
   bool _saving = false;
   bool _makeDefaultPrice = false;
+  bool _inStockOnly = false;
   int _productPickerVersion = 0;
   PaymentMode _paymentMode = PaymentMode.cash;
   DateTime? _dueDate;
@@ -110,12 +115,15 @@ class _BillingPageState extends State<BillingPage> {
       case PaymentMode.cash:
         _cash.text = grandTotalStr;
         _upi.text = '0.00';
+        _dueDate = null;
         break;
       case PaymentMode.upi:
         _cash.text = '0.00';
         _upi.text = grandTotalStr;
+        _dueDate = null;
         break;
       case PaymentMode.split:
+        _dueDate = null;
         final currentCash = _parseMoney(_cash.text) ?? 0;
         if (currentCash == 0 || currentCash > total.grandTotalPaise) {
           final half = total.grandTotalPaise ~/ 2;
@@ -143,18 +151,57 @@ class _BillingPageState extends State<BillingPage> {
 
   BusinessSettingsModel? _businessSettings;
 
+  Map<String, ({int mrp, int sellingPrice})> _receivedPricing = {};
+
   @override
   void initState() {
     super.initState();
+    _quantity.addListener(_onQuantityChanged);
     _loadBusinessSettings();
+    _loadPricing();
+  }
+
+  void _onQuantityChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void didUpdateWidget(covariant BillingPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller.appContext?.businessId !=
-        widget.controller.appContext?.businessId) {
+            widget.controller.appContext?.businessId ||
+        oldWidget.controller.currentOutlet?.outletId !=
+            widget.controller.currentOutlet?.outletId) {
       _loadBusinessSettings();
+      _loadPricing();
+    }
+  }
+
+  Future<void> _loadPricing() async {
+    try {
+      final pricing =
+          await widget.controller.loadBarcodeReceivedVariantPricing();
+      if (mounted) setState(() => _receivedPricing = pricing);
+    } catch (_) {}
+  }
+
+  int _effectiveSellingPrice(ProductVariantModel variant) {
+    if (variant.sellingPrice > 0) return variant.sellingPrice;
+    return _receivedPricing[variant.variantId]?.sellingPrice ?? 0;
+  }
+
+  int _effectiveMrp(ProductVariantModel variant) {
+    if (variant.mrp > 0) return variant.mrp;
+    return _receivedPricing[variant.variantId]?.mrp ?? 0;
+  }
+
+  Future<List<VariantBatchPriceOption>> _getVariantBatches(
+    String variantId,
+  ) async {
+    try {
+      return await widget.controller.loadVariantBatches(variantId);
+    } catch (_) {
+      return const [];
     }
   }
 
@@ -179,10 +226,25 @@ class _BillingPageState extends State<BillingPage> {
     for (final product in controller.products) ...product.variants,
   ];
 
+  int _availableStockUnits(ProductVariantModel variant) {
+    if (!variant.trackStock) return 999999;
+    final rawStock = controller.productStock[variant.variantId] ?? 0;
+    if (rawStock <= 0) return 0;
+    return rawStock >= 1000 ? (rawStock / 1000).floor() : rawStock;
+  }
+
+  int _currentCartQuantity(String variantId) {
+    return _lines
+        .where((line) => line.variantId == variantId)
+        .fold<int>(0, (sum, line) => sum + line.quantity);
+  }
+
   @override
   void dispose() {
+    _quantity.removeListener(_onQuantityChanged);
     _quantity.dispose();
     _discount.dispose();
+    _billDiscount.dispose();
     _cash.dispose();
     _upi.dispose();
     _sellingPrice.dispose();
@@ -458,6 +520,7 @@ class _BillingPageState extends State<BillingPage> {
                   onPressed: () {
                     setState(() {
                       _lines.clear();
+                      _billDiscount.text = '0.00';
                       _syncPaymentInputsForCurrentTotal();
                     });
                   },
@@ -507,8 +570,10 @@ class _BillingPageState extends State<BillingPage> {
 
     final quantity = int.tryParse(_quantity.text) ?? 1;
     searchController.clear();
-    _addOrIncrementVariant(variant, quantity);
-    _clearProductSelection();
+    final added = await _addOrIncrementVariant(variant, quantity);
+    if (added) {
+      _clearProductSelection();
+    }
   }
 
   Widget _buildScannerDock(BuildContext context, AppLocalizations? l10n) {
@@ -536,8 +601,29 @@ class _BillingPageState extends State<BillingPage> {
                     displayStringForOption: (variant) => variant.displayName,
                     optionsBuilder: (value) {
                       final query = value.text.trim().toLowerCase();
-                      if (query.isEmpty) return variants;
-                      final matches = variants
+                      var sourceList = variants;
+                      if (_inStockOnly) {
+                        sourceList = sourceList
+                            .where(
+                              (v) =>
+                                  !v.trackStock || _availableStockUnits(v) > 0,
+                            )
+                            .toList();
+                      }
+                      if (query.isEmpty) {
+                        final list = List<ProductVariantModel>.from(sourceList);
+                        list.sort((a, b) {
+                          final aInStock =
+                              !a.trackStock || _availableStockUnits(a) > 0;
+                          final bInStock =
+                              !b.trackStock || _availableStockUnits(b) > 0;
+                          if (aInStock && !bInStock) return -1;
+                          if (!aInStock && bInStock) return 1;
+                          return a.displayName.compareTo(b.displayName);
+                        });
+                        return list;
+                      }
+                      final matches = sourceList
                           .where(
                             (variant) =>
                                 [
@@ -553,27 +639,78 @@ class _BillingPageState extends State<BillingPage> {
                           )
                           .toList();
                       matches.sort((a, b) {
+                        final aInStock =
+                            !a.trackStock || _availableStockUnits(a) > 0;
+                        final bInStock =
+                            !b.trackStock || _availableStockUnits(b) > 0;
+                        if (aInStock && !bInStock) return -1;
+                        if (!aInStock && bInStock) return 1;
+
                         final aBarcodeExact =
                             (a.barcode?.trim().toLowerCase() == query);
                         final bBarcodeExact =
                             (b.barcode?.trim().toLowerCase() == query);
                         if (aBarcodeExact && !bBarcodeExact) return -1;
                         if (!aBarcodeExact && bBarcodeExact) return 1;
+
                         final aSkuExact =
                             (a.sku?.trim().toLowerCase() == query);
                         final bSkuExact =
                             (b.sku?.trim().toLowerCase() == query);
                         if (aSkuExact && !bSkuExact) return -1;
                         if (!aSkuExact && bSkuExact) return 1;
+
+                        final aNameExact =
+                            (a.displayName.toLowerCase() == query);
+                        final bNameExact =
+                            (b.displayName.toLowerCase() == query);
+                        if (aNameExact && !bNameExact) return -1;
+                        if (!aNameExact && bNameExact) return 1;
+
                         return 0;
                       });
                       return matches;
                     },
-                    onSelected: (value) {
+                    onSelected: (value) async {
+                      final batches = await _getVariantBatches(value.variantId);
+                      final activeBatches =
+                          batches.where((b) => b.availableQty > 0).toList();
+                      final distinctPrices = activeBatches
+                          .map((b) => b.sellingPricePaise)
+                          .where((p) => p > 0)
+                          .toSet();
+
+                      VariantBatchPriceOption? chosen;
+                      if (distinctPrices.length > 1) {
+                        if (!context.mounted) return;
+                        chosen = await showDialog<VariantBatchPriceOption>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (ctx) => _LotPriceSelectionDialog(
+                            variant: value,
+                            batches: activeBatches,
+                          ),
+                        );
+                      } else if (activeBatches.isNotEmpty) {
+                        chosen = activeBatches.first;
+                      }
+
+                      if (!mounted) return;
                       setState(() {
                         _selected = value;
-                        _sellingPrice.text = _formatMoney(value.sellingPrice);
-                        _mrp.text = _formatMoney(value.mrp);
+                        _selectedBatch = chosen;
+                        final effectiveSell =
+                            (chosen != null && chosen.sellingPricePaise > 0)
+                                ? chosen.sellingPricePaise
+                                : _effectiveSellingPrice(value);
+                        final effectiveMrp =
+                            (chosen != null && chosen.mrpPaise > 0)
+                                ? chosen.mrpPaise
+                                : _effectiveMrp(value);
+                        _sellingPrice.text =
+                            effectiveSell > 0 ? _formatMoney(effectiveSell) : '';
+                        _mrp.text =
+                            effectiveMrp > 0 ? _formatMoney(effectiveMrp) : '';
                         final effectiveRate = _gst
                             ? (_billGstRateBps ?? value.defaultGstRateBps)
                             : 0;
@@ -592,7 +729,7 @@ class _BillingPageState extends State<BillingPage> {
                         ) => TextField(
                           controller: textController,
                           focusNode: focusNode,
-                          onSubmitted: (value) {
+                          onSubmitted: (value) async {
                             final query = value.trim();
                             if (query.isEmpty) return;
 
@@ -607,10 +744,12 @@ class _BillingPageState extends State<BillingPage> {
                                 .toList();
                             if (barcodeMatches.isNotEmpty) {
                               final qty = int.tryParse(_quantity.text) ?? 1;
-                              _addOrIncrementVariant(barcodeMatches.first, qty);
+                              final added = await _addOrIncrementVariant(barcodeMatches.first, qty);
                               textController.clear();
-                              _clearProductSelection();
-                              focusNode.requestFocus();
+                              if (added) {
+                                _clearProductSelection();
+                                focusNode.requestFocus();
+                              }
                               return;
                             }
 
@@ -625,10 +764,12 @@ class _BillingPageState extends State<BillingPage> {
                                 .toList();
                             if (skuMatches.isNotEmpty) {
                               final qty = int.tryParse(_quantity.text) ?? 1;
-                              _addOrIncrementVariant(skuMatches.first, qty);
+                              final added = await _addOrIncrementVariant(skuMatches.first, qty);
                               textController.clear();
-                              _clearProductSelection();
-                              focusNode.requestFocus();
+                              if (added) {
+                                _clearProductSelection();
+                                focusNode.requestFocus();
+                              }
                               return;
                             }
 
@@ -642,10 +783,12 @@ class _BillingPageState extends State<BillingPage> {
                                 .toList();
                             if (singleMatches.length == 1) {
                               final qty = int.tryParse(_quantity.text) ?? 1;
-                              _addOrIncrementVariant(singleMatches.first, qty);
+                              final added = await _addOrIncrementVariant(singleMatches.first, qty);
                               textController.clear();
-                              _clearProductSelection();
-                              focusNode.requestFocus();
+                              if (added) {
+                                _clearProductSelection();
+                                focusNode.requestFocus();
+                              }
                               return;
                             }
 
@@ -708,49 +851,54 @@ class _BillingPageState extends State<BillingPage> {
                                 const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final variant = options.elementAt(index);
-                              final stockThousandths =
-                                  controller.productStock[variant.variantId] ??
-                                  0;
-                              final stockUnits = (stockThousandths / 1000)
-                                  .round();
+                              final isStockTracked = variant.trackStock;
+                              final stockUnits = _availableStockUnits(variant);
+                              final isOutOfStock =
+                                  isStockTracked && stockUnits <= 0;
 
                               return ListTile(
                                 dense: true,
-                                title: Text(
-                                  variant.displayName,
-                                  style: const TextStyle(
+                                title: Text.rich(
+                                  TextSpan(
+                                    text: variant.displayName,
+                                    children: [
+                                      if (isOutOfStock)
+                                        TextSpan(
+                                          text:
+                                              '  [${l10n?.outOfStock ?? "Out of stock"}]',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.red.shade800,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
+                                    color: isOutOfStock
+                                        ? Colors.grey.shade700
+                                        : null,
                                   ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                subtitle: Row(
-                                  children: [
-                                    Text(
-                                      'SKU: ${variant.sku ?? '—'}',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                    if (variant.barcode != null &&
-                                        variant.barcode!.isNotEmpty) ...[
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '• ${variant.barcode}',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey.shade600,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
+                                subtitle: Text(
+                                  'SKU: ${variant.sku ?? '—'}${variant.barcode != null && variant.barcode!.isNotEmpty ? " • ${variant.barcode}" : ""}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 trailing: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      _rupees(variant.sellingPrice),
+                                      _rupees(_effectiveSellingPrice(variant)),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
@@ -763,34 +911,44 @@ class _BillingPageState extends State<BillingPage> {
                                         vertical: 1,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: stockUnits > 5
-                                            ? Colors.green.withValues(
+                                        color: !isStockTracked
+                                            ? Colors.blue.withValues(
                                                 alpha: 0.12,
                                               )
-                                            : (stockUnits > 0
-                                                  ? Colors.orange.withValues(
-                                                      alpha: 0.15,
-                                                    )
-                                                  : Colors.red.withValues(
-                                                      alpha: 0.12,
-                                                    )),
+                                            : (stockUnits > 5
+                                                ? Colors.green.withValues(
+                                                    alpha: 0.12,
+                                                  )
+                                                : (stockUnits > 0
+                                                      ? Colors.orange
+                                                          .withValues(
+                                                            alpha: 0.15,
+                                                          )
+                                                      : Colors.red.withValues(
+                                                          alpha: 0.15,
+                                                        ))),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        stockUnits > 5
-                                            ? '${l10n?.inStock ?? "In Stock"}: $stockUnits'
-                                            : (stockUnits > 0
-                                                  ? '${l10n?.lowStock ?? "Low"}: $stockUnits'
-                                                  : (l10n?.outOfStock ??
-                                                        'Out of stock')),
+                                        !isStockTracked
+                                            ? 'Untracked'
+                                            : (stockUnits > 5
+                                                ? '${l10n?.inStock ?? "In Stock"}: $stockUnits'
+                                                : (stockUnits > 0
+                                                      ? '${l10n?.lowStock ?? "Low"}: $stockUnits'
+                                                      : (l10n?.outOfStock ??
+                                                            'Out of stock'))),
                                         style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700,
-                                          color: stockUnits > 5
-                                              ? Colors.green.shade800
-                                              : (stockUnits > 0
-                                                    ? Colors.orange.shade900
-                                                    : Colors.red.shade800),
+                                          color: !isStockTracked
+                                              ? Colors.blue.shade800
+                                              : (stockUnits > 5
+                                                  ? Colors.green.shade800
+                                                  : (stockUnits > 0
+                                                        ? Colors.orange
+                                                            .shade900
+                                                        : Colors.red.shade800)),
                                         ),
                                       ),
                                     ),
@@ -805,13 +963,51 @@ class _BillingPageState extends State<BillingPage> {
                     ),
                   ),
                 ),
+                FilterChip(
+                  selected: _inStockOnly,
+                  label: Text(
+                    l10n != null ? '${l10n.inStock} only' : 'In-stock only',
+                  ),
+                  avatar: Icon(
+                    _inStockOnly
+                        ? Icons.check_circle
+                        : Icons.inventory_2_outlined,
+                    size: 16,
+                    color: _inStockOnly
+                        ? Colors.green.shade800
+                        : Colors.blueGrey,
+                  ),
+                  selectedColor: Colors.green.shade50,
+                  checkmarkColor: Colors.green.shade800,
+                  onSelected: (val) {
+                    setState(() {
+                      _inStockOnly = val;
+                      _productPickerVersion++;
+                    });
+                  },
+                ),
                 SizedBox(
-                  width: 90,
+                  width: (_selected != null &&
+                          _selected!.trackStock &&
+                          ((int.tryParse(_quantity.text) ?? 1) +
+                                  _currentCartQuantity(_selected!.variantId) >
+                              _availableStockUnits(_selected!)))
+                      ? 110
+                      : 90,
                   child: TextField(
                     controller: _quantity,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: l10n?.qty ?? 'Qty',
+                      errorText: (_selected != null &&
+                              _selected!.trackStock &&
+                              ((int.tryParse(_quantity.text) ?? 1) +
+                                      _currentCartQuantity(
+                                        _selected!.variantId,
+                                      ) >
+                                  _availableStockUnits(_selected!)))
+                          ? 'Max: ${(_availableStockUnits(_selected!) - _currentCartQuantity(_selected!.variantId)).clamp(0, 999999)}'
+                          : null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -842,7 +1038,11 @@ class _BillingPageState extends State<BillingPage> {
                 ),
                 FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF10263D),
+                    backgroundColor: (_selected != null &&
+                            _selected!.trackStock &&
+                            _availableStockUnits(_selected!) <= 0)
+                        ? Colors.red.shade700
+                        : const Color(0xFF10263D),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
                       vertical: 14,
@@ -852,8 +1052,21 @@ class _BillingPageState extends State<BillingPage> {
                     ),
                   ),
                   onPressed: _selected == null ? null : _addLine,
-                  icon: const Icon(Icons.add_shopping_cart, size: 18),
-                  label: Text(l10n?.addToCart ?? 'Add to cart'),
+                  icon: Icon(
+                    (_selected != null &&
+                            _selected!.trackStock &&
+                            _availableStockUnits(_selected!) <= 0)
+                        ? Icons.block
+                        : Icons.add_shopping_cart,
+                    size: 18,
+                  ),
+                  label: Text(
+                    (_selected != null &&
+                            _selected!.trackStock &&
+                            _availableStockUnits(_selected!) <= 0)
+                        ? (l10n?.outOfStock ?? 'Out of stock')
+                        : (l10n?.addToCart ?? 'Add to cart'),
+                  ),
                 ),
                 if (_lines.isNotEmpty)
                   OutlinedButton.icon(
@@ -1023,6 +1236,12 @@ class _BillingPageState extends State<BillingPage> {
                   ),
                   DataColumn(
                     label: Text(
+                      l10n?.discount ?? 'Discount',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
                       l10n?.taxable ?? 'Taxable',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -1161,6 +1380,52 @@ class _BillingPageState extends State<BillingPage> {
                           ),
                         ),
                         DataCell(
+                          InkWell(
+                            onTap: () => _promptDiscountEdit(context, index),
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _lines[index].discountPaise > 0
+                                    ? const Color(0xFFDCFCE7)
+                                    : Colors.grey.shade100,
+                                border: Border.all(
+                                  color: _lines[index].discountPaise > 0
+                                      ? const Color(0xFF86EFAC)
+                                      : Colors.grey.shade300,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _lines[index].discountPaise > 0
+                                        ? '-₹${(_lines[index].discountPaise / 100).toStringAsFixed(2)}'
+                                        : '₹0.00',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: _lines[index].discountPaise > 0
+                                          ? const Color(0xFF15803D)
+                                          : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.edit,
+                                    size: 11,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
                           Text(
                             _rupees(total.lines[index].taxablePaise),
                             style: const TextStyle(fontSize: 13),
@@ -1249,6 +1514,12 @@ class _BillingPageState extends State<BillingPage> {
                             splashRadius: 18,
                             onPressed: () => setState(() {
                               _lines.removeAt(index);
+                              final totalDiscount = _lines.fold<int>(
+                                0,
+                                (sum, l) => sum + l.discountPaise,
+                              );
+                              _billDiscount.text =
+                                  (totalDiscount / 100).toStringAsFixed(2);
                               _syncPaymentInputsForCurrentTotal();
                             }),
                             icon: Icon(
@@ -1303,8 +1574,83 @@ class _BillingPageState extends State<BillingPage> {
             ),
             const SizedBox(height: 14),
             _summary(l10n?.subtotal ?? 'Subtotal', total.subtotalPaise),
-            if (total.totalDiscountPaise > 0)
-              _summary(l10n?.discount ?? 'Discount', total.totalDiscountPaise),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF16A34A).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFF16A34A).withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.discount_outlined,
+                        size: 16,
+                        color: Color(0xFF16A34A),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n?.discount ?? 'Discount',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Color(0xFF15803D),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: 120,
+                    height: 36,
+                    child: TextField(
+                      controller: _billDiscount,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF15803D),
+                      ),
+                      decoration: InputDecoration(
+                        prefixText: '₹ ',
+                        prefixStyle: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF15803D),
+                        ),
+                        hintText: '0.00',
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        isDense: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF86EFAC)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide:
+                              const BorderSide(color: Color(0xFF86EFAC)),
+                        ),
+                      ),
+                      onChanged: _onBillDiscountChanged,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
             if (_gst) ...[
               _summary(l10n?.taxable ?? 'Taxable', total.taxableTotalPaise),
               _summary(
@@ -1800,6 +2146,7 @@ class _BillingPageState extends State<BillingPage> {
               const SizedBox(height: 10),
               TextField(
                 controller: _cash,
+                readOnly: true,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -1807,6 +2154,16 @@ class _BillingPageState extends State<BillingPage> {
                   labelText:
                       l10n?.cashReceived ?? 'Cash received from customer (₹)',
                   prefixText: '₹ ',
+                  suffixIcon: const Tooltip(
+                    message: 'Full cash payment (locked to Grand Total)',
+                    child: Icon(
+                      Icons.lock_outline,
+                      size: 18,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -2240,31 +2597,48 @@ class _BillingPageState extends State<BillingPage> {
               },
             ),
             const SizedBox(height: 10),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () async {
-                final now = DateTime.now();
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _dueDate ?? now.add(const Duration(days: 30)),
-                  firstDate: now,
-                  lastDate: now.add(const Duration(days: 365)),
+            Builder(
+              builder: (context) {
+                final c = _parseMoney(_cash.text) ?? 0;
+                final u = _parseMoney(_upi.text) ?? 0;
+                final paid = c + u;
+                final due = (total.grandTotalPaise - paid).clamp(
+                  0,
+                  total.grandTotalPaise,
                 );
-                if (picked != null) {
-                  setState(() => _dueDate = picked);
-                }
+                final hasDue = due > 0;
+                return OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: hasDue
+                      ? () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate:
+                                _dueDate ?? now.add(const Duration(days: 30)),
+                            firstDate: now,
+                            lastDate: now.add(const Duration(days: 365)),
+                          );
+                          if (picked != null) {
+                            setState(() => _dueDate = picked);
+                          }
+                        }
+                      : null,
+                  icon: const Icon(Icons.calendar_today, size: 16),
+                  label: Text(
+                    !hasDue
+                        ? 'No Due Date (Fully Paid in Cash)'
+                        : (_dueDate == null
+                            ? (l10n?.setRepaymentDueDate ??
+                                'Set Repayment Due Date (Optional)')
+                            : '${l10n?.dueDate ?? "Due Date"}: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}'),
+                  ),
+                );
               },
-              icon: const Icon(Icons.calendar_today, size: 16),
-              label: Text(
-                _dueDate == null
-                    ? (l10n?.setRepaymentDueDate ??
-                          'Set Repayment Due Date (Optional)')
-                    : '${l10n?.dueDate ?? "Due Date"}: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}',
-              ),
             ),
             const SizedBox(height: 10),
             Builder(
@@ -2730,13 +3104,74 @@ class _BillingPageState extends State<BillingPage> {
   }
 
   void _addLine() {
-    final variant = _selected!;
+    final variant = _selected;
+    if (variant == null) return;
     final quantity = int.tryParse(_quantity.text) ?? 0;
     final discount = _parseMoney(_discount.text) ?? 0;
     final gstRate = _gst ? (double.tryParse(_gstRate.text.trim()) ?? 0.0) : 0.0;
     if (quantity <= 0) return;
+
+    if (variant.trackStock) {
+      final available = _availableStockUnits(variant);
+      final inCart = _currentCartQuantity(variant.variantId);
+      if (available <= 0) {
+        _showStockAlert(
+          title: 'Out of Stock Alert',
+          message:
+              'Quantity cannot be billed because "${variant.displayName}" has 0 available stock in store.',
+          productName: variant.displayName,
+          availableStock: 0,
+          requestedQty: quantity,
+        );
+        _message(
+          'Out of Stock: "${variant.displayName}" has 0 available stock and cannot be added to the bill.',
+          isError: true,
+        );
+        return;
+      }
+      if (inCart + quantity > available) {
+        _showStockAlert(
+          title: 'Insufficient Stock Alert',
+          message:
+              'Quantity cannot be greater than stock quantity! You requested $quantity units of "${variant.displayName}", but only $available units are available in store${inCart > 0 ? " ($inCart already in cart)" : ""}.',
+          productName: variant.displayName,
+          availableStock: available,
+          requestedQty: inCart + quantity,
+          onAdjustToMax: () {
+            final maxCanAdd = available - inCart;
+            if (maxCanAdd > 0) {
+              setState(() => _quantity.text = maxCanAdd.toString());
+            }
+          },
+        );
+        _message(
+          'Insufficient Stock: Cannot add $quantity units of "${variant.displayName}". Only $available available in stock${inCart > 0 ? ' (Cart already has $inCart)' : ''}.',
+          isError: true,
+        );
+        return;
+      }
+    }
     if (_gst && (gstRate < 0 || gstRate > 100)) {
       _message('Enter a valid GST rate between 0 and 100%.');
+      return;
+    }
+
+    final enteredSelling = _parseMoney(_sellingPrice.text);
+    final enteredMrp = _parseMoney(_mrp.text);
+    final effectiveSelling = (enteredSelling != null && enteredSelling > 0)
+        ? enteredSelling
+        : _effectiveSellingPrice(variant);
+    final effectiveMrp = (enteredMrp != null && enteredMrp > 0)
+        ? enteredMrp
+        : _effectiveMrp(variant);
+
+    if (effectiveSelling <= 0) {
+      _message('Enter a selling price greater than ₹0.00 before adding to cart.');
+      return;
+    }
+
+    if (effectiveMrp > 0 && effectiveSelling > effectiveMrp) {
+      _message('Selling price cannot exceed MRP.');
       return;
     }
 
@@ -2745,6 +3180,18 @@ class _BillingPageState extends State<BillingPage> {
       (line) => line.variantId == variant.variantId,
     );
 
+    if (enteredSelling != null && enteredSelling > 0) {
+      if (variant.sellingPrice <= 0 ||
+          (enteredMrp != null && enteredMrp > 0 && variant.mrp <= 0)) {
+        _autoPersistPricing(
+          variant: variant,
+          sellingPrice: enteredSelling,
+          mrp: (enteredMrp != null && enteredMrp > 0) ? enteredMrp : effectiveMrp,
+          gstRateBps: lineGstRateBps > 0 ? lineGstRateBps : variant.defaultGstRateBps,
+        );
+      }
+    }
+
     setState(() {
       if (existingIndex >= 0) {
         final existing = _lines[existingIndex];
@@ -2754,14 +3201,14 @@ class _BillingPageState extends State<BillingPage> {
           name: existing.name,
           hsn: existing.hsn,
           quantity: existing.quantity + quantity,
-          unitPricePaise:
-              _parseMoney(_sellingPrice.text) ?? existing.unitPricePaise,
+          unitPricePaise: effectiveSelling,
           gstRateBps: lineGstRateBps,
           discountPaise: existing.discountPaise + discount,
           unit: existing.unit,
           conversionFactor: existing.conversionFactor,
           trackStock: existing.trackStock,
           priceIncludesTax: existing.priceIncludesTax,
+          batchId: existing.batchId ?? _selectedBatch?.batchId,
         );
       } else {
         _lines.add(
@@ -2771,31 +3218,158 @@ class _BillingPageState extends State<BillingPage> {
             name: variant.displayName,
             hsn: variant.hsnCode ?? '',
             quantity: quantity,
-            unitPricePaise:
-                _parseMoney(_sellingPrice.text) ?? variant.sellingPrice,
+            unitPricePaise: effectiveSelling,
             gstRateBps: lineGstRateBps,
             discountPaise: discount,
             unit: variant.commercialUnitName ?? variant.baseUnitId,
             conversionFactor: variant.baseQuantityPerCommercialUnit.toInt(),
             trackStock: variant.trackStock,
             priceIncludesTax: variant.priceIncludesTax,
+            batchId: _selectedBatch?.batchId,
           ),
         );
       }
-      _selected = null;
       _clearProductSelection();
+      final totalDiscount =
+          _lines.fold<int>(0, (sum, l) => sum + l.discountPaise);
+      _billDiscount.text = (totalDiscount / 100).toStringAsFixed(2);
       _syncPaymentInputsForCurrentTotal();
     });
   }
 
-  void _addOrIncrementVariant(ProductVariantModel variant, [int quantity = 1]) {
+  Future<void> _autoPersistPricing({
+    required ProductVariantModel variant,
+    required int sellingPrice,
+    required int mrp,
+    required int gstRateBps,
+  }) async {
+    try {
+      final appContext = controller.appContext;
+      final token = controller.idToken;
+      final prodId = variant.productId ??
+          controller.products
+              .where((p) => p.variants.any((v) => v.variantId == variant.variantId))
+              .firstOrNull
+              ?.productId ??
+          variant.variantId;
+      if (appContext?.businessId == null || token == null) return;
+
+      await controller.productRepository.updateVariantPricing(
+        tenantId: appContext!.ownerUid,
+        businessId: appContext.businessId!,
+        productId: prodId,
+        variantId: variant.variantId,
+        sellingPrice: sellingPrice,
+        mrp: mrp > 0 ? mrp : sellingPrice,
+        gstRateBps: gstRateBps,
+        actorUid: appContext.uid,
+        token: token,
+        makeDefaultForProduct: false,
+      );
+      await controller.loadProducts();
+      await _loadPricing();
+    } catch (e) {
+      debugPrint('Failed to auto-persist variant pricing: $e');
+    }
+  }
+
+  Future<bool> _addOrIncrementVariant(
+    ProductVariantModel variant, [
+    int quantity = 1,
+    VariantBatchPriceOption? selectedBatch,
+  ]) async {
     if (quantity <= 0) quantity = 1;
+
+    if (variant.trackStock) {
+      final available = _availableStockUnits(variant);
+      final inCart = _currentCartQuantity(variant.variantId);
+      if (available <= 0) {
+        _showStockAlert(
+          title: 'Out of Stock Alert',
+          message:
+              'Quantity cannot be billed because "${variant.displayName}" has 0 available stock in store.',
+          productName: variant.displayName,
+          availableStock: 0,
+          requestedQty: quantity,
+        );
+        _message(
+          'Out of Stock: "${variant.displayName}" has 0 available stock and cannot be added to the bill.',
+          isError: true,
+        );
+        return false;
+      }
+      if (inCart + quantity > available) {
+        _showStockAlert(
+          title: 'Insufficient Stock Alert',
+          message:
+              'Quantity cannot be greater than stock quantity! Requested ${inCart + quantity} units of "${variant.displayName}", but only $available units are available in store${inCart > 0 ? " ($inCart already in cart)" : ""}.',
+          productName: variant.displayName,
+          availableStock: available,
+          requestedQty: inCart + quantity,
+        );
+        _message(
+          'Insufficient Stock: Cannot add $quantity units of "${variant.displayName}". Only $available available in stock${inCart > 0 ? ' (Cart already has $inCart)' : ''}.',
+          isError: true,
+        );
+        return false;
+      }
+    }
+
+    VariantBatchPriceOption? batch = selectedBatch;
+    if (batch == null) {
+      final batches = await _getVariantBatches(variant.variantId);
+      final activeBatches = batches.where((b) => b.availableQty > 0).toList();
+      final distinctPrices = activeBatches
+          .map((b) => b.sellingPricePaise)
+          .where((p) => p > 0)
+          .toSet();
+
+      if (distinctPrices.length > 1) {
+        if (!mounted) return false;
+        final chosen = await showDialog<VariantBatchPriceOption>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => _LotPriceSelectionDialog(
+            variant: variant,
+            batches: activeBatches,
+          ),
+        );
+        if (chosen == null) {
+          return false;
+        }
+        batch = chosen;
+      } else if (activeBatches.isNotEmpty) {
+        batch = activeBatches.first;
+      }
+    }
+
+    final price = (batch != null && batch.sellingPricePaise > 0)
+        ? batch.sellingPricePaise
+        : _effectiveSellingPrice(variant);
+
     final existingIndex = _lines.indexWhere(
-      (line) => line.variantId == variant.variantId,
+      (line) =>
+          line.variantId == variant.variantId &&
+          line.unitPricePaise == price,
     );
     final targetGstBps = _gst
         ? (_billGstRateBps ?? variant.defaultGstRateBps)
         : 0;
+
+    if (price <= 0 && (existingIndex < 0 || _lines[existingIndex].unitPricePaise <= 0)) {
+      setState(() {
+        _selected = variant;
+        _sellingPrice.text = '';
+        final effMrp = (batch != null && batch.mrpPaise > 0)
+            ? batch.mrpPaise
+            : _effectiveMrp(variant);
+        _mrp.text = effMrp > 0 ? _formatMoney(effMrp) : '';
+        final effectiveRate = _gst ? (_billGstRateBps ?? variant.defaultGstRateBps) : 0;
+        _gstRate.text = (effectiveRate / 100).toStringAsFixed(2);
+      });
+      _message('Please set selling price for ${variant.displayName} before adding to bill.');
+      return false;
+    }
 
     setState(() {
       if (existingIndex >= 0) {
@@ -2806,13 +3380,16 @@ class _BillingPageState extends State<BillingPage> {
           name: existing.name,
           hsn: existing.hsn,
           quantity: existing.quantity + quantity,
-          unitPricePaise: existing.unitPricePaise,
+          unitPricePaise: existing.unitPricePaise > 0
+              ? existing.unitPricePaise
+              : price,
           gstRateBps: _gst ? existing.gstRateBps : 0,
           discountPaise: existing.discountPaise,
           unit: existing.unit,
           conversionFactor: existing.conversionFactor,
           trackStock: existing.trackStock,
           priceIncludesTax: existing.priceIncludesTax,
+          batchId: existing.batchId ?? batch?.batchId,
         );
       } else {
         _lines.add(
@@ -2822,13 +3399,14 @@ class _BillingPageState extends State<BillingPage> {
             name: variant.displayName,
             hsn: variant.hsnCode ?? '',
             quantity: quantity,
-            unitPricePaise: variant.sellingPrice,
+            unitPricePaise: price,
             gstRateBps: targetGstBps,
             discountPaise: 0,
             unit: variant.commercialUnitName ?? variant.baseUnitId,
             conversionFactor: variant.baseQuantityPerCommercialUnit.toInt(),
             trackStock: variant.trackStock,
             priceIncludesTax: variant.priceIncludesTax,
+            batchId: batch?.batchId,
           ),
         );
       }
@@ -2839,6 +3417,7 @@ class _BillingPageState extends State<BillingPage> {
         ? _lines[existingIndex].quantity
         : quantity;
     _message('Added ${variant.displayName} (Qty: $totalQty)');
+    return true;
   }
 
   void _updateLineQuantity(int index, int newQty) {
@@ -2846,11 +3425,37 @@ class _BillingPageState extends State<BillingPage> {
     if (newQty <= 0) {
       setState(() {
         _lines.removeAt(index);
+        final totalDiscount =
+            _lines.fold<int>(0, (sum, l) => sum + l.discountPaise);
+        _billDiscount.text = (totalDiscount / 100).toStringAsFixed(2);
         _syncPaymentInputsForCurrentTotal();
       });
       return;
     }
     final line = _lines[index];
+    if (line.trackStock && newQty > line.quantity) {
+      final variant =
+          variants.where((v) => v.variantId == line.variantId).firstOrNull;
+      final rawStock = controller.productStock[line.variantId] ?? 0;
+      final available = variant != null
+          ? _availableStockUnits(variant)
+          : (rawStock >= 1000 ? (rawStock / 1000).floor() : rawStock);
+      if (newQty > available) {
+        _showStockAlert(
+          title: 'Stock Limit Reached',
+          message:
+              'Quantity cannot be greater than stock quantity! Cannot increase quantity to $newQty for "${line.name}" because only $available units are available in store.',
+          productName: line.name,
+          availableStock: available,
+          requestedQty: newQty,
+        );
+        _message(
+          'Insufficient Stock: Cannot set quantity to $newQty for "${line.name}". Only $available available in stock.',
+          isError: true,
+        );
+        return;
+      }
+    }
     setState(() {
       _lines[index] = BillLineInput(
         variantId: line.variantId,
@@ -2865,6 +3470,7 @@ class _BillingPageState extends State<BillingPage> {
         unit: line.unit,
         conversionFactor: line.conversionFactor,
         trackStock: line.trackStock,
+        batchId: line.batchId,
       );
       _syncPaymentInputsForCurrentTotal();
     });
@@ -2907,7 +3513,155 @@ class _BillingPageState extends State<BillingPage> {
       ),
     );
     if (result != null && result > 0) {
+      final line = _lines[index];
+      if (line.trackStock) {
+        final variant =
+            variants.where((v) => v.variantId == line.variantId).firstOrNull;
+        final rawStock = controller.productStock[line.variantId] ?? 0;
+        final available = variant != null
+            ? _availableStockUnits(variant)
+            : (rawStock >= 1000 ? (rawStock / 1000).floor() : rawStock);
+        if (result > available) {
+          _showStockAlert(
+            title: 'Insufficient Stock Alert',
+            message:
+                'Quantity cannot be greater than stock quantity! Cannot set quantity to $result for "${line.name}" because only $available units are available in store.',
+            productName: line.name,
+            availableStock: available,
+            requestedQty: result,
+            onAdjustToMax: () => _updateLineQuantity(index, available),
+          );
+          _message(
+            'Insufficient Stock: Cannot set quantity to $result for "${line.name}". Only $available available in stock.',
+            isError: true,
+          );
+          return;
+        }
+      }
       _updateLineQuantity(index, result);
+    }
+  }
+
+  void _onBillDiscountChanged(String value) {
+    final discountRupees = double.tryParse(value.trim()) ?? 0.0;
+    final totalDiscountPaise = (discountRupees * 100).round();
+    _distributeBillDiscount(totalDiscountPaise);
+  }
+
+  void _distributeBillDiscount(int totalDiscountPaise) {
+    if (_lines.isEmpty) return;
+    final grossTotal = _lines.fold<int>(
+      0,
+      (sum, l) => sum + (l.quantity * l.unitPricePaise),
+    );
+    if (grossTotal <= 0) return;
+
+    final effectiveDiscount = totalDiscountPaise.clamp(0, grossTotal);
+    var allocated = 0;
+    setState(() {
+      for (var i = 0; i < _lines.length; i++) {
+        final l = _lines[i];
+        final lineGross = l.quantity * l.unitPricePaise;
+        int lineDiscount;
+        if (i == _lines.length - 1) {
+          lineDiscount = effectiveDiscount - allocated;
+        } else {
+          lineDiscount = (effectiveDiscount * lineGross / grossTotal).round();
+          allocated += lineDiscount;
+        }
+        _lines[i] = BillLineInput(
+          variantId: l.variantId,
+          sku: l.sku,
+          name: l.name,
+          hsn: l.hsn,
+          quantity: l.quantity,
+          unit: l.unit,
+          conversionFactor: l.conversionFactor,
+          trackStock: l.trackStock,
+          unitPricePaise: l.unitPricePaise,
+          discountPaise: lineDiscount.clamp(0, lineGross),
+          gstRateBps: l.gstRateBps,
+          priceIncludesTax: l.priceIncludesTax,
+        );
+      }
+      _syncPaymentInputsForCurrentTotal();
+    });
+  }
+
+  Future<void> _promptDiscountEdit(BuildContext context, int index) async {
+    final line = _lines[index];
+    final lineGross = line.quantity * line.unitPricePaise;
+    final currentDiscountRupees =
+        (line.discountPaise / 100).toStringAsFixed(2);
+    final discountController =
+        TextEditingController(text: currentDiscountRupees);
+    final result = await showDialog<double>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text('Edit Discount for ${line.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Item Gross Total: ${_rupees(lineGross)}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: discountController,
+              autofocus: true,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Discount (₹)',
+                prefixText: '₹ ',
+                prefixIcon: Icon(Icons.discount_outlined),
+              ),
+              onSubmitted: (val) {
+                final parsed = double.tryParse(val.trim());
+                Navigator.pop(dialogCtx, parsed);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final parsed = double.tryParse(discountController.text.trim());
+              Navigator.pop(dialogCtx, parsed);
+            },
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result >= 0) {
+      final newDiscountPaise = (result * 100).round().clamp(0, lineGross);
+      setState(() {
+        _lines[index] = BillLineInput(
+          variantId: line.variantId,
+          sku: line.sku,
+          name: line.name,
+          hsn: line.hsn,
+          quantity: line.quantity,
+          unit: line.unit,
+          conversionFactor: line.conversionFactor,
+          trackStock: line.trackStock,
+          unitPricePaise: line.unitPricePaise,
+          discountPaise: newDiscountPaise,
+          gstRateBps: line.gstRateBps,
+          priceIncludesTax: line.priceIncludesTax,
+        );
+        final totalDiscount =
+            _lines.fold<int>(0, (sum, l) => sum + l.discountPaise);
+        _billDiscount.text = (totalDiscount / 100).toStringAsFixed(2);
+        _syncPaymentInputsForCurrentTotal();
+      });
     }
   }
 
@@ -3039,6 +3793,7 @@ class _BillingPageState extends State<BillingPage> {
         unit: line.unit,
         conversionFactor: line.conversionFactor,
         trackStock: line.trackStock,
+        batchId: line.batchId,
       );
       _syncPaymentInputsForCurrentTotal();
     });
@@ -3190,6 +3945,7 @@ class _BillingPageState extends State<BillingPage> {
   void _clearProductSelection() {
     setState(() {
       _selected = null;
+      _selectedBatch = null;
       _productPickerVersion++;
       _quantity.text = '1';
       _discount.text = '0.00';
@@ -3203,8 +3959,14 @@ class _BillingPageState extends State<BillingPage> {
     final variant = _selected;
     final appContext = controller.appContext;
     final token = controller.idToken;
+    final prodId = variant?.productId ??
+        controller.products
+            .where((p) => p.variants.any((v) => v.variantId == variant?.variantId))
+            .firstOrNull
+            ?.productId ??
+        variant?.variantId;
     if (variant == null ||
-        variant.productId == null ||
+        prodId == null ||
         appContext?.businessId == null ||
         token == null) {
       return;
@@ -3222,12 +3984,16 @@ class _BillingPageState extends State<BillingPage> {
       _message('Enter valid selling price, MRP, and GST rate.');
       return;
     }
+    if (mrp > 0 && sellingPrice > mrp) {
+      _message('Selling price cannot exceed MRP.');
+      return;
+    }
     setState(() => _saving = true);
     try {
       await controller.productRepository.updateVariantPricing(
         tenantId: appContext!.ownerUid,
         businessId: appContext.businessId!,
-        productId: variant.productId!,
+        productId: prodId,
         variantId: variant.variantId,
         sellingPrice: sellingPrice,
         mrp: mrp,
@@ -3237,6 +4003,7 @@ class _BillingPageState extends State<BillingPage> {
         makeDefaultForProduct: _makeDefaultPrice,
       );
       await controller.loadProducts();
+      await _loadPricing();
       final updated = variants.where(
         (item) => item.variantId == variant.variantId,
       );
@@ -3337,11 +4104,8 @@ class _BillingPageState extends State<BillingPage> {
       final business = controller.businesses.where(
         (item) => item.businessId == appContext.businessId,
       );
-      final name = business.isEmpty ? 'NUB' : business.first.businessName;
-      if (_gst && (business.isEmpty || business.first.gstState == null)) {
-        _message('Complete GST setup before creating a GST bill.');
-        return;
-      }
+      final currentBusiness = business.isNotEmpty ? business.first : null;
+      final name = currentBusiness?.businessName ?? outlet.outletName;
       final normalizedCode = name
           .replaceAll(RegExp(r'[^A-Za-z0-9]'), '')
           .toUpperCase();
@@ -3384,6 +4148,30 @@ class _BillingPageState extends State<BillingPage> {
       }
       if (mounted) {
         final currentBusiness = business.isNotEmpty ? business.first : null;
+        final businessGstin = currentBusiness?.gstin?.trim().isNotEmpty == true
+            ? currentBusiness!.gstin!.trim()
+            : (outlet.gstin?.trim().isNotEmpty == true
+                ? outlet.gstin!.trim()
+                : null);
+
+        final resolvedGstState = (currentBusiness?.gstState?.trim().isNotEmpty == true)
+            ? currentBusiness!.gstState!.trim()
+            : (outlet.gstState?.trim().isNotEmpty == true)
+                ? outlet.gstState!.trim()
+                : CustomerValidators.stateNameFromCode(
+                    CustomerValidators.stateCodeFromGstin(businessGstin),
+                  );
+
+        final resolvedGstStateCode = CustomerValidators.stateCodeFromGstin(businessGstin) ??
+            (resolvedGstState != null
+                ? CustomerValidators.gstStateCodes.entries
+                    .firstWhere(
+                      (e) => e.value.toLowerCase() == resolvedGstState.toLowerCase(),
+                      orElse: () => const MapEntry('', ''),
+                    )
+                    .key
+                : null);
+
         final printLines = <InvoicePrintLine>[
           for (var i = 0; i < _lines.length; i++)
             InvoicePrintLine(
@@ -3406,17 +4194,21 @@ class _BillingPageState extends State<BillingPage> {
           invoiceNumber: result.invoiceNumber,
           invoiceDate: DateTime.now(),
           businessName: currentBusiness?.businessName ?? name,
-          businessTradeName: currentBusiness?.gstTradeName,
-          businessAddress: currentBusiness?.address,
-          businessGstin: currentBusiness?.gstin,
+          businessTradeName:
+              currentBusiness?.gstTradeName ?? outlet.gstTradeName,
+          businessAddress: currentBusiness?.address ?? outlet.address,
+          businessGstin: businessGstin,
           businessPan:
-              currentBusiness?.gstin != null &&
-                  currentBusiness!.gstin!.length >= 12
-              ? currentBusiness.gstin!.substring(2, 12)
-              : null,
-          businessPhone: currentBusiness?.phone,
+              businessGstin != null && businessGstin.length >= 12
+                  ? businessGstin.substring(2, 12)
+                  : null,
+          businessPhone: currentBusiness?.phone ?? outlet.contactNumber,
           businessEmail: currentBusiness?.email,
-          businessState: currentBusiness?.gstState,
+          businessState: resolvedGstState,
+          businessStateCode: (resolvedGstStateCode != null &&
+                  resolvedGstStateCode.isNotEmpty)
+              ? resolvedGstStateCode
+              : null,
           customerName: _selectedCustomer?.name.trim().isNotEmpty == true
               ? _selectedCustomer!.name
               : 'Walk-in customer',
@@ -3474,6 +4266,7 @@ class _BillingPageState extends State<BillingPage> {
 
         setState(() {
           _lines.clear();
+          _billDiscount.text = '0.00';
           _cash.text = '0.00';
           _upi.text = '0.00';
           _dueDate = null;
@@ -3580,9 +4373,168 @@ class _BillingPageState extends State<BillingPage> {
     );
   }
 
-  void _message(String message) =>
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
+  void _message(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              if (isError) ...[
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: isError ? Colors.red.shade800 : null,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: isError ? 4 : 2),
+        ),
+      );
+  }
+
+  Future<void> _showStockAlert({
+    required String title,
+    required String message,
+    String? productName,
+    int? availableStock,
+    int? requestedQty,
+    VoidCallback? onAdjustToMax,
+  }) async {
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.red.shade800,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.red.shade900,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message,
+              style: const TextStyle(fontSize: 14, height: 1.4),
+            ),
+            if (availableStock != null && requestedQty != null) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Available in Stock:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '$availableStock units',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: availableStock > 0
+                                ? Colors.green.shade800
+                                : Colors.red.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Requested Quantity:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '$requestedQty units',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          if (onAdjustToMax != null &&
+              availableStock != null &&
+              availableStock > 0)
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF10263D),
+                side: const BorderSide(color: Color(0xFF10263D)),
+              ),
+              onPressed: () {
+                Navigator.of(dialogCtx).pop();
+                onAdjustToMax();
+              },
+              icon: const Icon(Icons.check, size: 16),
+              label: Text('Set Qty to $availableStock'),
+            ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade800,
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('OK, Understood'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _BarcodeScannerDialog extends StatefulWidget {
@@ -3759,131 +4711,191 @@ class _ProductDetailsCard extends StatelessWidget {
   final VoidCallback onSavePricing;
 
   @override
-  Widget build(BuildContext context) => Card(
-    elevation: 0,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(color: Colors.blueGrey.withValues(alpha: 0.2)),
-    ),
-    color: Theme.of(context).colorScheme.surfaceContainerHighest
-        .withValues(alpha: 0.4),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Wrap(
-        spacing: 24,
-        runSpacing: 12,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          _detail(l10n?.name ?? 'Product', variant.productName ?? variant.name),
-          _detail('Variant', variant.name),
-          _detail(l10n?.sku ?? 'SKU', variant.sku ?? '—'),
-          _detail('Barcode', variant.barcode ?? '—'),
-          _detail(
-            l10n?.unit ?? 'Unit',
-            variant.commercialUnitName ?? variant.baseUnitId,
-          ),
-          SizedBox(
-            width: 160,
-            child: TextField(
-              controller: sellingPrice,
-              enabled: !saving,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: l10n?.sellingPrice ?? 'Selling price (₹)',
-                border: OutlineInputBorder(
+  Widget build(BuildContext context) {
+    final rawStock = stock[variant.variantId] ?? 0;
+    final isStockTracked = variant.trackStock;
+    final stockUnits = rawStock >= 1000 ? (rawStock / 1000).floor() : rawStock;
+    final isOutOfStock = isStockTracked && stockUnits <= 0;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isOutOfStock
+              ? Colors.red.shade300
+              : Colors.blueGrey.withValues(alpha: 0.2),
+        ),
+      ),
+      color: isOutOfStock
+          ? Colors.red.shade50.withValues(alpha: 0.25)
+          : Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.4),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isOutOfStock) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  border: Border.all(color: Colors.red.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.red.shade800,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Out of Stock: "${variant.displayName}" has 0 available inventory and cannot be billed.',
+                        style: TextStyle(
+                          color: Colors.red.shade900,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 160,
-            child: TextField(
-              controller: mrp,
-              enabled: !saving,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: l10n?.mrp ?? 'MRP (₹)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 130,
-            child: TextField(
-              controller: gstRate,
-              enabled: isGst && !saving,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: '${l10n?.gst ?? "GST"} (%)',
-                helperText: isGst ? null : 'Turned off (0%)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
-                ),
-              ),
-            ),
-          ),
-          _detail(l10n?.hsn ?? 'HSN', variant.hsnCode ?? '—'),
-          _detail(
-            l10n?.availableStock ?? 'Available stock',
-            _formatAvailableStock(stock[variant.variantId] ?? 0),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Checkbox(
-                value: makeDefault,
-                onChanged: saving
-                    ? null
-                    : (value) => onMakeDefaultChanged(value ?? false),
-              ),
-              Text(
-                l10n?.makeDefaultPrice ?? 'Make default for this product',
-                style: const TextStyle(fontSize: 13),
               ),
             ],
-          ),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF10263D),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+            Wrap(
+              spacing: 24,
+              runSpacing: 12,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                _detail(
+                  l10n?.name ?? 'Product',
+                  variant.productName ?? variant.name,
+                ),
+                _detail('Variant', variant.name),
+                _detail(l10n?.sku ?? 'SKU', variant.sku ?? '—'),
+                _detail('Barcode', variant.barcode ?? '—'),
+                _detail(
+                  l10n?.unit ?? 'Unit',
+                  variant.commercialUnitName ?? variant.baseUnitId,
+                ),
+                SizedBox(
+                  width: 160,
+                  child: TextField(
+                    controller: sellingPrice,
+                    enabled: !saving,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n?.sellingPrice ?? 'Selling price (₹)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 160,
+                  child: TextField(
+                    controller: mrp,
+                    enabled: !saving,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n?.mrp ?? 'MRP (₹)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 130,
+                  child: TextField(
+                    controller: gstRate,
+                    enabled: isGst && !saving,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: '${l10n?.gst ?? "GST"} (%)',
+                      helperText: isGst ? null : 'Turned off (0%)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                    ),
+                  ),
+                ),
+                _detail(l10n?.hsn ?? 'HSN', variant.hsnCode ?? '—'),
+                _detail(
+                  l10n?.availableStock ?? 'Available stock',
+                  !isStockTracked
+                      ? 'Untracked'
+                      : (isOutOfStock
+                          ? '0 (Out of stock)'
+                          : _formatAvailableStock(rawStock)),
+                  isWarning: isOutOfStock,
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Checkbox(
+                      value: makeDefault,
+                      onChanged: saving
+                          ? null
+                          : (value) => onMakeDefaultChanged(value ?? false),
+                    ),
+                    Text(
+                      l10n?.makeDefaultPrice ?? 'Make default for this product',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ],
+                ),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF10263D),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: saving ? null : onSavePricing,
+                  icon: const Icon(Icons.save_outlined, size: 18),
+                  label: Text(
+                    saving
+                        ? (l10n?.saving ?? 'Saving...')
+                        : (l10n?.savePrices ?? 'Save prices'),
+                  ),
+                ),
+              ],
             ),
-            onPressed: saving ? null : onSavePricing,
-            icon: const Icon(Icons.save_outlined, size: 18),
-            label: Text(
-              saving
-                  ? (l10n?.saving ?? 'Saving...')
-                  : (l10n?.savePrices ?? 'Save prices'),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
-  Widget _detail(String label, String value) => SizedBox(
+  Widget _detail(String label, String value, {bool isWarning = false}) => SizedBox(
     width: 160,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -3895,7 +4907,11 @@ class _ProductDetailsCard extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            color: isWarning ? Colors.red.shade800 : null,
+          ),
         ),
       ],
     ),
@@ -3903,7 +4919,206 @@ class _ProductDetailsCard extends StatelessWidget {
 }
 
 String _formatAvailableStock(int thousandths) {
-  return thousandths >= 1000
-      ? (thousandths / 1000).round().toString()
-      : thousandths.toString();
+  if (thousandths >= 1000) {
+    final value = thousandths / 1000;
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+  return thousandths.toString();
+}
+
+class _LotPriceSelectionDialog extends StatelessWidget {
+  const _LotPriceSelectionDialog({
+    required this.variant,
+    required this.batches,
+  });
+
+  final ProductVariantModel variant;
+  final List<VariantBatchPriceOption> batches;
+
+  String _formatMoney(int paise) => (paise / 100).toStringAsFixed(2);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF6FF),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.sell_outlined,
+              color: Color(0xFF2563EB),
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Select Selling Price / Lot',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  variant.displayName,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 440,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Multiple purchase lots found with different prices. Tap the price matching the physical product:',
+              style: TextStyle(fontSize: 13, color: Color(0xFF475569)),
+            ),
+            const SizedBox(height: 12),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    for (var i = 0; i < batches.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 8),
+                      _batchCard(context, batches[i]),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+  }
+
+  Widget _batchCard(BuildContext context, VariantBatchPriceOption batch) {
+    final sellStr = _formatMoney(batch.sellingPricePaise);
+    final mrpStr = batch.mrpPaise > 0 ? _formatMoney(batch.mrpPaise) : null;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      color: const Color(0xFFF8FAFC),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => Navigator.of(context).pop(batch),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '₹$sellStr',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        if (mrpStr != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            'MRP: ₹$mrpStr',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        if (batch.internalBatchNo.isNotEmpty)
+                          Text(
+                            'Lot: ${batch.internalBatchNo}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF475569),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        if (batch.purchaseId != null &&
+                            batch.purchaseId!.isNotEmpty)
+                          Text(
+                            '• ${batch.purchaseId}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${_formatAvailableStock(batch.availableQty)} in stock',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF166534),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: Color(0xFF94A3B8),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

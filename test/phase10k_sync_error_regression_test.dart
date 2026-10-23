@@ -91,7 +91,7 @@ void main() {
       'name': 'Test Drain',
     }, idToken: token('U'));
 
-    expect(await SyncOutboxRepository(src).pendingCount(), 1);
+    expect((await src.db.query('sync_outbox')).length, 1);
     expect(sync.state, SyncState.offline);
 
     // Reconnect and sync
@@ -365,7 +365,7 @@ void main() {
       'lastError': 'Remote version changed for customers/CUST-CONFLICT-1. Local data retained.',
     }, where: "documentId = 'CUST-CONFLICT-1'");
 
-    expect(await SyncOutboxRepository(src).pendingCount(), 1);
+    expect((await src.db.query('sync_outbox')).length, 1);
 
     // 5. User accepts remote data to resolve conflict
     connectivity.available = true;

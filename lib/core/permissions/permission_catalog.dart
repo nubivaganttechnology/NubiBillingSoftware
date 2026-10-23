@@ -93,6 +93,12 @@ class PermissionCatalog {
       Icons.fact_check_outlined,
       'attendance',
     ),
+    AdminModule(
+      'salary',
+      'Staff Salary',
+      Icons.account_balance_wallet_outlined,
+      'salary',
+    ),
     AdminModule('reports', 'Reports', Icons.bar_chart_outlined, 'reports'),
     AdminModule(
       'businesses',
@@ -124,6 +130,16 @@ class PermissionCatalog {
         .where(
           (module) =>
               allows(module.permission, permissions) ||
+              (module.id == 'attendance' &&
+                  (allows('attendance', permissions) ||
+                      allows('ATTENDANCE_VIEW', permissions) ||
+                      allows('ATTENDANCE_MANAGE', permissions) ||
+                      allows('ATTENDANCE_APPROVE', permissions) ||
+                      allows('salary', permissions))) ||
+              (module.id == 'salary' &&
+                  (allows('salary', permissions) ||
+                      allows('SALARY_VIEW', permissions) ||
+                      allows('SALARY_MANAGE', permissions))) ||
               (module.id == 'barcode' &&
                   (allows('products', permissions) ||
                       allows('product.read', permissions))) ||

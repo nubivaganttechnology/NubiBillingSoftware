@@ -5,6 +5,7 @@ import '../../core/utils/validators.dart';
 import '../../data/models/employee_model.dart';
 import '../staff_salary/staff_salary_page.dart';
 import '../../data/models/permission_model.dart';
+import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 
 class EmployeeManagementPage extends StatefulWidget {
@@ -25,8 +26,9 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    final l10n = AppLocalizations.of(context);
     if (controller.appContext?.accountType != 'owner') {
-      return const Center(child: Text('Only an owner can manage employees.'));
+      return Center(child: Text(l10n?.onlyOwnerCanManageEmployees ?? 'Only an owner can manage employees.'));
     }
     return AnimatedBuilder(
       animation: controller,
@@ -61,12 +63,12 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                     FilledButton.icon(
                       onPressed: () => _openAddEmployee(context),
                       icon: const Icon(Icons.person_add_alt_1),
-                      label: const Text('Add Employee'),
+                      label: Text(l10n?.addEmployee ?? 'Add Employee'),
                     ),
                   ],
                 );
                 final title = Text(
-                  'Employees',
+                  l10n?.employees ?? 'Employees',
                   style: Theme.of(context).textTheme.headlineSmall,
                 );
                 return compact
@@ -97,7 +99,7 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                   title: Text(controller.employeesError!),
                   trailing: TextButton(
                     onPressed: controller.loadEmployees,
-                    child: const Text('Retry'),
+                    child: Text(l10n?.retry ?? 'Retry'),
                   ),
                 ),
               )
@@ -388,18 +390,18 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       final discard = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Discard Changes?'),
-          content: const Text(
-            'Your entered employee information will be lost.',
+          title: Text(AppLocalizations.of(context)?.discardChangesTitle ?? 'Discard Changes?'),
+          content: Text(
+            AppLocalizations.of(context)?.discardChangesSubtitle ?? 'Your entered employee information will be lost.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Discard'),
+              child: Text(AppLocalizations.of(context)?.discard ?? 'Discard'),
             ),
           ],
         ),
@@ -490,6 +492,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -500,7 +503,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         builder: (context, _) => Scaffold(
           appBar: AppBar(
             title: Text(
-              widget.employee == null ? 'Add Employee' : 'Edit Employee',
+              widget.employee == null ? (AppLocalizations.of(context)?.addEmployee ?? 'Add Employee') : (AppLocalizations.of(context)?.editEmployee ?? 'Edit Employee'),
             ),
             leading: IconButton(
               onPressed: controller.employeeSaving ? null : _close,
@@ -521,7 +524,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                       const SizedBox(height: 12),
                       FilledButton(
                         onPressed: controller.loadEmployeeMasters,
-                        child: const Text('Retry'),
+                        child: Text(l10n?.retry ?? 'Retry'),
                       ),
                     ],
                   ),

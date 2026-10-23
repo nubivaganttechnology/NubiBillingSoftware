@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:testflutter/data/models/product_master_value.dart';
 import 'package:testflutter/data/services/catalogue_selection_resolver.dart';
 import 'package:testflutter/data/services/firestore_data_service.dart';
 import 'package:testflutter/data/services/firestore_rest_service.dart';
@@ -286,5 +287,53 @@ void main() {
 
     expect(firestore.queryCalls, isNotEmpty);
     // Verified queries ran against local mock
+  });
+
+  test('explicit subcategory with profileId=EXPLICIT_METADATA and templateStatus=READY is eligible even when templateSelectable is false', () async {
+    const stencilId =
+        'SYS_SUBCATEGORY_SYS_CATEGORY_TEXTURES_SPECIAL_EFFECTS_STENCILS_WALL_ART';
+    firestore.records['product_subcategories']!.add({
+      'id': stencilId,
+      'subcategoryId': stencilId,
+      'categoryId': 'CAT_PAINTS',
+      'name': 'Stencils & Wall Art',
+      'scopeType': 'SYSTEM',
+      'status': 'ACTIVE',
+      'profileId': 'EXPLICIT_METADATA',
+      'templateStatus': 'READY',
+      'templateSelectable': false,
+    });
+    firestore.records['subcategory_attribute_templates']!.add({
+      'id': 'TPL_STENCILS_FINISH',
+      'subcategoryId': stencilId,
+      'attributeId': 'finish',
+      'scopeType': 'SYSTEM',
+      'status': 'ACTIVE',
+    });
+
+    final subcat = const ProductMasterValue(
+      id: stencilId,
+      name: 'Stencils & Wall Art',
+      status: 'ACTIVE',
+      categoryId: 'CAT_PAINTS',
+      scopeType: 'SYSTEM',
+      rawFields: {
+        'profileId': 'EXPLICIT_METADATA',
+        'templateStatus': 'READY',
+        'templateSelectable': false,
+      },
+    );
+
+    final diag = await selectionResolver.evaluateSubcategoryEligibility(
+      subcat: subcat,
+      tenantId: 'TENANT1',
+      businessId: 'BIZ1',
+      token: 'TOKEN1',
+      businessTypeId: 'HARDWARE',
+      businessSubTypeId: 'PAINTS',
+    );
+
+    expect(diag.eligible, isTrue);
+    expect(diag.exclusionReason, equals(SelectionExclusionReason.none));
   });
 }

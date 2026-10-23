@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../data/services/invoice_print_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 class PrintFormatDialog extends StatefulWidget {
   const PrintFormatDialog({
@@ -190,6 +191,7 @@ class _PrintFormatDialogState extends State<PrintFormatDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
       titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
@@ -211,12 +213,12 @@ class _PrintFormatDialogState extends State<PrintFormatDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Select Print Format',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n?.selectPrintFormat ?? 'Select Print Format',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Invoice ${widget.data.invoiceNumber}',
+                  '${l10n?.supplierBill ?? 'Invoice'} ${widget.data.invoiceNumber}',
                   style: TextStyle(
                     fontSize: 12,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -228,7 +230,7 @@ class _PrintFormatDialogState extends State<PrintFormatDialog> {
           IconButton(
             icon: const Icon(Icons.close, size: 20),
             onPressed: () => Navigator.pop(context),
-            tooltip: 'Cancel',
+            tooltip: l10n?.cancel ?? 'Cancel',
           ),
         ],
       ),
@@ -291,9 +293,9 @@ class _PrintFormatDialogState extends State<PrintFormatDialog> {
                   ),
                   child: Row(
                     children: [
-                      const Text(
-                        'Paper Width:',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      Text(
+                        l10n?.paperWidth ?? 'Paper Width:',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(width: 12),
                       SizedBox(
@@ -335,9 +337,9 @@ class _PrintFormatDialogState extends State<PrintFormatDialog> {
                 value: _rememberAsDefault,
                 onChanged: (val) =>
                     setState(() => _rememberAsDefault = val ?? false),
-                title: const Text(
-                  'Remember as default format',
-                  style: TextStyle(fontSize: 13),
+                title: Text(
+                  l10n?.saveAsDefaultFormat ?? 'Save as Default Format',
+                  style: const TextStyle(fontSize: 13),
                 ),
                 subtitle: const Text(
                   'Future bills will default to this format in settings',
@@ -355,7 +357,7 @@ class _PrintFormatDialogState extends State<PrintFormatDialog> {
         OutlinedButton.icon(
           onPressed: _isProcessing ? null : _handleShare,
           icon: const Icon(Icons.share_outlined, size: 18),
-          label: const Text('Share PDF'),
+          label: Text(l10n?.sharePdf ?? 'Share PDF'),
         ),
         FilledButton.icon(
           onPressed: _isProcessing ? null : _handlePrint,
@@ -369,7 +371,7 @@ class _PrintFormatDialogState extends State<PrintFormatDialog> {
                   ),
                 )
               : const Icon(Icons.print_outlined, size: 18),
-          label: const Text('Print Bill'),
+          label: Text(l10n?.printBill ?? 'Print Bill'),
         ),
       ],
     );

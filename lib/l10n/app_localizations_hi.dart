@@ -1822,4 +1822,556 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get aboutAppDescription =>
       'खुदरा, थोक, गोदाम लॉजिस्टिक्स और वाणिज्यिक व्यापार कार्यों के लिए इंजीनियर किया गया उच्च-प्रदर्शन, ऑफ़लाइन-प्रथम एंटरप्राइज़ समाधान।';
+
+  @override
+  String get staffSalaryKhata => 'कर्मचारी वेतन खाता';
+
+  @override
+  String get staffSalarySubtitle =>
+      'अग्रिम खाता, उपस्थिति समाधान और पेरोल निपटान';
+
+  @override
+  String get selectStaffMember => 'कर्मचारी चुनें';
+
+  @override
+  String get addDailyWorker => '+ दैनिक कर्मी जोड़ें';
+
+  @override
+  String get searchStaffHint => 'नाम या कोड द्वारा कर्मचारी खोजें...';
+
+  @override
+  String get noStaffMatched => 'कोई कर्मचारी मेल नहीं खाता।';
+
+  @override
+  String get noRoleAssigned => 'कोई पद आवंटित नहीं';
+
+  @override
+  String get salaryBaseRateAndType => 'मूल दर और प्रकार';
+
+  @override
+  String get salaryNotConfigured => 'कॉन्फ़िगर नहीं है';
+
+  @override
+  String get tapToConfigureRate => 'दर कॉन्फ़िगर करने के लिए टैप करें';
+
+  @override
+  String get outstandingAdvances => 'बकाया अग्रिम (पेशगी)';
+
+  @override
+  String get midMonthAdvancesSubtitle => 'माह के मध्य नकद/यूपीआई अग्रिम';
+
+  @override
+  String get noAdvanceDue => 'कोई अग्रिम बकाया नहीं';
+
+  @override
+  String get storePurchasesCredit => 'दुकान खरीदारी उधार';
+
+  @override
+  String get storeGoodsOnCredit => 'उधार पर ली गई वस्तुएं';
+
+  @override
+  String get noStoreCreditDue => 'कोई स्टोर उधार बकाया नहीं';
+
+  @override
+  String get netSalaryPayable => 'कुल देय वेतन';
+
+  @override
+  String get acrossUnpaidPeriods => 'स्वीकृत अदत्त अवधियों में';
+
+  @override
+  String get allPeriodsSettled => 'सभी अवधियां चुकता';
+
+  @override
+  String get giveAdvancePeshgi => '+ अग्रिम दें (पेशगी)';
+
+  @override
+  String get approvePeriodSalary => 'अवधि वेतन स्वीकृत करें';
+
+  @override
+  String get salaryProfileAndRate => 'वेतन प्रोफ़ाइल और दर';
+
+  @override
+  String get outletAllocationSplit => 'आउटलेट आवंटन विभाजन';
+
+  @override
+  String get salaryPeriodsTab => 'वेतन अवधियां';
+
+  @override
+  String get khataPassbookTab => 'खाता पासबुक';
+
+  @override
+  String get salaryProfileAndSplitsTab => 'वेतन प्रोफ़ाइल और विभाजन';
+
+  @override
+  String get noSalaryPeriods => 'अभी तक कोई वेतन अवधि परिकलित नहीं की गई।';
+
+  @override
+  String get salaryRateHistory => 'वेतन दर इतिहास';
+
+  @override
+  String get updateRateAddProfile => 'दर अपडेट / प्रोफ़ाइल जोड़ें';
+
+  @override
+  String get noSalaryProfileConfigured =>
+      'कोई वेतन दर प्रोफ़ाइल कॉन्फ़िगर नहीं है।';
+
+  @override
+  String get configureSalaryRateProfile => 'वेतन दर प्रोफ़ाइल कॉन्फ़िगर करें';
+
+  @override
+  String get baseSalaryRate => 'मूल वेतन दर';
+
+  @override
+  String get wageType => 'मजदूरी प्रकार';
+
+  @override
+  String get monthlyFixed => 'मासिक निश्चित';
+
+  @override
+  String get dailyWage => 'दैनिक मजदूरी';
+
+  @override
+  String get hourlyRate => 'प्रति घंटा दर';
+
+  @override
+  String get shiftBased => 'शिफ्ट आधारित';
+
+  @override
+  String get paymentCycle => 'भुगतान चक्र';
+
+  @override
+  String get monthly => 'मासिक';
+
+  @override
+  String get fourteenDays => '14 दिन';
+
+  @override
+  String get weekly => 'साप्ताहिक';
+
+  @override
+  String get saveSalaryProfile => 'वेतन प्रोफ़ाइल सहेजें';
+
+  @override
+  String get outletAllocationPercent => 'आउटलेट आवंटन (%)';
+
+  @override
+  String get outletAllocationDesc =>
+      'आउटलेट्स में वेतन व्यय का प्रतिशत विभाजन निर्दिष्ट करें। कुल ठीक 100% होना चाहिए।';
+
+  @override
+  String get totalAllocation => 'कुल आवंटन:';
+
+  @override
+  String get saveHundredPercentSplit => '100% विभाजन सहेजें';
+
+  @override
+  String get allocatedOutlet => 'आवंटित आउटलेट';
+
+  @override
+  String get noOutletsAssignedToEmployee =>
+      'इस व्यवसाय के तहत इस कर्मचारी को कोई आउटलेट आवंटित नहीं है। कृपया पहले कर्मचारी प्रबंधन में एक आउटलेट आवंटित करें।';
+
+  @override
+  String get disburseStaffAdvance => 'कर्मचारी अग्रिम भुगतान (पेशगी)';
+
+  @override
+  String get advanceAmount => 'अग्रिम राशि (₹)';
+
+  @override
+  String get paymentMode => 'भुगतान माध्यम';
+
+  @override
+  String get referenceNumber => 'संदर्भ संख्या (वैकल्पिक)';
+
+  @override
+  String get notesOptional => 'टिप्पणी / कारण (वैकल्पिक)';
+
+  @override
+  String get disburseAdvance => 'अग्रिम भुगतान करें';
+
+  @override
+  String get approveSalaryPeriodTitle => 'वेतन अवधि स्वीकृत करें';
+
+  @override
+  String get grossEarned => 'सकल अर्जित';
+
+  @override
+  String get paid => 'भुगतान किया गया';
+
+  @override
+  String get advanceAdjusted => 'अग्रिम समायोजित';
+
+  @override
+  String get storePurchaseAdjusted => 'दुकान खरीद समायोजित';
+
+  @override
+  String get balanceDue => 'शेष देय राशि';
+
+  @override
+  String get generateSalarySlip => 'वेतन पर्ची बनाएं';
+
+  @override
+  String get salaryAcknowledged => 'स्वीकृत';
+
+  @override
+  String get salaryAcknowledge => 'स्वीकार करें';
+
+  @override
+  String get selectSalarySlipLanguage => 'वेतन पर्ची की भाषा चुनें';
+
+  @override
+  String get salaryRateSaved => 'वेतन दर सफलतापूर्वक सहेजी गई।';
+
+  @override
+  String get advanceRecorded => 'अग्रिम सफलतापूर्वक दर्ज किया गया।';
+
+  @override
+  String get salaryPeriodApproved => 'वेतन अवधि सफलतापूर्वक स्वीकृत की गई।';
+
+  @override
+  String get selectPrintFormat => 'प्रिंट प्रारूप चुनें';
+
+  @override
+  String get paperWidth => 'कागज़ की चौड़ाई:';
+
+  @override
+  String get saveAsDefaultFormat => 'डिफ़ॉल्ट प्रारूप के रूप में सहेजें';
+
+  @override
+  String get confirmUpiReceipt =>
+      'अंतिम रूप देने से पहले UPI रसीद की मैन्युअल पुष्टि करें।';
+
+  @override
+  String get scanToPay => 'भुगतान के लिए स्कैन करें';
+
+  @override
+  String get payUsingUpi => 'Google Pay, PhonePe, Paytm या BHIM से भुगतान करें';
+
+  @override
+  String get allOutlets => 'सभी आउटलेट';
+
+  @override
+  String get stepByStepDateSelection => 'चरणबद्ध तिथि चयन';
+
+  @override
+  String get fromDateStep => '1. प्रारंभ तिथि';
+
+  @override
+  String get toDateStep => '2. समाप्ति तिथि';
+
+  @override
+  String get step1Instruction => 'कैलेंडर से प्रारंभिक तिथि चुनें';
+
+  @override
+  String get step2Instruction => 'कैलेंडर से अंतिम तिथि चुनें';
+
+  @override
+  String get applyRange => 'लागू करें';
+
+  @override
+  String get addEmployee => 'कर्मचारी जोड़ें';
+
+  @override
+  String get addGodown => 'गोदाम जोड़ें';
+
+  @override
+  String get addRack => 'रैक जोड़ें';
+
+  @override
+  String get adjustment => 'समायोजन';
+
+  @override
+  String get advanceBalance => 'अग्रिम क्रेडिट';
+
+  @override
+  String get applicationInformation => 'एप्लिकेशन जानकारी';
+
+  @override
+  String get attendanceCheckInRecorded =>
+      'आज के लिए उपस्थिति चेक-इन पहले ही दर्ज हो चुका है।';
+
+  @override
+  String get bankAndPaymentDetails => 'चालान के लिए बैंक और भुगतान विवरण';
+
+  @override
+  String get barcodingAndItemIdentification => 'बारकोडिंग और आइटम पहचान';
+
+  @override
+  String get billingAndInvoice => 'बिलिंग और चालान';
+
+  @override
+  String get businessInformation => 'व्यवसाय जानकारी';
+
+  @override
+  String get checkoutCompletedToday =>
+      'आज के लिए चेकआउट पूरा हो चुका है। प्रतिदिन केवल 1 चेकआउट की अनुमति है।';
+
+  @override
+  String get cloudDiagnosticsAndAnalytics =>
+      'क्लाउड डायग्नोस्टिक्स और त्रुटि विश्लेषण';
+
+  @override
+  String get cloudSyncEngineStatus => 'क्लाउड सिंक्रोनाइज़ेशन इंजन स्थिति';
+
+  @override
+  String get creditSale => 'उधार बिक्री';
+
+  @override
+  String get delete => 'हटाएं';
+
+  @override
+  String get discardUnsavedPurchaseSubtitle =>
+      'आपके वर्तमान स्प्रेडशीट संपादन सहेजे नहीं गए हैं।';
+
+  @override
+  String get discardUnsavedPurchaseTitle => 'सहेजे न गए खरीद को त्यागें?';
+
+  @override
+  String get earlyCheckoutNotice => 'शीघ्र चेकआउट सूचना';
+
+  @override
+  String get editEmployee => 'कर्मचारी संपादित करें';
+
+  @override
+  String get email => 'ईमेल पता';
+
+  @override
+  String get employees => 'कर्मचारी';
+
+  @override
+  String get enterpriseProcurement =>
+      'एंटरप्राइज खरीद · चालान इनवर्डिंग और आइटम प्रविष्टि';
+
+  @override
+  String get excelGridMode => 'एक्सेल ग्रिड मोड';
+
+  @override
+  String get expiryDate => 'समाप्ति तिथि';
+
+  @override
+  String get forgotPassword => 'पासवर्ड भूल गए?';
+
+  @override
+  String get godownManagement => 'गोदाम प्रबंधन';
+
+  @override
+  String get gstAndTax => 'जीएसटी और टैक्स';
+
+  @override
+  String get gstFilingScheme => 'जीएसटी फाइलिंग योजना';
+
+  @override
+  String get internalBatchNo => 'आंतरिक बैच संख्या';
+
+  @override
+  String get inventoryPolicies => 'इन्वेंट्री नीतियां';
+
+  @override
+  String get invoicePrintingLayout => 'चालान प्रिंटिंग लेआउट';
+
+  @override
+  String get languageAndAppearance => 'भाषा और स्वरूप';
+
+  @override
+  String get location => 'स्थान';
+
+  @override
+  String get maintenanceMessage =>
+      'हम कुछ सुधार कर रहे हैं। कृपया कुछ देर बाद पुनः प्रयास करें।';
+
+  @override
+  String get mfgDate => 'निर्माण तिथि';
+
+  @override
+  String get noLedgerTransactions => 'कोई बहीखाता लेन-देन नहीं मिला';
+
+  @override
+  String get noStoragePermission =>
+      'आपको भंडारण स्थान देखने की अनुमति नहीं है।';
+
+  @override
+  String get numberingAndContentOptions => 'क्रमांकन और सामग्री विकल्प';
+
+  @override
+  String get offlineCustomerLedgerNotice =>
+      'ऑफ़लाइन मोड: स्थानीय रूप से कैश्ड लेज़र प्रदर्शित हो रहा है। सर्वर से कनेक्ट होने तक वास्तविक समय शेष और प्रविष्टियाँ पुरानी हो सकती हैं।';
+
+  @override
+  String get onlyOwnerCanManageEmployees =>
+      'केवल स्वामी ही कर्मचारियों का प्रबंधन कर सकते हैं।';
+
+  @override
+  String get password => 'पासवर्ड';
+
+  @override
+  String get preview => 'पूर्वावलोकन';
+
+  @override
+  String get product => 'उत्पाद';
+
+  @override
+  String get receiving => 'प्राप्ति';
+
+  @override
+  String get retry => 'पुनः प्रयास करें';
+
+  @override
+  String get saveChanges => 'परिवर्तन सहेजें';
+
+  @override
+  String get scrollLeft => 'तालिका बाएं स्क्रॉल करें';
+
+  @override
+  String get scrollRight => 'तालिका दाएं स्क्रॉल करें';
+
+  @override
+  String get selectBusinessToManageGodowns =>
+      'वैकल्पिक गोदामों का प्रबंधन करने के लिए एक व्यवसाय चुनें।';
+
+  @override
+  String get settingsAndPreferences => 'सेटिंग्स और प्राथमिकताएं';
+
+  @override
+  String get signIn => 'साइन इन करें';
+
+  @override
+  String get stay => 'यहीं रहें';
+
+  @override
+  String get stockAvailabilityRules => 'स्टॉक उपलब्धता और सुरक्षा नियम';
+
+  @override
+  String get storeAt => 'यहाँ स्टोर करें';
+
+  @override
+  String get storeProfile => 'स्टोर प्रोफ़ाइल';
+
+  @override
+  String get supplierLot => 'आपूर्तिकर्ता लॉट';
+
+  @override
+  String get syncAndDiagnostics => 'सिंक और डायग्नोस्टिक्स';
+
+  @override
+  String get systemMaintenance => 'सिस्टम रखरखाव';
+
+  @override
+  String get taxRate => 'जीएसटी %';
+
+  @override
+  String get taxSlabsAndReporting => 'टैक्स स्लैब और रिपोर्टिंग विकल्प';
+
+  @override
+  String get totalEntries => 'कुल लेज़र प्रविष्टियाँ';
+
+  @override
+  String get unifiedCustomerLedger => 'एकीकृत ग्राहक लेज़र';
+
+  @override
+  String get variantSpecification => 'वेरिएंट / विनिर्देश';
+
+  @override
+  String get allEvents => 'सभी लेन-देन';
+
+  @override
+  String get advancesFilter => 'अग्रिम';
+
+  @override
+  String get storePurchasesFilter => 'दुकान खरीद';
+
+  @override
+  String get paymentsAndOffsetsFilter => 'भुगतान और समायोजन';
+
+  @override
+  String get noLedgerTransactionsDesc =>
+      'इस कर्मचारी के लिए कोई नकद अग्रिम, खरीद या भुगतान दर्ज नहीं है।';
+
+  @override
+  String get cashAdvanceGiven => 'नकद अग्रिम दिया';
+
+  @override
+  String get upiAdvanceGiven => 'यूपीआई अग्रिम दिया';
+
+  @override
+  String get bankAdvanceGiven => 'बैंक अग्रिम दिया';
+
+  @override
+  String get storeGoodsCredit => 'दुकान का सामान उधार';
+
+  @override
+  String get salaryPaymentPaid => 'वेतन भुगतान किया गया';
+
+  @override
+  String get advanceAdjustedInSalary => 'वेतन में अग्रिम समायोजित';
+
+  @override
+  String get storeCreditOffsetInSalary => 'वेतन में दुकान उधार समायोजित';
+
+  @override
+  String get staffInvoiceDirectPaid => 'कर्मचारी इनवॉइस प्रत्यक्ष भुगतान';
+
+  @override
+  String get recordSalaryPaymentTitle => 'वेतन भुगतान दर्ज करें';
+
+  @override
+  String get remainingNetPayable => 'शेष कुल देय:';
+
+  @override
+  String get disbursePayment => 'भुगतान करें';
+
+  @override
+  String get adjustMidMonthAdvance => 'माह के मध्य अग्रिम समायोजित करें';
+
+  @override
+  String get adjustMidMonthAdvanceDesc =>
+      'इस स्वीकृत वेतन अवधि के बदले माह के मध्य नकद/यूपीआई अग्रिम काटें।';
+
+  @override
+  String get offsetStorePurchaseCredit => 'दुकान खरीद उधार समायोजित करें';
+
+  @override
+  String get offsetStorePurchaseCreditDesc =>
+      'इस कर्मचारी द्वारा उधार लिए गए सामान को उनके वेतन से काटें।';
+
+  @override
+  String get storeCreditDue => 'दुकान उधार देय:';
+
+  @override
+  String get applyPurchaseOffset => 'खरीद समायोजन लागू करें';
+
+  @override
+  String get confirmAndApproveSalary => 'वेतन की पुष्टि और स्वीकृति दें';
+
+  @override
+  String get calculatedNetEarned => 'परिकलित शुद्ध अर्जित:';
+
+  @override
+  String get bonusLabel => 'बोनस (₹)';
+
+  @override
+  String get extraOvertimeLabel => 'अतिरिक्त ओवरटाइम (₹)';
+
+  @override
+  String get deductionPerAbsentDay => 'प्रति अनुपस्थित दिन कटौती (₹)';
+
+  @override
+  String get otherDeductionsLabel => 'अन्य कटौती (₹)';
+
+  @override
+  String get approvedWorkUnits => 'स्वीकृत कार्य इकाइयाँ';
+
+  @override
+  String get lockedFromApprovedAttendance =>
+      'स्वीकृत उपस्थिति रिकॉर्ड से परिकलित';
+
+  @override
+  String get noSalaryPeriodsApprovedYet =>
+      'अभी तक कोई वेतन अवधि स्वीकृत नहीं हुई';
+
+  @override
+  String get approvePeriodSalaryDesc =>
+      'इस माह की कमाई की गणना और लॉक करने के लिए ऊपर \"अवधि वेतन स्वीकृत करें\" पर क्लिक करें।';
+
+  @override
+  String get approveCurrentPeriod => 'वर्तमान अवधि स्वीकृत करें';
 }

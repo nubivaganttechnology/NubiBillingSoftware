@@ -12,6 +12,8 @@ import '../widgets/custom_date_range_dialog.dart';
 import 'audit_report_dialog.dart';
 import 'report_export_service.dart';
 
+enum _ExportAction { print, pdf, csv, excel }
+
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key, required this.controller});
   final AppController controller;
@@ -522,6 +524,92 @@ class _ReportsPageState extends State<ReportsPage> {
     }
   }
 
+  Future<void> _exportPeriodReport(_ExportAction action) async {
+    final ctx = widget.controller.appContext;
+    final token = widget.controller.idToken ?? '';
+    final tenantId = ctx?.ownerUid ?? ctx?.uid ?? '';
+    final businessId = (ctx?.businessId?.isNotEmpty == true)
+        ? ctx!.businessId!
+        : (widget.controller.businesses.firstOrNull?.businessId ?? '');
+    final outletId = (ctx?.outletId?.isNotEmpty == true)
+        ? ctx!.outletId!
+        : (widget.controller.currentOutlet?.outletId ??
+            widget.controller.outlets.firstOrNull?.outletId ??
+            '');
+    final businessName =
+        widget.controller.businesses
+            .where((b) => b.businessId == businessId)
+            .firstOrNull
+            ?.businessName ??
+        widget.controller.businesses.firstOrNull?.businessName ??
+        'Business';
+    final outletName =
+        widget.controller.currentOutlet?.outletName ??
+        widget.controller.outlets.firstOrNull?.outletName ??
+        'Outlet';
+
+    if (businessId.isEmpty || outletId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Select a business and outlet to export reports.'),
+        ),
+      );
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Preparing report export...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    try {
+      final detail = await _repository.loadDetailReport(
+        tileId: ReportTileId.salesSummary,
+        tenantId: tenantId,
+        businessId: businessId,
+        outletId: outletId,
+        businessName: businessName,
+        outletName: outletName,
+        dateRange: _currentDateRange,
+        token: token,
+      );
+
+      String? result;
+      switch (action) {
+        case _ExportAction.print:
+          await ReportExportService.printReport(detail);
+          return;
+        case _ExportAction.pdf:
+          result = await ReportExportService.savePdf(detail);
+          break;
+        case _ExportAction.csv:
+          result = await ReportExportService.exportCsv(detail);
+          break;
+        case _ExportAction.excel:
+          result = await ReportExportService.exportExcel(detail);
+          break;
+      }
+
+      if (mounted && result != null && result.isNotEmpty) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('File saved successfully: $result'),
+            backgroundColor: const Color(0xFF16A34A),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    }
+  }
+
   void _showLanguageSelectorDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final currentCode = widget.controller.currentLocale.languageCode;
@@ -809,17 +897,17 @@ class _ReportsPageState extends State<ReportsPage> {
                     _TopActionButton(
                       label: 'Print',
                       onPressed: () =>
-                          _openDetailReport(ReportTileId.salesSummary),
+                          _exportPeriodReport(_ExportAction.print),
                     ),
                     _TopActionButton(
                       label: 'Save PDF',
                       onPressed: () =>
-                          _openDetailReport(ReportTileId.salesSummary),
+                          _exportPeriodReport(_ExportAction.pdf),
                     ),
                     _TopActionButton(
                       label: 'Export CSV',
                       onPressed: () =>
-                          _openDetailReport(ReportTileId.salesSummary),
+                          _exportPeriodReport(_ExportAction.csv),
                     ),
                   ],
                 );
@@ -1124,9 +1212,9 @@ class _ReportsPageState extends State<ReportsPage> {
               // Executive Stat Cards
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final columns = (constraints.maxWidth / 240).floor().clamp(
+                  final columns = (constraints.maxWidth / 210).floor().clamp(
                     1,
-                    4,
+                    5,
                   );
                   final width = math.max(
                     0.0,
@@ -1153,6 +1241,22 @@ class _ReportsPageState extends State<ReportsPage> {
                           iconColor: const Color(0xFF0D9488),
                           onTap: () =>
                               _openDetailReport(ReportTileId.salesSummary),
+                        ),
+                      ),
+                      SizedBox(
+                        width: width,
+                        child: _ModernKpiCard(
+                          title: l10n?.grossProfitLabel ?? 'Gross Profit & Margin',
+                          value: _formatMoney(_overview.grossProfitPaise),
+                          subValue: _overview.grossProfitMarginPercentage != null
+                              ? '${_overview.grossProfitMarginPercentage! >= 0 ? '+' : ''}${_overview.grossProfitMarginPercentage!.toStringAsFixed(1)}% margin'
+                              : 'Estimated gross profit',
+                          growthPositive: _overview.grossProfitPaise >= 0,
+                          icon: Icons.trending_up_rounded,
+                          iconBg: const Color(0xFFF0FDF4),
+                          iconColor: const Color(0xFF16A34A),
+                          onTap: () =>
+                              _openDetailReport(ReportTileId.profitEstimate),
                         ),
                       ),
                       SizedBox(
@@ -1697,13 +1801,20 @@ class _ExecutiveRevenueExpenseChartState
             ReportTrendPoint(label: 'P6', salesPaise: 0, purchasesPaise: 0),
           ];
 
-    // Find peak interval
+    // Find peak interval and totals
     ReportTrendPoint? peakPoint;
+    int totalSales = 0;
+    int totalPurchases = 0;
     for (final p in displayPoints) {
+      totalSales += p.salesPaise;
+      totalPurchases += p.purchasesPaise;
       if (peakPoint == null || p.salesPaise > peakPoint.salesPaise) {
         peakPoint = p;
       }
     }
+    final overallNetPaise = totalSales - totalPurchases;
+    final double overallMarginPct =
+        totalSales > 0 ? (overallNetPaise / totalSales) * 100 : 0.0;
 
     return Container(
       padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 14 : 22),
@@ -1806,6 +1917,28 @@ class _ExecutiveRevenueExpenseChartState
                           ),
                         ),
                       ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: overallNetPaise >= 0
+                            ? const Color(0xFFDCFCE7)
+                            : const Color(0xFFFEE2E2),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Net Margin: ${overallNetPaise >= 0 ? '+' : ''}${_formatCompactPaise(overallNetPaise)} (${overallMarginPct.toStringAsFixed(1)}%)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: overallNetPaise >= 0
+                              ? const Color(0xFF15803D)
+                              : const Color(0xFFB91C1C),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -2032,7 +2165,7 @@ class _ExecutiveRevenueExpenseChartState
                                               ),
                                             ),
                                             Text(
-                                              '${netPaise >= 0 ? '+' : ''}${_formatCurrency(netPaise)}',
+                                              '${netPaise >= 0 ? '+' : ''}${_formatCurrency(netPaise)} (${pt.salesPaise > 0 ? ((netPaise / pt.salesPaise) * 100).toStringAsFixed(1) : '0.0'}%)',
                                               style: TextStyle(
                                                 color: netPaise >= 0
                                                     ? const Color(0xFF34D399)
@@ -4885,7 +5018,10 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
       final res = await action();
       if (mounted && res is String && res.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File saved successfully: $res')),
+          SnackBar(
+            content: Text('File saved successfully: $res'),
+            backgroundColor: const Color(0xFF16A34A),
+          ),
         );
       }
     } catch (e) {

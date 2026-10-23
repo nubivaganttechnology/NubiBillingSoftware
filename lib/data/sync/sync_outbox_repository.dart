@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:sqflite/sqflite.dart';
 
+import '../../core/constants/firebase_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
 import '../local/local_data_source.dart';
@@ -320,22 +321,36 @@ class LocalTransactionContext implements FirestoreTransactionContext {
           : Map<String, dynamic>.from(
               jsonDecode(row['payloadJson'] as String) as Map,
             );
+      final fields = FirestoreRestService.decodeFields({
+        ...base,
+        ...?write['fields'] as Map<String, dynamic>?,
+      });
+      fields.putIfAbsent('id', () => id);
+      if (collection == FirebaseConstants.invoices) {
+        fields.putIfAbsent('invoiceId', () => id);
+      }
       return FirestoreTransactionDocument(
+        id: id,
         exists: write['operation'] != 'DELETE',
-        fields: FirestoreRestService.decodeFields({
-          ...base,
-          ...?write['fields'] as Map<String, dynamic>?,
-        }),
+        fields: fields,
         updateTime: row?['remoteUpdateTime'] as String?,
       );
     }
+    final fields = row == null
+        ? <String, dynamic>{}
+        : FirestoreRestService.decodeFields(
+            jsonDecode(row['payloadJson'] as String),
+          );
+    if (row != null) {
+      fields.putIfAbsent('id', () => id);
+      if (collection == FirebaseConstants.invoices) {
+        fields.putIfAbsent('invoiceId', () => id);
+      }
+    }
     return FirestoreTransactionDocument(
+      id: id,
       exists: row != null && row['isDeleted'] == 0,
-      fields: row == null
-          ? {}
-          : FirestoreRestService.decodeFields(
-              jsonDecode(row['payloadJson'] as String),
-            ),
+      fields: fields,
       updateTime: row?['remoteUpdateTime'] as String?,
     );
   }
@@ -348,10 +363,22 @@ class LocalTransactionContext implements FirestoreTransactionContext {
     final documents = await local.query(collection, filters, executor: tx);
     return documents
         .map(
-          (document) => FirestoreTransactionDocument(
-            exists: true,
-            fields: FirestoreRestService.decodeFields(document['fields']),
-          ),
+          (document) {
+            final docName = document['name'] as String? ?? '';
+            final docId = docName.split('/').last;
+            final fields = FirestoreRestService.decodeFields(document['fields']);
+            if (docId.isNotEmpty) {
+              fields.putIfAbsent('id', () => docId);
+              if (collection == FirebaseConstants.invoices) {
+                fields.putIfAbsent('invoiceId', () => docId);
+              }
+            }
+            return FirestoreTransactionDocument(
+              id: docId,
+              exists: true,
+              fields: fields,
+            );
+          },
         )
         .toList();
   }

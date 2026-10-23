@@ -1,17 +1,46 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
 import '../../core/constants/firebase_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
 import '../../domain/billing/bill_calculator.dart';
 import '../../domain/billing/billing_models.dart';
 import '../../domain/billing/invoice_number.dart';
+import '../local/local_data_source.dart';
 import '../models/invoice_model.dart';
+import '../services/firestore_data_service.dart';
 import '../services/firestore_transaction_service.dart';
+import '../services/firestore_value_codec.dart';
 import '../services/offline_firestore_service.dart';
 
 String _dateOnly(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-'
     '${date.month.toString().padLeft(2, '0')}-'
     '${date.day.toString().padLeft(2, '0')}';
+
+Future<({FirestoreTransactionDocument doc, String id})> _resolveStockBalance(
+  FirestoreTransactionContext tx, {
+  required String tenantId,
+  required String businessId,
+  required String outletId,
+  required String variantId,
+}) async {
+  final canonicalId = '${tenantId}_${outletId}_$variantId';
+  var stock = await tx.get(FirebaseConstants.stockBalances, canonicalId);
+  if (stock.exists) return (doc: stock, id: canonicalId);
+
+  final legacyId =
+      '${tenantId}_${businessId}_OUTLET_${outletId}_DIRECT_$variantId';
+  stock = await tx.get(FirebaseConstants.stockBalances, legacyId);
+  if (stock.exists) return (doc: stock, id: legacyId);
+
+  return (
+    doc: await tx.get(FirebaseConstants.stockBalances, canonicalId),
+    id: canonicalId,
+  );
+}
 
 class BillingRepository {
   BillingRepository(this.transactions);
@@ -32,9 +61,18 @@ class BillingRepository {
     required String mode,
     required DateTime paymentAt,
     DateTime? nextDueDate,
+    String? collectedAtOutletId,
     required String token,
   }) async {
     if (amountPaise <= 0) throw const AppException('Enter a payment amount.');
+    late Map<String, dynamic> invoiceUpdatesToCache;
+    late Map<String, dynamic> rawInvoiceFields;
+    late Map<String, dynamic> rawCustomerFields;
+    late int customerDueToCache;
+    late int appliedToCache;
+    late int customerAdvanceToCache;
+    late int excessToCache;
+
     await serverTransactions.runAtomicOperation((tx) async {
       final invoice = await tx.get(FirebaseConstants.invoices, invoiceId);
       final customer = await tx.get(FirebaseConstants.customers, customerId);
@@ -70,11 +108,25 @@ class BillingRepository {
         'duePaise': customerDue - applied,
         'advancePaise': customerAdvance + excess,
       }, updateTime: customer.updateTime);
+
+      rawInvoiceFields = Map<String, dynamic>.from(invoice.fields);
+      rawCustomerFields = Map<String, dynamic>.from(customer.fields);
+      invoiceUpdatesToCache = invoiceUpdates;
+      customerDueToCache = customerDue;
+      appliedToCache = applied;
+      customerAdvanceToCache = customerAdvance;
+      excessToCache = excess;
+
       final paymentId = IdGenerator.create('PAY');
       final ledgerId = IdGenerator.create('LED');
       final bid = invoice.fields['businessId'] as String? ?? '';
       final tid = invoice.fields['tenantId'] as String? ?? '';
       final oid = invoice.fields['outletId'] as String? ?? '';
+      final collectingOutlet =
+          (collectedAtOutletId != null && collectedAtOutletId.isNotEmpty)
+              ? collectedAtOutletId
+              : oid;
+
       tx.create(FirebaseConstants.payments, paymentId, {
         'paymentId': paymentId,
         'invoiceId': invoiceId,
@@ -82,7 +134,7 @@ class BillingRepository {
         'businessId': bid,
         'tenantId': tid,
         'outletId': oid,
-        'collectedAtOutletId': oid,
+        'collectedAtOutletId': collectingOutlet,
         'mode': mode,
         'paymentMethod': mode,
         'amountPaise': amountPaise,
@@ -98,7 +150,8 @@ class BillingRepository {
           'transactionId': ledgerId,
           'businessId': bid,
           'tenantId': tid,
-          'outletId': oid,
+          'outletId': collectingOutlet,
+          'originalOutletId': oid,
           'invoiceId': invoiceId,
           'customerId': customerId,
           'transactionType': 'PAYMENT',
@@ -113,6 +166,52 @@ class BillingRepository {
         },
       );
     }, idToken: token);
+
+    // Update local read-only cache if available (as SYNCED)
+    if (transactions is OfflineFirestoreService) {
+      final local = (transactions as OfflineFirestoreService).localDataSource;
+      if (local != null) {
+        try {
+          await local.db.transaction((localTx) async {
+            final nowIso = DateTime.now().toUtc().toIso8601String();
+            final updatedInv = {
+              ...rawInvoiceFields,
+              ...invoiceUpdatesToCache,
+              'updatedAt': nowIso,
+            };
+            await LocalDataSource.put(localTx, FirebaseConstants.invoices, {
+              'remoteId': invoiceId,
+              'payloadJson': jsonEncode(
+                FirestoreValueCodec.encodeFields(updatedInv),
+              ),
+              ...LocalDataSource.scopeColumns(updatedInv),
+              'syncStatus': 'SYNCED',
+              'localUpdatedAt': LocalDataSource.now(),
+              'isDeleted': 0,
+            });
+
+            final updatedCust = {
+              ...rawCustomerFields,
+              'duePaise': (customerDueToCache - appliedToCache).clamp(0, 1 << 50),
+              'advancePaise': customerAdvanceToCache + excessToCache,
+              'updatedAt': nowIso,
+            };
+            await LocalDataSource.put(localTx, FirebaseConstants.customers, {
+              'remoteId': customerId,
+              'payloadJson': jsonEncode(
+                FirestoreValueCodec.encodeFields(updatedCust),
+              ),
+              ...LocalDataSource.scopeColumns(updatedCust),
+              'syncStatus': 'SYNCED',
+              'localUpdatedAt': LocalDataSource.now(),
+              'isDeleted': 0,
+            });
+          });
+        } catch (e) {
+          debugPrint('Failed to update local cache after billing settle: $e');
+        }
+      }
+    }
   }
 
   Future<void> updateDueDate({
@@ -120,7 +219,7 @@ class BillingRepository {
     required DateTime? dueDate,
     required String token,
   }) async {
-    await transactions.runAtomicOperation((tx) async {
+    await serverTransactions.runAtomicOperation((tx) async {
       final invoice = await tx.get(FirebaseConstants.invoices, invoiceId);
       if (!invoice.exists) {
         throw const AppException('The invoice no longer exists.');
@@ -176,16 +275,22 @@ class BillingRepository {
       }
 
       final stockReads = <String, FirestoreTransactionDocument>{};
+      final stockIds = <String, String>{};
       for (final item in items) {
         final variantId = item.fields['variantId'] as String?;
         final quantity = (item.fields['quantity'] as num?)?.toInt() ?? 0;
         if (variantId == null || quantity <= 0) continue;
-        final stockId =
-            '${tenantId}_${businessId}_OUTLET_${outletId}_DIRECT_$variantId';
-        stockReads[stockId] ??= await tx.get(
-          FirebaseConstants.stockBalances,
-          stockId,
-        );
+        if (!stockReads.containsKey(variantId)) {
+          final res = await _resolveStockBalance(
+            tx,
+            tenantId: tenantId,
+            businessId: businessId,
+            outletId: outletId,
+            variantId: variantId,
+          );
+          stockReads[variantId] = res.doc;
+          stockIds[variantId] = res.id;
+        }
       }
 
       FirestoreTransactionDocument? customer;
@@ -214,16 +319,14 @@ class BillingRepository {
         final variantId = item.fields['variantId'] as String?;
         final quantity = (item.fields['quantity'] as num?)?.toInt() ?? 0;
         if (variantId == null || quantity <= 0) continue;
-        final stockId =
-            '${tenantId}_${businessId}_OUTLET_${outletId}_DIRECT_$variantId';
-        final stock = stockReads[stockId]!;
+        final stock = stockReads[variantId]!;
+        final stockId = stockIds[variantId]!;
         if (!stock.exists) {
           throw const AppException('Stock record is missing for this bill.');
         }
-        final onHand = currentOnHand[stockId] ?? 0;
-        final delta = (onHand >= 1000) ? quantity * 1000 : quantity;
-        final nextOnHand = onHand + delta;
-        currentOnHand[stockId] = nextOnHand;
+        final onHand = currentOnHand[variantId] ?? 0;
+        final nextOnHand = onHand + quantity;
+        currentOnHand[variantId] = nextOnHand;
         tx.update(FirebaseConstants.stockBalances, stockId, {
           ...stock.fields,
           'quantityOnHand': nextOnHand,
@@ -316,8 +419,7 @@ class BillingRepository {
       taxStructure: request.taxStructure,
     );
     final invoiceId = 'REQ_${request.requestId}';
-    final isCreditOrAdvance = request.duePaise > 0 || request.advancePaise > 0;
-    final runner = isCreditOrAdvance ? serverTransactions : transactions;
+    final runner = serverTransactions;
     return runner.runAtomicOperation((tx) async {
       final existing = await tx.get(FirebaseConstants.invoices, invoiceId);
       if (existing.exists) {
@@ -352,14 +454,21 @@ class BillingRepository {
           ? null
           : await tx.get(FirebaseConstants.customerBalances, balanceId);
       final stockReads = <String, FirestoreTransactionDocument>{};
+      final stockIds = <String, String>{};
       for (final line in calculated.lines) {
         if (!line.input.trackStock) continue;
-        final stockId =
-            '${request.tenantId}_${request.businessId}_OUTLET_${request.outletId}_DIRECT_${line.input.variantId}';
-        stockReads[stockId] = await tx.get(
-          FirebaseConstants.stockBalances,
-          stockId,
-        );
+        final variantId = line.input.variantId;
+        if (!stockReads.containsKey(variantId)) {
+          final res = await _resolveStockBalance(
+            tx,
+            tenantId: request.tenantId,
+            businessId: request.businessId,
+            outletId: request.outletId,
+            variantId: variantId,
+          );
+          stockReads[variantId] = res.doc;
+          stockIds[variantId] = res.id;
+        }
       }
 
       final oldDue =
@@ -398,6 +507,8 @@ class BillingRepository {
       }
 
       final invoiceFields = <String, dynamic>{
+        'invoiceId': invoiceId,
+        'id': invoiceId,
         'requestId': request.requestId,
         'invoiceNumber': invoiceNumber,
         'tenantId': request.tenantId,
@@ -500,18 +611,20 @@ class BillingRepository {
       };
       for (final line in calculated.lines) {
         if (!line.input.trackStock) continue;
-        final stockId =
-            '${request.tenantId}_${request.businessId}_OUTLET_${request.outletId}_DIRECT_${line.input.variantId}';
-        final stock = stockReads[stockId]!;
-        final quantity = currentStockOnHand[stockId] ?? 0;
-        final deduction = (quantity >= 1000)
+        final variantId = line.input.variantId;
+        final stock = stockReads[variantId]!;
+        final stockId = stockIds[variantId]!;
+        final quantity = currentStockOnHand[variantId] ?? 0;
+        final deduction = (quantity >= 1000 || line.input.conversionFactor == 1)
             ? line.input.quantityBase * 1000
             : line.input.quantityBase;
         if (quantity < deduction) {
-          throw const AppException('Insufficient stock for one or more items.');
+          throw AppException(
+            'Insufficient stock for "${line.input.name}". Available: ${quantity ~/ 1000}, Requested: ${line.input.quantity}.',
+          );
         }
         final balanceAfter = quantity - deduction;
-        currentStockOnHand[stockId] = balanceAfter;
+        currentStockOnHand[variantId] = balanceAfter;
         tx.update(FirebaseConstants.stockBalances, stockId, {
           ...stock.fields,
           'quantityOnHand': balanceAfter,
@@ -531,6 +644,66 @@ class BillingRepository {
           'balanceAfter': balanceAfter,
           'immutable': true,
         });
+
+        // Decrement inventory batch if tracked
+        String? targetBatchId = line.input.batchId;
+        FirestoreTransactionDocument? batchDoc;
+        if (targetBatchId != null && targetBatchId.isNotEmpty) {
+          batchDoc = await tx.get(FirebaseConstants.inventoryBatches, targetBatchId);
+          if (!batchDoc.exists) batchDoc = null;
+        }
+        if (batchDoc == null) {
+          final batchDocs = await tx.query(FirebaseConstants.inventoryBatches, [
+            FirestoreFilter('tenantId', 'EQUAL', request.tenantId),
+            FirestoreFilter('outletId', 'EQUAL', request.outletId),
+            FirestoreFilter('variantId', 'EQUAL', variantId),
+          ]);
+          final active = batchDocs.where((d) {
+            final st = (d.fields['status'] as String? ?? '').toUpperCase();
+            final qty = (d.fields['availableQty'] as num?)?.toInt() ?? 0;
+            return !const {'DELETED', 'VOID', 'DEPLETED'}.contains(st) && qty > 0;
+          }).toList();
+          if (active.isNotEmpty) {
+            final priceMatch = active.where((d) {
+              final sp = (d.fields['sellingPrice'] as num?)?.toInt() ?? 0;
+              return sp == line.input.unitPricePaise;
+            }).firstOrNull;
+            batchDoc = priceMatch ?? active.first;
+            targetBatchId = batchDoc.id ?? batchDoc.fields['batchId'] as String?;
+          }
+        }
+        if (batchDoc != null && batchDoc.exists && targetBatchId != null) {
+          final curBatchQty = (batchDoc.fields['availableQty'] as num?)?.toInt() ?? 0;
+          final nextBatchQty = (curBatchQty - deduction).clamp(0, 1 << 40);
+          tx.update(FirebaseConstants.inventoryBatches, targetBatchId, {
+            ...batchDoc.fields,
+            'availableQty': nextBatchQty,
+            'status': nextBatchQty == 0 ? 'DEPLETED' : 'AVAILABLE',
+            'updatedAt': request.createdAt.toUtc().toIso8601String(),
+          }, updateTime: batchDoc.updateTime);
+
+          final ibmId = IdGenerator.create('IBM');
+          tx.create(FirebaseConstants.inventoryBatchMovements, ibmId, {
+            'movementId': ibmId,
+            'tenantId': request.tenantId,
+            'businessId': request.businessId,
+            'outletId': request.outletId,
+            'batchId': targetBatchId,
+            'productId': variantId,
+            'variantId': variantId,
+            'movementType': 'SALE',
+            'quantity': deduction,
+            'direction': 'OUT',
+            'referenceType': 'INVOICE',
+            'referenceId': invoiceId,
+            'reason': 'Sale $invoiceNumber',
+            'createdByUid': request.cashierUid,
+            'occurredAt': request.createdAt.toUtc().toIso8601String(),
+            'status': 'POSTED',
+            'createdAt': request.createdAt.toUtc().toIso8601String(),
+            'immutable': true,
+          });
+        }
       }
       if (sequence.exists) {
         tx.update(FirebaseConstants.documentSequences, sequenceId, {
@@ -638,7 +811,7 @@ class BillingRepository {
       taxStructure: taxStructure,
     );
 
-    await transactions.runAtomicOperation((tx) async {
+    await serverTransactions.runAtomicOperation((tx) async {
       final invoice = await tx.get(FirebaseConstants.invoices, invoiceId);
       if (!invoice.exists) throw const AppException('Bill no longer exists.');
       final status = invoice.fields['status'] as String? ?? '';
@@ -697,16 +870,22 @@ class BillingRepository {
         ...newVariantBaseQty.keys,
       };
       final stockReads = <String, FirestoreTransactionDocument>{};
+      final stockIds = <String, String>{};
       for (final variantId in allVariants) {
         final track =
             newTrackStock[variantId] ?? oldTrackStock[variantId] ?? true;
         if (!track) continue;
-        final stockId =
-            '${tenantId}_${businessId}_OUTLET_${outletId}_DIRECT_$variantId';
-        stockReads[stockId] = await tx.get(
-          FirebaseConstants.stockBalances,
-          stockId,
-        );
+        if (!stockReads.containsKey(variantId)) {
+          final res = await _resolveStockBalance(
+            tx,
+            tenantId: tenantId,
+            businessId: businessId,
+            outletId: outletId,
+            variantId: variantId,
+          );
+          stockReads[variantId] = res.doc;
+          stockIds[variantId] = res.id;
+        }
       }
 
       FirestoreTransactionDocument? customer;
@@ -728,27 +907,27 @@ class BillingRepository {
         final track =
             newTrackStock[variantId] ?? oldTrackStock[variantId] ?? true;
         if (!track) continue;
-        final stockId =
-            '${tenantId}_${businessId}_OUTLET_${outletId}_DIRECT_$variantId';
-        final stock = stockReads[stockId];
-        if (stock == null || !stock.exists) continue;
+        final stock = stockReads[variantId];
+        final stockId = stockIds[variantId];
+        if (stock == null || !stock.exists || stockId == null) continue;
 
         final oldQty = oldVariantBaseQty[variantId] ?? 0;
         final newQty = newVariantBaseQty[variantId] ?? 0;
         final netDeduction = newQty - oldQty;
         if (netDeduction == 0) continue;
 
-        final onHand = currentStockOnHand[stockId] ?? 0;
-        final scaledDeduction = (onHand >= 1000)
-            ? netDeduction * 1000
-            : netDeduction;
+        final onHand = currentStockOnHand[variantId] ?? 0;
+        final scaledDeduction =
+            (onHand >= 1000) ? netDeduction * 1000 : netDeduction;
 
         if (scaledDeduction > 0 && onHand < scaledDeduction) {
-          throw const AppException('Insufficient stock for updated items.');
+          throw AppException(
+            'Insufficient stock for variant "$variantId". Available: ${onHand ~/ 1000}, Required: $netDeduction.',
+          );
         }
 
         final balanceAfter = onHand - scaledDeduction;
-        currentStockOnHand[stockId] = balanceAfter;
+        currentStockOnHand[variantId] = balanceAfter;
         tx.update(FirebaseConstants.stockBalances, stockId, {
           ...stock.fields,
           'quantityOnHand': balanceAfter,
@@ -760,8 +939,8 @@ class BillingRepository {
           'businessId': businessId,
           'outletId': outletId,
           'productId': variantId,
-          'type': scaledDeduction > 0 ? 'SALE_ADJUSTMENT' : 'RETURN_ADJUSTMENT',
-          'qtyBase': scaledDeduction.abs(),
+          'type': netDeduction > 0 ? 'SALE_ADJUSTMENT' : 'RETURN_ADJUSTMENT',
+          'qtyBase': netDeduction.abs(),
           'reason': 'Edit Bill $invoiceNumber',
           'referenceId': invoiceId,
           'userId': cashierUid,

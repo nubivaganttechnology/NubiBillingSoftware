@@ -295,7 +295,8 @@ class ResolvedUnitRule {
     }
     row['soldAs'] = allows(selling, allowedSellingUnits)
         ? selling
-        : defaultSellingUnit;
+        : (defaultSellingUnit ??
+            (allows(row['unit'], allowedSellingUnits) ? row['unit'] : null));
     if (row['soldAs'] == null && allows(selling, allowedSellingUnits)) {
       row['soldAs'] = selling;
     }

@@ -459,9 +459,12 @@ class FirestoreRestService
           '412',
         }.contains(error.code?.toUpperCase());
         final preconditionFailure =
-            error.code == '400' &&
+            (error.code == '400' || error.code == 'FAILED_PRECONDITION') &&
             (error.message.toLowerCase().contains('precondition') ||
-                error.message.toLowerCase().contains('update time'));
+                error.message.toLowerCase().contains('update time') ||
+                error.message.toLowerCase().contains('stored version') ||
+                error.message.toLowerCase().contains('base version') ||
+                error.message.toLowerCase().contains('does not match'));
         if ((!retryable && !preconditionFailure) || attempt == maxAttempts) {
           rethrow;
         }
@@ -644,9 +647,15 @@ class _RestFirestoreTransaction implements FirestoreTransactionContext {
     final key = _key(collection, id);
     final pending = _writes[key];
     if (pending?.kind == FirestoreWriteKind.create) {
+      final fields = Map<String, dynamic>.of(pending!.fields!);
+      fields.putIfAbsent('id', () => id);
+      if (collection == FirebaseConstants.invoices) {
+        fields.putIfAbsent('invoiceId', () => id);
+      }
       return FirestoreTransactionDocument(
+        id: id,
         exists: true,
-        fields: Map.of(pending!.fields!),
+        fields: fields,
       );
     }
     try {
@@ -663,15 +672,21 @@ class _RestFirestoreTransaction implements FirestoreTransactionContext {
         );
       }
       _readUpdateTimes[key] = updateTime;
+      final fields = FirestoreRestService.decodeFields(document['fields']);
+      fields.putIfAbsent('id', () => id);
+      if (collection == FirebaseConstants.invoices) {
+        fields.putIfAbsent('invoiceId', () => id);
+      }
       return FirestoreTransactionDocument(
+        id: id,
         exists: true,
-        fields: FirestoreRestService.decodeFields(document['fields']),
+        fields: fields,
         updateTime: updateTime,
       );
     } on AppException catch (error) {
       if (error.code == 'not-found') {
         _readUpdateTimes[key] = null;
-        return const FirestoreTransactionDocument(exists: false, fields: {});
+        return FirestoreTransactionDocument(id: id, exists: false, fields: const {});
       }
       rethrow;
     }
@@ -695,9 +710,17 @@ class _RestFirestoreTransaction implements FirestoreTransactionContext {
       if (updateTime != null) {
         _readUpdateTimes[key] = updateTime;
       }
+      final fields = FirestoreRestService.decodeFields(doc['fields']);
+      if (docId.isNotEmpty) {
+        fields.putIfAbsent('id', () => docId);
+        if (collection == FirebaseConstants.invoices) {
+          fields.putIfAbsent('invoiceId', () => docId);
+        }
+      }
       return FirestoreTransactionDocument(
+        id: docId,
         exists: true,
-        fields: FirestoreRestService.decodeFields(doc['fields']),
+        fields: fields,
         updateTime: updateTime,
       );
     }).toList();

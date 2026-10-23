@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// Helper and widgets for dynamic UPI QR code generation and payments.
 class UpiQrWidget extends StatelessWidget {
   const UpiQrWidget({
@@ -68,6 +70,8 @@ class UpiQrWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     // If legacy constructor was used with raw data
     if (data.isNotEmpty) {
       final amt = amountPaise != null
@@ -99,8 +103,9 @@ class UpiQrWidget extends StatelessWidget {
                   ),
             ),
           const SizedBox(height: 6),
-          const Text(
-            'Confirm UPI receipt manually before finalizing.',
+          Text(
+            l10n?.confirmUpiReceipt ??
+                'Confirm UPI receipt manually before finalizing.',
             textAlign: TextAlign.center,
           ),
         ],
@@ -118,9 +123,9 @@ class UpiQrWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text(
-          'Scan to Pay',
-          style: TextStyle(
+        Text(
+          l10n?.scanToPay ?? 'Scan to Pay',
+          style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -209,10 +214,11 @@ class UpiQrWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.grey.shade300),
           ),
-          child: const Text(
-            'Pay using Google Pay, PhonePe, Paytm or BHIM',
+          child: Text(
+            l10n?.payUsingUpi ??
+                'Pay using Google Pay, PhonePe, Paytm or BHIM',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
@@ -239,16 +245,16 @@ class UpiQrWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         name,
         style: TextStyle(
+          color: color,
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: color,
         ),
       ),
     );

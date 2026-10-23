@@ -28,6 +28,30 @@ import '../services/offline_firestore_service.dart';
 import '../services/historical_catalogue_resolver.dart';
 import '../services/outlet_placement_backfill.dart';
 
+class VariantBatchPriceOption {
+  const VariantBatchPriceOption({
+    required this.batchId,
+    required this.internalBatchNo,
+    required this.availableQty,
+    required this.sellingPricePaise,
+    required this.mrpPaise,
+    this.purchaseRatePaise = 0,
+    this.purchaseId,
+    this.supplierLotNo,
+    this.expiryDate,
+  });
+
+  final String batchId;
+  final String internalBatchNo;
+  final int availableQty;
+  final int sellingPricePaise;
+  final int mrpPaise;
+  final int purchaseRatePaise;
+  final String? purchaseId;
+  final String? supplierLotNo;
+  final DateTime? expiryDate;
+}
+
 class ProductRepository {
   ProductRepository(
     this.firestore,
@@ -179,6 +203,103 @@ class ProductRepository {
       }
     }
     return pricing;
+  }
+
+  Future<List<VariantBatchPriceOption>> loadVariantBatches({
+    required String token,
+    required String tenantId,
+    required String businessId,
+    required String outletId,
+    required String variantId,
+  }) async {
+    final source = firestore;
+    if (source is! OfflineFirestoreService) {
+      final docs = await firestore.queryDocuments(
+        collection: FirebaseConstants.inventoryBatches,
+        filters: [
+          FirestoreFilter('tenantId', 'EQUAL', tenantId),
+          FirestoreFilter('businessId', 'EQUAL', businessId),
+          FirestoreFilter('outletId', 'EQUAL', outletId),
+          FirestoreFilter('variantId', 'EQUAL', variantId),
+        ],
+        idToken: token,
+      );
+      final list = <VariantBatchPriceOption>[];
+      for (final doc in docs) {
+        final data = FirestoreRestService.decodeFields(doc['fields']);
+        final status = (data['status'] as String? ?? '').toUpperCase();
+        if (data['isDeleted'] == true ||
+            const {'PENDING_RECEIPT', 'DELETED', 'VOID'}.contains(status)) {
+          continue;
+        }
+        final availableQty = (data['availableQty'] as num?)?.toInt() ?? 0;
+        if (availableQty <= 0) continue;
+        list.add(
+          VariantBatchPriceOption(
+            batchId: data['batchId']?.toString() ??
+                doc['name']?.toString().split('/').last ??
+                '',
+            internalBatchNo: data['internalBatchNo']?.toString() ??
+                data['batchId']?.toString() ??
+                '',
+            availableQty: availableQty,
+            sellingPricePaise: (data['sellingPrice'] as num?)?.toInt() ?? 0,
+            mrpPaise: (data['mrp'] as num?)?.toInt() ?? 0,
+            purchaseRatePaise: (data['purchaseRate'] as num?)?.toInt() ?? 0,
+            purchaseId: data['purchaseId']?.toString(),
+            supplierLotNo: data['supplierLotNo']?.toString(),
+            expiryDate: data['expiryDate'] is DateTime
+                ? data['expiryDate'] as DateTime
+                : DateTime.tryParse(data['expiryDate']?.toString() ?? ''),
+          ),
+        );
+      }
+      return list;
+    }
+
+    final local = await source.localDataSourceForToken(token);
+    final rows = await local.db.query(
+      'local_inventory_batches',
+      columns: ['payloadJson'],
+      where:
+          'isDeleted=0 AND tenantId=? AND businessId=? AND outletId=? AND variantId=?',
+      whereArgs: [tenantId, businessId, outletId, variantId],
+    );
+    final list = <VariantBatchPriceOption>[];
+    for (final row in rows) {
+      final payload = jsonDecode(row['payloadJson'] as String);
+      if (payload is! Map) continue;
+      final data = FirestoreRestService.decodeFields(
+        Map<String, dynamic>.from(payload),
+      );
+      final status = (data['status'] as String? ?? '').toUpperCase();
+      if (data['isDeleted'] == true ||
+          data['isDeleted'] == 1 ||
+          const {'PENDING_RECEIPT', 'DELETED', 'VOID'}.contains(status)) {
+        continue;
+      }
+      final availableQty = (data['availableQty'] as num?)?.toInt() ?? 0;
+      if (availableQty <= 0) continue;
+
+      list.add(
+        VariantBatchPriceOption(
+          batchId: data['batchId']?.toString() ?? '',
+          internalBatchNo: data['internalBatchNo']?.toString() ??
+              data['batchId']?.toString() ??
+              '',
+          availableQty: availableQty,
+          sellingPricePaise: (data['sellingPrice'] as num?)?.toInt() ?? 0,
+          mrpPaise: (data['mrp'] as num?)?.toInt() ?? 0,
+          purchaseRatePaise: (data['purchaseRate'] as num?)?.toInt() ?? 0,
+          purchaseId: data['purchaseId']?.toString(),
+          supplierLotNo: data['supplierLotNo']?.toString(),
+          expiryDate: data['expiryDate'] is DateTime
+              ? data['expiryDate'] as DateTime
+              : DateTime.tryParse(data['expiryDate']?.toString() ?? ''),
+        ),
+      );
+    }
+    return list;
   }
 
 
@@ -1036,18 +1157,39 @@ class ProductRepository {
       businessId: businessId,
       token: token,
     );
+    final receivedPricing = await receivedVariantPricing(
+      token: token,
+      tenantId: tenantId,
+      businessId: businessId,
+      outletId: outletId,
+    );
     return [
       for (final product in masters)
         if (placements[product.productId] case final placement?)
           (() {
             final effectiveStatus =
                 !placement.isActive ? 'INACTIVE' : product.status;
-            final effectiveProduct = placement.variantIds == null
-                ? product
-                : product.withVariants([
-                    for (final v in product.variants)
-                      if (placement.variantIds!.contains(v.variantId)) v,
-                  ]);
+            final baseVariants = placement.variantIds == null
+                ? product.variants
+                : product.variants
+                    .where((v) => placement.variantIds!.contains(v.variantId))
+                    .toList();
+            final effectiveVariants = [
+              for (final v in baseVariants)
+                (() {
+                  final pricing = receivedPricing[v.variantId];
+                  if (pricing != null && (v.sellingPrice <= 0 || v.mrp <= 0)) {
+                    return v.copyWith(
+                      sellingPrice: v.sellingPrice > 0
+                          ? v.sellingPrice
+                          : pricing.sellingPrice,
+                      mrp: v.mrp > 0 ? v.mrp : pricing.mrp,
+                    );
+                  }
+                  return v;
+                })(),
+            ];
+            final effectiveProduct = product.withVariants(effectiveVariants);
             return effectiveStatus != product.status
                 ? effectiveProduct.copyWith(status: effectiveStatus)
                 : effectiveProduct;
@@ -1229,7 +1371,7 @@ class ProductRepository {
         'status': OutletProductModel.statusInactive,
         'isActive': false,
         'updatedAt': now,
-        if (actorUid != null) 'updatedBy': actorUid,
+        'updatedBy': ?actorUid,
       }, updateTime: placement.updateTime);
       return true;
     }, idToken: token);
@@ -1377,7 +1519,7 @@ class ProductRepository {
         'productId': productId,
         'productName': productName,
         'variantName': nameOfVariant,
-        'name': '$productName · $nameOfVariant',
+        'name': '$productName Â· $nameOfVariant',
         'baseUnitId': unitId.trim(),
         'unitId': unitId.trim(),
         'sku': _optional(sku),
@@ -2042,7 +2184,7 @@ class ProductRepository {
           'productId': productId,
           'productName': name,
           'variantName': variantName.isEmpty ? 'Default' : variantName,
-          'name': '$name · ${variantName.isEmpty ? 'Default' : variantName}',
+          'name': '$name Â· ${variantName.isEmpty ? 'Default' : variantName}',
           ...variant,
           'barcode': barcode,
           'hsnCode': productFields['hsnCode'],
@@ -2860,12 +3002,91 @@ class ProductRepository {
       if (outletId != null && fields['outletId'] != outletId) continue;
       final id = fields['variantId'] as String?;
       if (id != null) {
-        result[id] =
-            (result[id] ?? 0) +
-            ((fields['quantityOnHand'] as num?)?.toInt() ?? 0);
+        final rawQty = (fields['quantityOnHand'] as num?)?.toInt() ?? 0;
+        var qty = rawQty;
+        final remainder = rawQty % 1000;
+        if (remainder != 0) {
+          final unitsSold = 1000 - remainder;
+          if (unitsSold > 0 && unitsSold < 100) {
+            qty = rawQty - (unitsSold * 999);
+            final docId = doc['name']?.toString().split('/').last;
+            if (docId != null) {
+              _healStockFraction(
+                tenantId: tenantId,
+                businessId: businessId,
+                outletId: outletId,
+                variantId: id,
+                docId: docId,
+                correctedQty: qty,
+                unitsSold: unitsSold,
+                token: token,
+              );
+            }
+          }
+        }
+        result[id] = (result[id] ?? 0) + qty;
       }
     }
     return result;
+  }
+
+  Future<void> _healStockFraction({
+    required String tenantId,
+    required String businessId,
+    required String? outletId,
+    required String? variantId,
+    required String docId,
+    required int correctedQty,
+    required int unitsSold,
+    required String token,
+  }) async {
+    try {
+      await firestore.patchDocument(
+        FirebaseConstants.stockBalances,
+        docId,
+        {'quantityOnHand': correctedQty},
+        idToken: token,
+      );
+      if (variantId != null && outletId != null) {
+        final batchDocs = await firestore.queryDocuments(
+          collection: FirebaseConstants.inventoryBatches,
+          filters: [
+            FirestoreFilter('tenantId', 'EQUAL', tenantId),
+            FirestoreFilter('businessId', 'EQUAL', businessId),
+            FirestoreFilter('outletId', 'EQUAL', outletId),
+            FirestoreFilter('variantId', 'EQUAL', variantId),
+          ],
+          idToken: token,
+        );
+        for (final bDoc in batchDocs) {
+          final bFields = FirestoreRestService.decodeFields(bDoc['fields']);
+          final bQty = (bFields['availableQty'] as num?)?.toInt() ?? 0;
+          final bId = bDoc['name']?.toString().split('/').last;
+          if (bId != null && bQty >= unitsSold * 1000) {
+            final newBQty = bQty - (unitsSold * 1000);
+            await firestore.patchDocument(
+              FirebaseConstants.inventoryBatches,
+              bId,
+              {
+                'availableQty': newBQty,
+                'status': newBQty == 0 ? 'DEPLETED' : 'AVAILABLE',
+              },
+              idToken: token,
+            );
+            break;
+          }
+        }
+      }
+      if (firestore is OfflineFirestoreService) {
+        final local = (firestore as OfflineFirestoreService).localDataSource;
+        if (local != null && variantId != null) {
+          await local.db.rawUpdate(
+            "UPDATE local_stock_balances SET quantityOnHand=? WHERE variantId=?",
+            [correctedQty, variantId],
+          );
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> setProductStatus({
@@ -2999,7 +3220,7 @@ class ProductRepository {
             ? 'Default'
             : variantName.trim(),
         'name':
-            '${name.trim()} · ${variantName.trim().isEmpty ? 'Default' : variantName.trim()}',
+            '${name.trim()} Â· ${variantName.trim().isEmpty ? 'Default' : variantName.trim()}',
         'baseUnitId': unitId.trim(),
         'unitId': unitId.trim(),
         'sku': _optional(sku),

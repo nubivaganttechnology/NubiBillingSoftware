@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 import '../../core/constants/firebase_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/permissions/permission_catalog.dart';
@@ -12,6 +14,7 @@ import '../models/customer_payment_model.dart';
 import '../services/firestore_data_service.dart';
 import '../services/firestore_rest_service.dart';
 import '../services/firestore_transaction_service.dart';
+import '../services/firestore_value_codec.dart';
 import '../services/offline_firestore_service.dart';
 
 class CustomerRepository {
@@ -34,11 +37,14 @@ class CustomerRepository {
 
   /// Authoritative server transaction service for online-only financial operations.
   FirestoreTransactionService get serverTransactions {
-    final tx = _transactions;
-    if (tx != null) return tx;
     if (firestore is OfflineFirestoreService) {
       return (firestore as OfflineFirestoreService).serverTransactions;
     }
+    final tx = _transactions;
+    if (tx is OfflineFirestoreService) {
+      return tx.serverTransactions;
+    }
+    if (tx != null) return tx;
     if (firestore is FirestoreTransactionService) {
       return firestore as FirestoreTransactionService;
     }
@@ -317,19 +323,54 @@ class CustomerRepository {
       }
     }
 
-    final docs = await firestore.queryDocuments(
-      collection: FirebaseConstants.invoices,
-      filters: [
-        FirestoreFilter('tenantId', 'EQUAL', tenantId),
-        FirestoreFilter('businessId', 'EQUAL', businessId),
-        FirestoreFilter('customerId', 'EQUAL', customerId),
-        if (outletId != null) FirestoreFilter('outletId', 'EQUAL', outletId),
-      ],
-      idToken: token,
-    );
+    final filters = [
+      FirestoreFilter('tenantId', 'EQUAL', tenantId),
+      FirestoreFilter('businessId', 'EQUAL', businessId),
+      FirestoreFilter('customerId', 'EQUAL', customerId),
+      if (outletId != null) FirestoreFilter('outletId', 'EQUAL', outletId),
+    ];
+
+    List<Map<String, dynamic>> docs;
+    try {
+      if (firestore is OfflineFirestoreService) {
+        final offline = firestore as OfflineFirestoreService;
+        docs = await offline.remote.queryDocuments(
+          collection: FirebaseConstants.invoices,
+          filters: filters,
+          idToken: token,
+        );
+        final local = offline.localDataSource;
+        if (local != null && docs.isNotEmpty) {
+          try {
+            await local.upsertRemote(FirebaseConstants.invoices, docs);
+          } catch (_) {}
+        }
+      } else {
+        docs = await firestore.queryDocuments(
+          collection: FirebaseConstants.invoices,
+          filters: filters,
+          idToken: token,
+        );
+      }
+    } catch (_) {
+      docs = await firestore.queryDocuments(
+        collection: FirebaseConstants.invoices,
+        filters: filters,
+        idToken: token,
+      );
+    }
 
     final invoices = docs
-        .map((doc) => FirestoreRestService.decodeFields(doc['fields']))
+        .map((doc) {
+          final docName = doc['name'] as String? ?? '';
+          final docId = docName.split('/').last;
+          final fields = FirestoreRestService.decodeFields(doc['fields']);
+          if (docId.isNotEmpty) {
+            fields.putIfAbsent('id', () => docId);
+            fields.putIfAbsent('invoiceId', () => docId);
+          }
+          return fields;
+        })
         .where((inv) {
           final status = inv['status']?.toString() ?? '';
           final due = _int(inv['dueAmount']);
@@ -494,6 +535,22 @@ class CustomerRepository {
       final nowIso = now.toIso8601String();
       final allocationsToPost = <CustomerPaymentAllocation>[];
 
+      String invoiceDocId(FirestoreTransactionDocument doc) {
+        if (doc.id != null && doc.id!.isNotEmpty) return doc.id!;
+        final idField = doc.fields['invoiceId']?.toString() ??
+            doc.fields['id']?.toString() ??
+            '';
+        return idField;
+      }
+
+      bool matchesInvoice(FirestoreTransactionDocument doc, String targetId) {
+        if (targetId.isEmpty) return false;
+        if (doc.id != null && doc.id == targetId) return true;
+        if (doc.fields['invoiceId']?.toString() == targetId) return true;
+        if (doc.fields['id']?.toString() == targetId) return true;
+        return false;
+      }
+
       // 4. Calculate invoice allocations
       if (manualAllocations != null && manualAllocations.isNotEmpty) {
         var runningAllocated = 0;
@@ -504,7 +561,7 @@ class CustomerRepository {
             );
           }
           final match = outstandingInvoices
-              .where((doc) => doc.fields['invoiceId'] == req.invoiceId)
+              .where((doc) => matchesInvoice(doc, req.invoiceId))
               .firstOrNull;
           if (match == null) {
             throw AppException(
@@ -566,8 +623,8 @@ class CustomerRepository {
               DateTime.fromMillisecondsSinceEpoch(0);
           final cmp = dateA.compareTo(dateB);
           if (cmp != 0) return cmp;
-          final idA = a.fields['invoiceId']?.toString() ?? '';
-          final idB = b.fields['invoiceId']?.toString() ?? '';
+          final idA = invoiceDocId(a);
+          final idB = invoiceDocId(b);
           return idA.compareTo(idB);
         });
 
@@ -577,7 +634,8 @@ class CustomerRepository {
           final remDue = _int(inv.fields['dueAmount']);
           if (remDue <= 0) continue;
           final alloc = remainingToAllocate > remDue ? remDue : remainingToAllocate;
-          final invoiceId = inv.fields['invoiceId']?.toString() ?? '';
+          final invoiceId = invoiceDocId(inv);
+          if (invoiceId.isEmpty) continue;
           final originalOutletId = inv.fields['outletId']?.toString() ?? '';
           allocationsToPost.add(
             CustomerPaymentAllocation(
@@ -606,8 +664,12 @@ class CustomerRepository {
 
       // 5. Update settled invoices and post individual allocations
       for (final alloc in allocationsToPost) {
-        final invDoc = outstandingInvoices
-            .firstWhere((doc) => doc.fields['invoiceId'] == alloc.invoiceId);
+        final invDoc = outstandingInvoices.firstWhere(
+          (doc) => matchesInvoice(doc, alloc.invoiceId),
+          orElse: () => throw AppException(
+            'Invoice ${alloc.invoiceId} could not be matched among outstanding invoices.',
+          ),
+        );
         final oldDue = _int(invDoc.fields['dueAmount']);
         final oldPaid = _int(invDoc.fields['paidPaise']);
         final newDue = oldDue - alloc.allocatedPaise;
@@ -698,8 +760,12 @@ class CustomerRepository {
       finalNextAdvance = nextAdvance;
       finalCustomerFields = Map<String, dynamic>.from(customerDoc.fields);
       finalSettledInvoices = allocationsToPost.map((alloc) {
-        final invDoc = outstandingInvoices
-            .firstWhere((doc) => doc.fields['invoiceId'] == alloc.invoiceId);
+        final invDoc = outstandingInvoices.firstWhere(
+          (doc) => matchesInvoice(doc, alloc.invoiceId),
+          orElse: () => throw AppException(
+            'Invoice ${alloc.invoiceId} could not be matched.',
+          ),
+        );
         final oldDue = _int(invDoc.fields['dueAmount']);
         final oldPaid = _int(invDoc.fields['paidPaise']);
         final newDue = oldDue - alloc.allocatedPaise;
@@ -776,43 +842,57 @@ class CustomerRepository {
       if (local != null) {
         try {
           await local.db.transaction((localTx) async {
+            final updatedCustFields = {
+              ...finalCustomerFields,
+              'duePaise': finalNextDue,
+              'advancePaise': finalNextAdvance,
+              'updatedAt': nowIso,
+            };
             await LocalDataSource.put(localTx, FirebaseConstants.customers, {
               'remoteId': customerId,
-              'payloadJson': jsonEncode({
-                ...finalCustomerFields,
-                'duePaise': finalNextDue,
-                'advancePaise': finalNextAdvance,
-                'updatedAt': nowIso,
-              }),
+              'payloadJson': jsonEncode(
+                FirestoreValueCodec.encodeFields(updatedCustFields),
+              ),
+              ...LocalDataSource.scopeColumns(updatedCustFields),
               'syncStatus': 'SYNCED',
               'localUpdatedAt': LocalDataSource.now(),
               'isDeleted': 0,
             });
+            final paymentData = paymentRecord.toData();
             await LocalDataSource.put(localTx, FirebaseConstants.payments, {
               'remoteId': paymentId,
-              'payloadJson': jsonEncode(paymentRecord.toData()),
+              'payloadJson': jsonEncode(
+                FirestoreValueCodec.encodeFields(paymentData),
+              ),
+              ...LocalDataSource.scopeColumns(paymentData),
               'syncStatus': 'SYNCED',
               'localUpdatedAt': LocalDataSource.now(),
               'isDeleted': 0,
             });
             for (final inv in finalSettledInvoices) {
+              final updatedInvFields = {
+                ...inv['base'] as Map<String, dynamic>,
+                'dueAmount': inv['dueAmount'],
+                'paidPaise': inv['paidPaise'],
+                'status': inv['status'],
+                'paymentStatus': inv['status'],
+                'updatedAt': nowIso,
+              };
               await LocalDataSource.put(localTx, FirebaseConstants.invoices, {
                 'remoteId': inv['invoiceId'],
-                'payloadJson': jsonEncode({
-                  ...inv['base'] as Map<String, dynamic>,
-                  'dueAmount': inv['dueAmount'],
-                  'paidPaise': inv['paidPaise'],
-                  'status': inv['status'],
-                  'paymentStatus': inv['status'],
-                  'updatedAt': nowIso,
-                }),
+                'payloadJson': jsonEncode(
+                  FirestoreValueCodec.encodeFields(updatedInvFields),
+                ),
+                ...LocalDataSource.scopeColumns(updatedInvFields),
                 'syncStatus': 'SYNCED',
                 'localUpdatedAt': LocalDataSource.now(),
                 'isDeleted': 0,
               });
             }
           });
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Failed to update local cache after payment collection: $e');
+        }
       }
     }
 

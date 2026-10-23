@@ -1,14 +1,18 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../core/constants/firebase_constants.dart';
 import '../../core/errors/app_exception.dart';
+import '../local/local_data_source.dart';
 import '../models/financial_transaction_model.dart';
 import '../services/firestore_data_service.dart';
-import 'staff_attendance_repository.dart';
-import '../services/firestore_transaction_service.dart';
 import '../services/firestore_rest_service.dart';
+import '../services/firestore_transaction_service.dart';
+import '../services/firestore_value_codec.dart';
+import '../services/offline_firestore_service.dart';
+import 'staff_attendance_repository.dart';
 
 /// Phase 1 salary records. Every write is staged through the existing local
 /// transaction/outbox and reaches Firestore as one atomic repository batch.
@@ -17,6 +21,56 @@ class StaffSalaryRepository {
 
   final FirestoreDataService firestore;
   final FirestoreTransactionService atomicWrites;
+
+  /// Authoritative server transaction runner for online-only financial operations.
+  FirestoreTransactionService get serverTransactions {
+    final aw = atomicWrites;
+    if (aw is OfflineFirestoreService) {
+      return aw.serverTransactions;
+    }
+    final fs = firestore;
+    if (fs is OfflineFirestoreService) {
+      return fs.serverTransactions;
+    }
+    return atomicWrites;
+  }
+
+  LocalDataSource? get _localSource {
+    final aw = atomicWrites;
+    if (aw is OfflineFirestoreService) {
+      return aw.localDataSource;
+    }
+    final fs = firestore;
+    if (fs is OfflineFirestoreService) {
+      return fs.localDataSource;
+    }
+    return null;
+  }
+
+  Future<void> _updateLocalCache(
+    List<({String collection, String id, Map<String, dynamic> fields})> entries,
+  ) async {
+    final local = _localSource;
+    if (local == null) return;
+    try {
+      await local.db.transaction((localTx) async {
+        for (final entry in entries) {
+          await LocalDataSource.put(localTx, entry.collection, {
+            'remoteId': entry.id,
+            'payloadJson': jsonEncode(
+              FirestoreValueCodec.encodeFields(entry.fields),
+            ),
+            ...LocalDataSource.scopeColumns(entry.fields),
+            'syncStatus': 'SYNCED',
+            'localUpdatedAt': LocalDataSource.now(),
+            'isDeleted': 0,
+          });
+        }
+      });
+    } catch (e) {
+      debugPrint('Failed to update local cache: $e');
+    }
+  }
 
   static const allocationTotalBasisPoints = 10000;
 
@@ -42,7 +96,8 @@ class StaffSalaryRepository {
     required String businessId,
     required String employeeId,
   }) {
-    if (fields['tenantId'] != tenantId ||
+    final docTenant = fields['tenantId'] ?? fields['ownerUid'];
+    if (docTenant != tenantId ||
         fields['businessId'] != businessId ||
         fields['employeeId'] != employeeId) {
       throw const AppException(
@@ -75,10 +130,15 @@ class StaffSalaryRepository {
         'Enter a valid salary rate and effective period.',
       );
     }
-    if (initialOutletBasisPoints != null &&
-        (initialOutletBasisPoints.isEmpty ||
-            initialOutletBasisPoints.values.any((value) => value <= 0) ||
-            initialOutletBasisPoints.values.fold<int>(
+    final Map<String, int>? cleanedInitialWeights =
+        initialOutletBasisPoints == null
+            ? null
+            : Map<String, int>.fromEntries(
+                initialOutletBasisPoints.entries.where((e) => e.value > 0),
+              );
+    if (cleanedInitialWeights != null &&
+        (cleanedInitialWeights.isEmpty ||
+            cleanedInitialWeights.values.fold<int>(
                   0,
                   (sum, value) => sum + value,
                 ) !=
@@ -93,11 +153,16 @@ class StaffSalaryRepository {
     ]);
     await atomicWrites.runAtomicOperation((tx) async {
       final employee = await tx.get(FirebaseConstants.employees, emp);
+      final employeeTenant =
+          employee.fields['tenantId'] ?? employee.fields['ownerUid'];
+      final employeeBusinesses =
+          (employee.fields['businessIds'] as List? ?? [
+            if (employee.fields['businessId'] is String)
+              employee.fields['businessId'],
+          ]).whereType<String>().toSet();
       if (!employee.exists ||
-          employee.fields['ownerUid'] != tenantId ||
-          !(employee.fields['businessIds'] as List? ?? const []).contains(
-            businessId,
-          )) {
+          employeeTenant != tenantId ||
+          !employeeBusinesses.contains(businessId)) {
         throw const AppException(
           'Select an employee assigned to this business.',
         );
@@ -142,37 +207,63 @@ class StaffSalaryRepository {
         profileId,
       );
       if (existing.exists) {
-        throw const AppException(
-          'A salary profile already exists for that effective date.',
+        tx.update(
+          FirebaseConstants.employeeSalaryProfiles,
+          profileId,
+          {
+            'salaryType': salaryType,
+            'baseRatePaise': baseRatePaise,
+            'paymentCycle': paymentCycle,
+            if (effectiveTo != null)
+              'effectiveTo': effectiveTo.toUtc().toIso8601String(),
+            'status': 'ACTIVE',
+            'updatedBy': createdBy,
+            'updatedAt': DateTime.now().toUtc().toIso8601String(),
+          },
+          updateTime: existing.updateTime,
         );
+      } else {
+        tx.create(FirebaseConstants.employeeSalaryProfiles, profileId, {
+          'profileId': profileId,
+          'tenantId': tenantId,
+          'businessId': businessId,
+          'employeeId': emp,
+          'salaryType': salaryType,
+          'baseRatePaise': baseRatePaise,
+          'paymentCycle': paymentCycle,
+          'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
+          if (effectiveTo != null)
+            'effectiveTo': effectiveTo.toUtc().toIso8601String(),
+          'status': 'ACTIVE',
+          'createdBy': createdBy,
+          'createdAt': DateTime.now().toUtc().toIso8601String(),
+        });
       }
-      tx.create(FirebaseConstants.employeeSalaryProfiles, profileId, {
-        'profileId': profileId,
-        'tenantId': tenantId,
-        'businessId': businessId,
-        'employeeId': emp,
-        'salaryType': salaryType,
-        'baseRatePaise': baseRatePaise,
-        'paymentCycle': paymentCycle,
-        'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
-        if (effectiveTo != null)
-          'effectiveTo': effectiveTo.toUtc().toIso8601String(),
-        'status': 'ACTIVE',
-        'createdBy': createdBy,
-        'createdAt': DateTime.now().toUtc().toIso8601String(),
-      });
       final employeeOutlets =
-          (employee.fields['outletIds'] as List? ?? const [])
-              .whereType<String>()
-              .toSet();
-      final allocationBasisPoints =
-          initialOutletBasisPoints ??
-          (employeeOutlets.length == 1
-              ? {employeeOutlets.single: allocationTotalBasisPoints}
-              : null);
+          (employee.fields['outletIds'] as List? ?? [
+            if (employee.fields['outletId'] is String)
+              employee.fields['outletId'],
+          ]).whereType<String>().toSet();
+      Map<String, int>? allocationBasisPoints = cleanedInitialWeights;
+      if (allocationBasisPoints == null && employeeOutlets.isNotEmpty) {
+        final businessOutletIds = <String>[];
+        for (final oid in employeeOutlets) {
+          final oDoc = await tx.get(FirebaseConstants.outlets, _safeId(oid));
+          final oTenant = oDoc.fields['tenantId'] ?? oDoc.fields['ownerUid'];
+          if (oDoc.exists &&
+              oDoc.fields['businessId'] == businessId &&
+              oTenant == tenantId) {
+            businessOutletIds.add(oid);
+          }
+        }
+        if (businessOutletIds.length == 1) {
+          allocationBasisPoints = {
+            businessOutletIds.single: allocationTotalBasisPoints,
+          };
+        }
+      }
       if (allocationBasisPoints != null) {
         if (allocationBasisPoints.isEmpty ||
-            allocationBasisPoints.values.any((value) => value <= 0) ||
             allocationBasisPoints.values.fold<int>(
                   0,
                   (sum, value) => sum + value,
@@ -188,10 +279,12 @@ class StaffSalaryRepository {
             FirebaseConstants.outlets,
             _safeId(outletId),
           );
+          final outletTenant =
+              outlet.fields['tenantId'] ?? outlet.fields['ownerUid'];
           if (!assigned.contains(outletId) ||
               !outlet.exists ||
               outlet.fields['businessId'] != businessId ||
-              outlet.fields['tenantId'] != tenantId) {
+              outletTenant != tenantId) {
             throw const AppException(
               'Every allocated outlet must be assigned to the employee and business.',
             );
@@ -246,24 +339,37 @@ class StaffSalaryRepository {
           FirebaseConstants.employeeOutletAllocations,
           allocationId,
         );
-        if (priorAllocation.exists)
-          throw const AppException(
-            'An allocation already exists for that effective date.',
+        if (priorAllocation.exists) {
+          tx.update(
+            FirebaseConstants.employeeOutletAllocations,
+            allocationId,
+            {
+              'outletBasisPoints': allocationBasisPoints,
+              'allocationTotalBasisPoints': allocationTotalBasisPoints,
+              if (effectiveTo != null)
+                'effectiveTo': effectiveTo.toUtc().toIso8601String(),
+              'status': 'ACTIVE',
+              'updatedBy': createdBy,
+              'updatedAt': DateTime.now().toUtc().toIso8601String(),
+            },
+            updateTime: priorAllocation.updateTime,
           );
-        tx.create(FirebaseConstants.employeeOutletAllocations, allocationId, {
-          'allocationId': allocationId,
-          'tenantId': tenantId,
-          'businessId': businessId,
-          'employeeId': emp,
-          'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
-          if (effectiveTo != null)
-            'effectiveTo': effectiveTo.toUtc().toIso8601String(),
-          'outletBasisPoints': allocationBasisPoints,
-          'allocationTotalBasisPoints': allocationTotalBasisPoints,
-          'status': 'ACTIVE',
-          'createdBy': createdBy,
-          'createdAt': DateTime.now().toUtc().toIso8601String(),
-        });
+        } else {
+          tx.create(FirebaseConstants.employeeOutletAllocations, allocationId, {
+            'allocationId': allocationId,
+            'tenantId': tenantId,
+            'businessId': businessId,
+            'employeeId': emp,
+            'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
+            if (effectiveTo != null)
+              'effectiveTo': effectiveTo.toUtc().toIso8601String(),
+            'outletBasisPoints': allocationBasisPoints,
+            'allocationTotalBasisPoints': allocationTotalBasisPoints,
+            'status': 'ACTIVE',
+            'createdBy': createdBy,
+            'createdAt': DateTime.now().toUtc().toIso8601String(),
+          });
+        }
       }
     }, idToken: token);
     return profileId;
@@ -282,9 +388,11 @@ class StaffSalaryRepository {
     required String token,
   }) async {
     final emp = _safeId(employeeId);
-    if (outletBasisPoints.isEmpty ||
-        outletBasisPoints.values.any((value) => value <= 0) ||
-        outletBasisPoints.values.fold<int>(0, (sum, value) => sum + value) !=
+    final cleanedWeights = Map<String, int>.fromEntries(
+      outletBasisPoints.entries.where((e) => e.value > 0),
+    );
+    if (cleanedWeights.isEmpty ||
+        cleanedWeights.values.fold<int>(0, (sum, value) => sum + value) !=
             allocationTotalBasisPoints ||
         (effectiveTo != null && !effectiveTo.isAfter(effectiveFrom))) {
       throw const AppException('Outlet allocations must total exactly 100%.');
@@ -297,27 +405,35 @@ class StaffSalaryRepository {
     ]);
     await atomicWrites.runAtomicOperation((tx) async {
       final employee = await tx.get(FirebaseConstants.employees, emp);
+      final employeeTenant =
+          employee.fields['tenantId'] ?? employee.fields['ownerUid'];
+      final employeeBusinesses =
+          (employee.fields['businessIds'] as List? ?? [
+            if (employee.fields['businessId'] is String)
+              employee.fields['businessId'],
+          ]).whereType<String>().toSet();
       if (!employee.exists ||
-          employee.fields['ownerUid'] != tenantId ||
-          !(employee.fields['businessIds'] as List? ?? const []).contains(
-            businessId,
-          )) {
+          employeeTenant != tenantId ||
+          !employeeBusinesses.contains(businessId)) {
         throw const AppException(
           'Select an employee assigned to this business.',
         );
       }
-      final assigned = (employee.fields['outletIds'] as List? ?? const [])
-          .whereType<String>()
-          .toSet();
-      for (final outletId in outletBasisPoints.keys) {
+      final assigned = (employee.fields['outletIds'] as List? ?? [
+        if (employee.fields['outletId'] is String)
+          employee.fields['outletId'],
+      ]).whereType<String>().toSet();
+      for (final outletId in cleanedWeights.keys) {
         final outlet = await tx.get(
           FirebaseConstants.outlets,
           _safeId(outletId),
         );
+        final outletTenant =
+            outlet.fields['tenantId'] ?? outlet.fields['ownerUid'];
         if (!assigned.contains(outletId) ||
             !outlet.exists ||
             outlet.fields['businessId'] != businessId ||
-            outlet.fields['tenantId'] != tenantId) {
+            outletTenant != tenantId) {
           throw const AppException(
             'Every allocated outlet must be assigned to the employee and business.',
           );
@@ -363,24 +479,37 @@ class StaffSalaryRepository {
         FirebaseConstants.employeeOutletAllocations,
         allocationId,
       );
-      if (existing.exists)
-        throw const AppException(
-          'An allocation already exists for that effective date.',
+      if (existing.exists) {
+        tx.update(
+          FirebaseConstants.employeeOutletAllocations,
+          allocationId,
+          {
+            'outletBasisPoints': cleanedWeights,
+            'allocationTotalBasisPoints': allocationTotalBasisPoints,
+            if (effectiveTo != null)
+              'effectiveTo': effectiveTo.toUtc().toIso8601String(),
+            'status': 'ACTIVE',
+            'updatedBy': createdBy,
+            'updatedAt': DateTime.now().toUtc().toIso8601String(),
+          },
+          updateTime: existing.updateTime,
         );
-      tx.create(FirebaseConstants.employeeOutletAllocations, allocationId, {
-        'allocationId': allocationId,
-        'tenantId': tenantId,
-        'businessId': businessId,
-        'employeeId': emp,
-        'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
-        if (effectiveTo != null)
-          'effectiveTo': effectiveTo.toUtc().toIso8601String(),
-        'outletBasisPoints': outletBasisPoints,
-        'allocationTotalBasisPoints': allocationTotalBasisPoints,
-        'status': 'ACTIVE',
-        'createdBy': createdBy,
-        'createdAt': DateTime.now().toUtc().toIso8601String(),
-      });
+      } else {
+        tx.create(FirebaseConstants.employeeOutletAllocations, allocationId, {
+          'allocationId': allocationId,
+          'tenantId': tenantId,
+          'businessId': businessId,
+          'employeeId': emp,
+          'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
+          if (effectiveTo != null)
+            'effectiveTo': effectiveTo.toUtc().toIso8601String(),
+          'outletBasisPoints': cleanedWeights,
+          'allocationTotalBasisPoints': allocationTotalBasisPoints,
+          'status': 'ACTIVE',
+          'createdBy': createdBy,
+          'createdAt': DateTime.now().toUtc().toIso8601String(),
+        });
+      }
     }, idToken: token);
     return allocationId;
   }
@@ -408,8 +537,9 @@ class StaffSalaryRepository {
         : (baseRatePaise * workUnitsMilli + 500) ~/ 1000;
     final gross = base + bonusPaise + overtimePaise;
     final net = gross - approvedDeductionsPaise;
-    if (net < 0)
+    if (net < 0) {
       throw const AppException('Approved deductions exceed earnings.');
+    }
     return {
       'baseEarningsPaise': base,
       'grossEarningsPaise': gross,
@@ -480,8 +610,9 @@ class StaffSalaryRepository {
     required String token,
   }) async {
     final emp = _safeId(employeeId);
-    if (periodEnd.isBefore(periodStart))
+    if (periodEnd.isBefore(periodStart)) {
       throw const AppException('Salary period dates are invalid.');
+    }
     final periodId = _scopedId('SALPER', [
       tenantId,
       businessId,
@@ -514,20 +645,22 @@ class StaffSalaryRepository {
                       (prior.fields['attendanceRecordIds'] as List? ?? const [])
                           .whereType<String>(),
                     ));
-        if (!same)
+        if (!same) {
           throw const AppException(
             'This salary period ID has conflicting details.',
           );
+        }
         return;
       }
       final profile = await tx.get(
         FirebaseConstants.employeeSalaryProfiles,
         _safeId(profileId),
       );
-      if (!profile.exists)
+      if (!profile.exists) {
         throw const AppException(
           'The effective salary profile is unavailable.',
         );
+      }
       _scope(
         profile.fields,
         tenantId: tenantId,
@@ -645,10 +778,11 @@ class StaffSalaryRepository {
             (end == null || !periodEnd.isAfter(end));
       }).toList();
       Map<String, int> outletWeights;
-      if (valid.length > 1)
+      if (valid.length > 1) {
         throw const AppException(
           'Overlapping outlet allocations need correction.',
         );
+      }
       if (valid.length == 1) {
         final raw = valid.single.fields['outletBasisPoints'];
         outletWeights = raw is Map
@@ -658,10 +792,32 @@ class StaffSalaryRepository {
               )
             : {};
       } else {
-        outletWeights = fallbackOutletBasisPoints ?? {};
+        final activeAllocations = allocations.where((record) {
+          if (!record.exists) return false;
+          final status = record.fields['status'] as String? ?? 'ACTIVE';
+          return status == 'ACTIVE';
+        }).toList();
+        if (activeAllocations.isNotEmpty) {
+          final sorted = activeAllocations..sort((a, b) {
+            final aStart = a.fields['effectiveFrom']?.toString() ?? '';
+            final bStart = b.fields['effectiveFrom']?.toString() ?? '';
+            return bStart.compareTo(aStart);
+          });
+          final raw = sorted.first.fields['outletBasisPoints'];
+          outletWeights = raw is Map
+              ? raw.map(
+                  (key, value) =>
+                      MapEntry(key.toString(), (value as num).toInt()),
+                )
+              : (fallbackOutletBasisPoints ?? {});
+        } else {
+          outletWeights = fallbackOutletBasisPoints ?? {};
+        }
       }
+      outletWeights = Map<String, int>.fromEntries(
+        outletWeights.entries.where((e) => e.value > 0),
+      );
       if (outletWeights.isEmpty ||
-          outletWeights.values.any((value) => value <= 0) ||
           outletWeights.values.fold<int>(0, (sum, value) => sum + value) !=
               allocationTotalBasisPoints) {
         throw const AppException(
@@ -669,19 +825,25 @@ class StaffSalaryRepository {
         );
       }
       final employee = await tx.get(FirebaseConstants.employees, emp);
+      final employeeTenant =
+          employee.fields['tenantId'] ?? employee.fields['ownerUid'];
       final assignedOutlets =
-          (employee.fields['outletIds'] as List? ?? const [])
-              .whereType<String>()
-              .toSet();
+          (employee.fields['outletIds'] as List? ?? [
+            if (employee.fields['outletId'] is String)
+              employee.fields['outletId'],
+          ]).whereType<String>().toSet();
       for (final outletId in outletWeights.keys) {
         final outlet = await tx.get(
           FirebaseConstants.outlets,
           _safeId(outletId),
         );
+        final outletTenant =
+            outlet.fields['tenantId'] ?? outlet.fields['ownerUid'];
         if (!employee.exists ||
+            employeeTenant != tenantId ||
             !assignedOutlets.contains(outletId) ||
             !outlet.exists ||
-            outlet.fields['tenantId'] != tenantId ||
+            outletTenant != tenantId ||
             outlet.fields['businessId'] != businessId) {
           throw const AppException(
             'Salary allocation references an outlet outside the employee business.',
@@ -713,8 +875,9 @@ class StaffSalaryRepository {
         ...calc,
         'expenseAmountPaise': expenseAmount,
         'workUnitsMilli': workUnitsMilli,
-        if (attendanceRecordIds != null)
-          'attendanceRecordIds': attendanceRecordIds,
+        ...attendanceRecordIds == null
+            ? const <String, dynamic>{}
+            : {'attendanceRecordIds': attendanceRecordIds},
         'bonusPaise': bonusPaise,
         'overtimePaise': overtimePaise,
         'outletExpensesPaise': outletExpenses,
@@ -764,7 +927,11 @@ class StaffSalaryRepository {
     }
     final eventId = 'SKH-ADV-$request';
     final financialId = 'FIN-$eventId';
-    await atomicWrites.runAtomicOperation((tx) async {
+    late Map<String, dynamic> khataFields;
+    late Map<String, dynamic> financeFields;
+    var isDuplicate = false;
+
+    await serverTransactions.runAtomicOperation((tx) async {
       final existing = await tx.get(
         FirebaseConstants.staffKhataTransactions,
         eventId,
@@ -781,27 +948,41 @@ class StaffSalaryRepository {
             'This request ID was already used for different advance details.',
           );
         }
+        isDuplicate = true;
         return;
       }
       final employee = await tx.get(FirebaseConstants.employees, emp);
+      final employeeTenant =
+          employee.fields['tenantId'] ?? employee.fields['ownerUid'];
+      final employeeBusinesses =
+          (employee.fields['businessIds'] as List? ?? [
+            if (employee.fields['businessId'] is String)
+              employee.fields['businessId'],
+          ]).whereType<String>().toSet();
+      final employeeOutlets =
+          (employee.fields['outletIds'] as List? ?? [
+            if (employee.fields['outletId'] is String)
+              employee.fields['outletId'],
+          ]).whereType<String>().toSet();
       if (!employee.exists ||
-          employee.fields['ownerUid'] != tenantId ||
-          !(employee.fields['businessIds'] as List? ?? const []).contains(
-            businessId,
-          ) ||
-          !(employee.fields['outletIds'] as List? ?? const []).contains(
-            outlet,
-          )) {
+          employeeTenant != tenantId ||
+          !employeeBusinesses.contains(businessId) ||
+          !employeeOutlets.contains(outlet)) {
         throw const AppException('Employee is not assigned to this outlet.');
       }
       final now = DateTime.now().toUtc();
-      tx.create(FirebaseConstants.staffKhataTransactions, eventId, {
+      final khataType = paymentMode == 'UPI'
+          ? 'UPI_ADVANCE'
+          : (paymentMode == 'BANK_TRANSFER' || paymentMode == 'CHEQUE'
+              ? 'BANK_ADVANCE'
+              : 'CASH_ADVANCE');
+      khataFields = {
         'recordId': eventId,
         'tenantId': tenantId,
         'businessId': businessId,
         'outletId': outlet,
         'employeeId': emp,
-        'transactionType': 'CASH_ADVANCE',
+        'transactionType': khataType,
         'amountPaise': amountPaise,
         'paymentMode': paymentMode,
         'transactionDate': date.toUtc().toIso8601String(),
@@ -812,32 +993,50 @@ class StaffSalaryRepository {
         'status': 'POSTED',
         'createdBy': createdBy,
         'createdAt': now.toIso8601String(),
-      });
+      };
+      tx.create(FirebaseConstants.staffKhataTransactions, eventId, khataFields);
+      final finModel = FinancialTransactionModel(
+        transactionId: financialId,
+        tenantId: tenantId,
+        businessId: businessId,
+        outletId: outlet,
+        direction: 'OUT',
+        transactionType: 'STAFF_ADVANCE',
+        partyType: 'EMPLOYEE',
+        partyId: emp,
+        amount: amountPaise,
+        paymentMode: paymentMode,
+        referenceType: 'STAFF_KHATA',
+        referenceId: eventId,
+        transactionDate: date,
+        createdByUid: createdBy,
+        createdAt: now,
+        status: 'POSTED',
+        referenceNo: referenceNo,
+        notes: notes,
+      );
+      financeFields = finModel.toData();
       tx.create(
         FirebaseConstants.financialTransactions,
         financialId,
-        FinancialTransactionModel(
-          transactionId: financialId,
-          tenantId: tenantId,
-          businessId: businessId,
-          outletId: outlet,
-          direction: 'OUT',
-          transactionType: 'STAFF_ADVANCE',
-          partyType: 'EMPLOYEE',
-          partyId: emp,
-          amount: amountPaise,
-          paymentMode: paymentMode,
-          referenceType: 'STAFF_KHATA',
-          referenceId: eventId,
-          transactionDate: date,
-          createdByUid: createdBy,
-          createdAt: now,
-          status: 'POSTED',
-          referenceNo: referenceNo,
-          notes: notes,
-        ).toData(),
+        financeFields,
       );
     }, idToken: token);
+
+    if (!isDuplicate) {
+      await _updateLocalCache([
+        (
+          collection: FirebaseConstants.staffKhataTransactions,
+          id: eventId,
+          fields: khataFields,
+        ),
+        (
+          collection: FirebaseConstants.financialTransactions,
+          id: financialId,
+          fields: financeFields,
+        ),
+      ]);
+    }
     return eventId;
   }
 
@@ -874,7 +1073,12 @@ class StaffSalaryRepository {
       );
     }
     final eventId = 'SKH-PAY-$request', financialId = 'FIN-SAL-$request';
-    await atomicWrites.runAtomicOperation((tx) async {
+    late Map<String, dynamic> updatedPeriodFields;
+    late Map<String, dynamic> khataFields;
+    late Map<String, dynamic> financeFields;
+    var isDuplicate = false;
+
+    await serverTransactions.runAtomicOperation((tx) async {
       final duplicate = await tx.get(
         FirebaseConstants.staffKhataTransactions,
         eventId,
@@ -891,6 +1095,7 @@ class StaffSalaryRepository {
             'This payment request ID was already used for different details.',
           );
         }
+        isDuplicate = true;
         return;
       }
       final period = await tx.get(
@@ -906,13 +1111,21 @@ class StaffSalaryRepository {
       }
       final outletDoc = await tx.get(FirebaseConstants.outlets, outlet);
       final employee = await tx.get(FirebaseConstants.employees, emp);
+      final outletTenant =
+          outletDoc.fields['tenantId'] ?? outletDoc.fields['ownerUid'];
+      final employeeTenant =
+          employee.fields['tenantId'] ?? employee.fields['ownerUid'];
+      final employeeOutlets =
+          (employee.fields['outletIds'] as List? ?? [
+            if (employee.fields['outletId'] is String)
+              employee.fields['outletId'],
+          ]).whereType<String>().toSet();
       if (!outletDoc.exists ||
-          outletDoc.fields['tenantId'] != tenantId ||
+          outletTenant != tenantId ||
           outletDoc.fields['businessId'] != businessId ||
           !employee.exists ||
-          !(employee.fields['outletIds'] as List? ?? const []).contains(
-            outlet,
-          )) {
+          employeeTenant != tenantId ||
+          !employeeOutlets.contains(outlet)) {
         throw const AppException(
           'Payment outlet is not assigned to this employee and business.',
         );
@@ -923,18 +1136,30 @@ class StaffSalaryRepository {
           (period.fields['advanceAdjustedPaise'] as num?)?.toInt() ?? 0;
       final purchases =
           (period.fields['staffPurchaseAdjustedPaise'] as num?)?.toInt() ?? 0;
-      if (amountPaise > earned - paid - advances - purchases)
+      if (amountPaise > earned - paid - advances - purchases) {
         throw const AppException('Payment exceeds remaining salary payable.');
+      }
       final now = DateTime.now().toUtc();
+      final nowIso = now.toIso8601String();
       final nextPaid = paid + amountPaise;
+      final newStatus = nextPaid + advances + purchases == earned
+          ? 'PAID'
+          : 'PARTIALLY_PAID';
+
+      updatedPeriodFields = {
+        ...period.fields,
+        'paidAmountPaise': nextPaid,
+        'status': newStatus,
+        'updatedAt': nowIso,
+      };
+
       tx.update(FirebaseConstants.salaryPeriods, periodId, {
         'paidAmountPaise': nextPaid,
-        'status': nextPaid + advances + purchases == earned
-            ? 'PAID'
-            : 'PARTIALLY_PAID',
-        'updatedAt': now.toIso8601String(),
+        'status': newStatus,
+        'updatedAt': nowIso,
       }, updateTime: period.updateTime);
-      tx.create(FirebaseConstants.staffKhataTransactions, eventId, {
+
+      khataFields = {
         'recordId': eventId,
         'tenantId': tenantId,
         'businessId': businessId,
@@ -951,33 +1176,57 @@ class StaffSalaryRepository {
         'notes': notes?.trim(),
         'status': 'POSTED',
         'createdBy': paidBy,
-        'createdAt': now.toIso8601String(),
-      });
+        'createdAt': nowIso,
+      };
+      tx.create(FirebaseConstants.staffKhataTransactions, eventId, khataFields);
+
+      final finModel = FinancialTransactionModel(
+        transactionId: financialId,
+        tenantId: tenantId,
+        businessId: businessId,
+        outletId: outlet,
+        direction: 'OUT',
+        transactionType: 'SALARY_PAYMENT',
+        partyType: 'EMPLOYEE',
+        partyId: emp,
+        amount: amountPaise,
+        paymentMode: paymentMode,
+        referenceType: 'SALARY_PERIOD',
+        referenceId: periodId,
+        transactionDate: date,
+        createdByUid: paidBy,
+        createdAt: now,
+        status: 'POSTED',
+        referenceNo: referenceNo,
+        notes: notes,
+      );
+      financeFields = finModel.toData();
       tx.create(
         FirebaseConstants.financialTransactions,
         financialId,
-        FinancialTransactionModel(
-          transactionId: financialId,
-          tenantId: tenantId,
-          businessId: businessId,
-          outletId: outlet,
-          direction: 'OUT',
-          transactionType: 'SALARY_PAYMENT',
-          partyType: 'EMPLOYEE',
-          partyId: emp,
-          amount: amountPaise,
-          paymentMode: paymentMode,
-          referenceType: 'SALARY_PERIOD',
-          referenceId: periodId,
-          transactionDate: date,
-          createdByUid: paidBy,
-          createdAt: now,
-          status: 'POSTED',
-          referenceNo: referenceNo,
-          notes: notes,
-        ).toData(),
+        financeFields,
       );
     }, idToken: token);
+
+    if (!isDuplicate) {
+      await _updateLocalCache([
+        (
+          collection: FirebaseConstants.salaryPeriods,
+          id: periodId,
+          fields: updatedPeriodFields,
+        ),
+        (
+          collection: FirebaseConstants.staffKhataTransactions,
+          id: eventId,
+          fields: khataFields,
+        ),
+        (
+          collection: FirebaseConstants.financialTransactions,
+          id: financialId,
+          fields: financeFields,
+        ),
+      ]);
+    }
     return eventId;
   }
 
@@ -997,8 +1246,9 @@ class StaffSalaryRepository {
     final emp = _safeId(employeeId),
         request = _safeId(requestId),
         outlet = _safeId(outletId);
-    if (amountPaise <= 0)
+    if (amountPaise <= 0) {
       throw const AppException('Enter a positive advance adjustment.');
+    }
     final eventId = 'SKH-ADJ-$request';
     await atomicWrites.runAtomicOperation((tx) async {
       final duplicate = await tx.get(
@@ -1028,13 +1278,21 @@ class StaffSalaryRepository {
       }
       final outletDoc = await tx.get(FirebaseConstants.outlets, outlet);
       final employee = await tx.get(FirebaseConstants.employees, emp);
+      final outletTenant =
+          outletDoc.fields['tenantId'] ?? outletDoc.fields['ownerUid'];
+      final employeeTenant =
+          employee.fields['tenantId'] ?? employee.fields['ownerUid'];
+      final employeeOutlets =
+          (employee.fields['outletIds'] as List? ?? [
+            if (employee.fields['outletId'] is String)
+              employee.fields['outletId'],
+          ]).whereType<String>().toSet();
       if (!outletDoc.exists ||
-          outletDoc.fields['tenantId'] != tenantId ||
+          outletTenant != tenantId ||
           outletDoc.fields['businessId'] != businessId ||
           !employee.exists ||
-          !(employee.fields['outletIds'] as List? ?? const []).contains(
-            outlet,
-          )) {
+          employeeTenant != tenantId ||
+          !employeeOutlets.contains(outlet)) {
         throw const AppException(
           'Adjustment outlet is not assigned to this employee and business.',
         );
@@ -1116,7 +1374,7 @@ class StaffSalaryRepository {
     );
     return docs
         .map(
-          (doc) => Map<String, dynamic>.from(doc['fields'] as Map? ?? const {}),
+          (doc) => FirestoreRestService.decodeFields(doc['fields']),
         )
         .toList()
       ..sort(
@@ -1159,7 +1417,14 @@ class StaffSalaryRepository {
     }
     final eventId = 'SKH-PURPAY-$request';
     final financeId = 'FIN-SPAY-$request';
-    await atomicWrites.runAtomicOperation((tx) async {
+    final paymentId = 'PAY-SP-$request';
+    late Map<String, dynamic> updatedInvoiceFields;
+    late Map<String, dynamic> paymentFields;
+    late Map<String, dynamic> khataFields;
+    late Map<String, dynamic> financeFields;
+    var isDuplicate = false;
+
+    await serverTransactions.runAtomicOperation((tx) async {
       final duplicate = await tx.get(
         FirebaseConstants.staffKhataTransactions,
         eventId,
@@ -1173,36 +1438,55 @@ class StaffSalaryRepository {
             'This purchase payment request ID was already used.',
           );
         }
+        isDuplicate = true;
         return;
       }
       final invoice = await tx.get(FirebaseConstants.invoices, invoiceKey);
       final person = await tx.get(FirebaseConstants.employees, employee);
+      final invoiceTenant =
+          invoice.fields['tenantId'] ?? invoice.fields['ownerUid'];
+      final personTenant =
+          person.fields['tenantId'] ?? person.fields['ownerUid'];
       if (!invoice.exists ||
           invoice.fields['employeeId'] != employee ||
-          invoice.fields['tenantId'] != tenantId ||
+          invoiceTenant != tenantId ||
           invoice.fields['businessId'] != businessId ||
           invoice.fields['outletId'] != outlet ||
           !person.exists ||
-          person.fields['ownerUid'] != tenantId) {
+          personTenant != tenantId) {
         throw const AppException(
           'Staff invoice is unavailable in this outlet.',
         );
       }
       final due = (invoice.fields['outstandingAmount'] as num?)?.toInt() ?? 0;
-      if (due <= 0 || amountPaise > due)
+      if (due <= 0 || amountPaise > due) {
         throw const AppException('Payment exceeds the staff invoice balance.');
+      }
       final remaining = due - amountPaise;
       final now = DateTime.now().toUtc();
-      tx.update(FirebaseConstants.invoices, invoiceKey, {
-        'paidAmount':
-            ((invoice.fields['paidAmount'] as num?)?.toInt() ?? 0) +
-            amountPaise,
+      final nowIso = now.toIso8601String();
+      final newPaidAmount =
+          ((invoice.fields['paidAmount'] as num?)?.toInt() ?? 0) +
+          amountPaise;
+      final newPaymentStatus = remaining == 0 ? 'PAID' : 'PARTIALLY_PAID';
+
+      updatedInvoiceFields = {
+        ...invoice.fields,
+        'paidAmount': newPaidAmount,
         'outstandingAmount': remaining,
-        'paymentStatus': remaining == 0 ? 'PAID' : 'PARTIALLY_PAID',
-        'updatedAt': now.toIso8601String(),
+        'paymentStatus': newPaymentStatus,
+        'updatedAt': nowIso,
+      };
+
+      tx.update(FirebaseConstants.invoices, invoiceKey, {
+        'paidAmount': newPaidAmount,
+        'outstandingAmount': remaining,
+        'paymentStatus': newPaymentStatus,
+        'updatedAt': nowIso,
       }, updateTime: invoice.updateTime);
-      tx.create(FirebaseConstants.payments, 'PAY-SP-$request', {
-        'paymentId': 'PAY-SP-$request',
+
+      paymentFields = {
+        'paymentId': paymentId,
         'invoiceId': invoiceKey,
         'employeeId': employee,
         'tenantId': tenantId,
@@ -1212,10 +1496,12 @@ class StaffSalaryRepository {
         'amountPaise': amountPaise,
         'appliedPaise': amountPaise,
         'createdByUid': recordedBy,
-        'createdAt': now.toIso8601String(),
+        'createdAt': nowIso,
         'immutable': true,
-      });
-      tx.create(FirebaseConstants.staffKhataTransactions, eventId, {
+      };
+      tx.create(FirebaseConstants.payments, paymentId, paymentFields);
+
+      khataFields = {
         'recordId': eventId,
         'tenantId': tenantId,
         'businessId': businessId,
@@ -1229,31 +1515,60 @@ class StaffSalaryRepository {
         'requestId': request,
         'status': 'POSTED',
         'createdBy': recordedBy,
-        'createdAt': now.toIso8601String(),
-      });
+        'createdAt': nowIso,
+      };
+      tx.create(FirebaseConstants.staffKhataTransactions, eventId, khataFields);
+
+      final finModel = FinancialTransactionModel(
+        transactionId: financeId,
+        tenantId: tenantId,
+        businessId: businessId,
+        outletId: outlet,
+        direction: 'IN',
+        transactionType: 'STAFF_PURCHASE_PAYMENT',
+        partyType: 'EMPLOYEE',
+        partyId: employee,
+        amount: amountPaise,
+        paymentMode: paymentMode,
+        referenceType: 'INVOICE',
+        referenceId: invoiceKey,
+        transactionDate: now,
+        createdByUid: recordedBy,
+        createdAt: now,
+        status: 'POSTED',
+      );
+      financeFields = finModel.toData();
       tx.create(
         FirebaseConstants.financialTransactions,
         financeId,
-        FinancialTransactionModel(
-          transactionId: financeId,
-          tenantId: tenantId,
-          businessId: businessId,
-          outletId: outlet,
-          direction: 'IN',
-          transactionType: 'STAFF_PURCHASE_PAYMENT',
-          partyType: 'EMPLOYEE',
-          partyId: employee,
-          amount: amountPaise,
-          paymentMode: paymentMode,
-          referenceType: 'INVOICE',
-          referenceId: invoiceKey,
-          transactionDate: now,
-          createdByUid: recordedBy,
-          createdAt: now,
-          status: 'POSTED',
-        ).toData(),
+        financeFields,
       );
     }, idToken: token);
+
+    if (!isDuplicate) {
+      await _updateLocalCache([
+        (
+          collection: FirebaseConstants.invoices,
+          id: invoiceKey,
+          fields: updatedInvoiceFields,
+        ),
+        (
+          collection: FirebaseConstants.payments,
+          id: paymentId,
+          fields: paymentFields,
+        ),
+        (
+          collection: FirebaseConstants.staffKhataTransactions,
+          id: eventId,
+          fields: khataFields,
+        ),
+        (
+          collection: FirebaseConstants.financialTransactions,
+          id: financeId,
+          fields: financeFields,
+        ),
+      ]);
+    }
     return eventId;
   }
 
@@ -1274,8 +1589,9 @@ class StaffSalaryRepository {
         request = _safeId(requestId),
         outlet = _safeId(outletId),
         eventId = 'SKH-POFF-$request';
-    if (amountPaise <= 0)
+    if (amountPaise <= 0) {
       throw const AppException('Enter a positive purchase offset.');
+    }
     await atomicWrites.runAtomicOperation((tx) async {
       final duplicate = await tx.get(
         FirebaseConstants.staffKhataTransactions,
@@ -1295,8 +1611,10 @@ class StaffSalaryRepository {
         FirebaseConstants.salaryPeriods,
         _safeId(periodId),
       );
+      final periodTenant =
+          period.fields['tenantId'] ?? period.fields['ownerUid'];
       if (!period.exists ||
-          period.fields['tenantId'] != tenantId ||
+          periodTenant != tenantId ||
           period.fields['businessId'] != businessId ||
           period.fields['employeeId'] != employee ||
           !{'APPROVED', 'PARTIALLY_PAID'}.contains(period.fields['status'])) {
@@ -1312,10 +1630,12 @@ class StaffSalaryRepository {
         (row) => row.exists && row.fields['status'] == 'POSTED',
       )) {
         final value = (row.fields['amountPaise'] as num?)?.toInt() ?? 0;
-        if (row.fields['transactionType'] == 'STORE_PURCHASE')
+        if (row.fields['transactionType'] == 'STORE_PURCHASE') {
           receivable += value;
-        if (row.fields['transactionType'] == 'STORE_CREDIT_ADJUSTMENT')
+        }
+        if (row.fields['transactionType'] == 'STORE_CREDIT_ADJUSTMENT') {
           receivable -= value;
+        }
       }
       final earned = (period.fields['netEarnedPaise'] as num?)?.toInt() ?? 0;
       final paid = (period.fields['paidAmountPaise'] as num?)?.toInt() ?? 0;
@@ -1409,6 +1729,19 @@ class StaffSalaryRepository {
     employeeId: employeeId,
   );
 
+  Future<List<Map<String, dynamic>>> getOutletAllocations({
+    required String tenantId,
+    required String businessId,
+    required String token,
+    String? employeeId,
+  }) => _businessRecords(
+    collection: FirebaseConstants.employeeOutletAllocations,
+    tenantId: tenantId,
+    businessId: businessId,
+    token: token,
+    employeeId: employeeId,
+  );
+
   /// Records an employee's in-person acknowledgment on the approved salary
   /// period. The first acknowledgment is immutable; corrections need a new
   /// auditable payroll adjustment rather than overwriting the receipt.
@@ -1423,15 +1756,18 @@ class StaffSalaryRepository {
   }) async {
     final emp = _safeId(employeeId);
     final name = acknowledgedByName.trim().replaceAll(RegExp(r'\s+'), ' ');
-    if (name.isEmpty)
+    if (name.isEmpty) {
       throw const AppException('Enter the employee acknowledgment name.');
+    }
     await atomicWrites.runAtomicOperation((tx) async {
       final period = await tx.get(
         FirebaseConstants.salaryPeriods,
         _safeId(periodId),
       );
+      final periodTenant =
+          period.fields['tenantId'] ?? period.fields['ownerUid'];
       if (!period.exists ||
-          period.fields['tenantId'] != tenantId ||
+          periodTenant != tenantId ||
           period.fields['businessId'] != businessId ||
           period.fields['employeeId'] != emp) {
         throw const AppException(

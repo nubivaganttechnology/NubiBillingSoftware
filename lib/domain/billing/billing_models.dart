@@ -15,6 +15,7 @@ class BillLineInput {
     required this.gstRateBps,
     required this.priceIncludesTax,
     this.discountPaise = 0,
+    this.batchId,
     this.unit = 'UNIT',
     this.conversionFactor = 1,
     this.trackStock = true,
@@ -28,6 +29,7 @@ class BillLineInput {
   final int unitPricePaise;
   final int gstRateBps;
   final bool priceIncludesTax;
+  final String? batchId;
   final int discountPaise;
   final String unit;
   final int conversionFactor;

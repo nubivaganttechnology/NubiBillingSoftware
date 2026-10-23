@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/utils/id_generator.dart';
@@ -7,6 +11,7 @@ import '../../data/models/outlet_model.dart';
 import '../../data/repositories/staff_salary_repository.dart';
 import '../../data/repositories/staff_attendance_repository.dart';
 import '../../data/services/salary_document_service.dart';
+import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 import 'staff_attendance_page.dart';
 
@@ -261,6 +266,18 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
   List<OutletModel> get _businessOutlets =>
       c.outlets.where((o) => o.businessId == business).toList();
 
+  Map<String, int> _defaultOutletWeights(List<OutletModel> outlets) {
+    if (outlets.isEmpty) return {};
+    if (outlets.length == 1) return {outlets.single.outletId: 10000};
+    final share = 10000 ~/ outlets.length;
+    final remainder = 10000 % outlets.length;
+    final map = <String, int>{};
+    for (var i = 0; i < outlets.length; i++) {
+      map[outlets[i].outletId] = share + (i == 0 ? remainder : 0);
+    }
+    return map;
+  }
+
   String _getOutletNames(List<String> outletIds) {
     if (outletIds.isEmpty) {
       return 'Unassigned';
@@ -444,11 +461,20 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
     try {
       final repo = c.staffSalaryRepository!;
       final now = DateTime.now();
-      final effectiveFrom = DateTime(
-        now.year,
-        now.month + (_profiles.isEmpty ? 0 : 1),
-        1,
-      );
+      DateTime effectiveFrom;
+      if (currentActive != null) {
+        final activeStart =
+            DateTime.tryParse(currentActive['effectiveFrom']?.toString() ?? '');
+        final hasPeriods =
+            _periods.any((p) => p['profileId'] == currentActive['profileId']);
+        if (!hasPeriods && activeStart != null) {
+          effectiveFrom = DateTime(activeStart.year, activeStart.month, 1);
+        } else {
+          effectiveFrom = DateTime(now.year, now.month + 1, 1);
+        }
+      } else {
+        effectiveFrom = DateTime(now.year, now.month, 1);
+      }
 
       await repo.saveSalaryProfile(
         tenantId: tenant!,
@@ -493,7 +519,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
 
     try {
       final now = DateTime.now();
-      final effective = DateTime(now.year, now.month + 1, 1);
+      final effective = DateTime(now.year, now.month, 1);
       await c.staffSalaryRepository!.saveOutletAllocation(
         tenantId: tenant!,
         businessId: business!,
@@ -504,7 +530,10 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
         token: token!,
       );
       if (mounted) {
-        _showSuccess('Future outlet allocation split updated.');
+        _showSuccess(
+          AppLocalizations.of(context)?.outletAllocationSplit ??
+              'Outlet allocation split updated.',
+        );
       }
       await _load();
     } catch (e) {
@@ -517,6 +546,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
   Future<Map<String, int>?> _showOutletAllocationDialog(
     List<OutletModel> outlets,
   ) async {
+    final l10n = AppLocalizations.of(context);
     if (outlets.length == 1) {
       return {outlets.single.outletId: 10000};
     }
@@ -559,7 +589,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text('Outlet Allocation (%)'),
+                Text(l10n?.outletAllocationPercent ?? 'Outlet Allocation (%)'),
               ],
             ),
             content: SizedBox(
@@ -568,9 +598,10 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Specify the percentage split of salary expense across outlets. Must total exactly 100%.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  Text(
+                    l10n?.outletAllocationDesc ??
+                        'Specify the percentage split of salary expense across outlets. Must total exactly 100%.',
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                   ),
                   const SizedBox(height: 16),
                   for (var i = 0; i < outlets.length; i++) ...[
@@ -615,7 +646,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Total Allocation:',
+                          l10n?.totalAllocation ?? 'Total Allocation:',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: isValid
@@ -641,17 +672,33 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogCtx),
-                child: const Text('Cancel'),
+                child: Text(l10n?.cancel ?? 'Cancel'),
               ),
               FilledButton(
                 onPressed: isValid
                     ? () {
-                        final result = <String, int>{};
+                        final positiveOutlets = <int>[];
                         for (var i = 0; i < outlets.length; i++) {
                           final pct =
-                              double.tryParse(controllers[i].text) ?? 0.0;
+                              double.tryParse(controllers[i].text.trim()) ??
+                              0.0;
                           if (pct > 0) {
-                            result[outlets[i].outletId] = (pct * 100).round();
+                            positiveOutlets.add(i);
+                          }
+                        }
+                        final result = <String, int>{};
+                        var accumulated = 0;
+                        for (var idx = 0; idx < positiveOutlets.length; idx++) {
+                          final i = positiveOutlets[idx];
+                          final pct =
+                              double.tryParse(controllers[i].text.trim()) ??
+                              0.0;
+                          final bp = idx == positiveOutlets.length - 1
+                              ? 10000 - accumulated
+                              : (pct * 100).round();
+                          accumulated += bp;
+                          if (bp > 0) {
+                            result[outlets[i].outletId] = bp;
                           }
                         }
                         Navigator.pop(dialogCtx, result);
@@ -660,7 +707,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF132B45),
                 ),
-                child: const Text('Save 100% Split'),
+                child: Text(l10n?.saveHundredPercentSplit ?? 'Save 100% Split'),
               ),
             ],
           );
@@ -740,11 +787,12 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
       );
     } else if (type != 'MONTHLY' && attendance.isNotEmpty) {
       units = attendance.fold<int>(0, (sum, row) {
-        if (type == 'HOURLY') {
+        final payable = (row['payableUnitsMilli'] as num?)?.toInt() ?? 0;
+        if (type == 'HOURLY' && payable > 0) {
           final minutes = (row['workedMinutes'] as num?)?.toInt() ?? 0;
           return sum + ((minutes * 1000 + 30) ~/ 60);
         }
-        return sum + ((row['payableUnitsMilli'] as num?)?.toInt() ?? 0);
+        return sum + payable;
       });
     }
 
@@ -805,16 +853,17 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
         attendanceRecordIds: attendanceIds.isEmpty ? null : attendanceIds,
         approvedDeductionsPaise: totalApprovedDeductionsPaise,
         fallbackOutletBasisPoints:
-            weights.isEmpty && _employeeOutlets.length == 1
-            ? {_employeeOutlets.single.outletId: 10000}
-            : weights,
+            weights.isNotEmpty
+                ? weights
+                : _defaultOutletWeights(_employeeOutlets),
         approvedBy: c.appContext!.employeeId ?? c.user!.uid,
         token: token!,
       );
 
       if (mounted) {
         _showSuccess(
-          'Salary period approved successfully for ${_employee!.name}.',
+          AppLocalizations.of(context)?.salaryPeriodApproved ??
+              'Salary period approved successfully for ${_employee!.name}.',
         );
       }
       await _load();
@@ -1145,65 +1194,37 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
     Map<String, dynamic> period,
     SalaryDocumentType type,
   ) async {
-    final lang = await showDialog<SalaryDocumentLanguage>(
+    if (_employee == null) {
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context);
+    final appLangCode = c.currentLocale.languageCode;
+    final defaultLang = appLangCode == 'bn'
+        ? SalaryDocumentLanguage.bengali
+        : appLangCode == 'hi'
+            ? SalaryDocumentLanguage.hindi
+            : SalaryDocumentLanguage.english;
+
+    final periodLabel =
+        '${_formatDateString(period['periodStart']?.toString())} – ${_formatDateString(period['periodEnd']?.toString())}';
+    final isSlip = type == SalaryDocumentType.payslip;
+    final title = isSlip
+        ? (l10n?.generateSalarySlip ?? 'Salary Slip (PDF)')
+        : 'Salary Statement (PDF)';
+
+    final req = await showDialog<SalaryExportRequest>(
       context: context,
-      builder: (context) => SimpleDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.language_rounded, color: Color(0xFF132B45)),
-            const SizedBox(width: 8),
-            const Text('Document Language'),
-          ],
-        ),
-        children: [
-          SimpleDialogOption(
-            onPressed: () =>
-                Navigator.pop(context, SalaryDocumentLanguage.english),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, size: 18),
-                  SizedBox(width: 10),
-                  Text('English (Default)'),
-                ],
-              ),
-            ),
-          ),
-          SimpleDialogOption(
-            onPressed: () =>
-                Navigator.pop(context, SalaryDocumentLanguage.bengali),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Icon(Icons.translate, size: 18),
-                  SizedBox(width: 10),
-                  Text('বাংলা (Bengali)'),
-                ],
-              ),
-            ),
-          ),
-          SimpleDialogOption(
-            onPressed: () =>
-                Navigator.pop(context, SalaryDocumentLanguage.hindi),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Icon(Icons.translate, size: 18),
-                  SizedBox(width: 10),
-                  Text('हिन्दी (Hindi)'),
-                ],
-              ),
-            ),
-          ),
-        ],
+      builder: (context) => SalaryDocumentExportDialog(
+        title: title,
+        employeeName: _employee!.name,
+        periodLabel: periodLabel,
+        isSlip: isSlip,
+        initialLanguage: defaultLang,
       ),
     );
 
-    if (lang == null || _employee == null) {
+    if (req == null || !mounted) {
       return;
     }
 
@@ -1225,24 +1246,94 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
           'employeeCode': _employee!.employeeCode,
         },
         period: period,
-        language: lang,
+        language: req.language,
         type: type,
         transactions: _entries,
       );
-      final id = period['periodId']?.toString() ?? 'salary';
-      final label = type == SalaryDocumentType.payslip
-          ? 'Salary Slip'
-          : 'Salary Statement';
 
-      await SharePlus.instance.share(
-        ShareParams(
-          subject: '$label $id',
-          text: '$label for ${_employee!.name} ($id)',
-          files: [
-            XFile.fromData(bytes, name: '$id.pdf', mimeType: 'application/pdf'),
-          ],
-        ),
-      );
+      final periodId = period['periodId']?.toString() ?? 'salary';
+      final safeEmpName =
+          _employee!.name.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+      final docPrefix = isSlip ? 'SalarySlip' : 'SalaryStatement';
+      final fileName = '${docPrefix}_${safeEmpName}_$periodId.pdf';
+      final displayLabel = isSlip ? 'Salary Slip' : 'Salary Statement';
+
+      switch (req.action) {
+        case SalaryExportAction.download:
+          try {
+            final output = await FilePicker.saveFile(
+              dialogTitle: 'Save $displayLabel (PDF)',
+              fileName: fileName,
+              bytes: bytes,
+              type: FileType.custom,
+              allowedExtensions: ['pdf'],
+              mimeType: 'application/pdf',
+            );
+            if (output != null && mounted) {
+              final filePath = output.hasScheme && output.scheme == 'file'
+                  ? output.toFilePath()
+                  : (output.path.isNotEmpty ? output.path : output.toString());
+              final file = File(filePath);
+              if (!await file.exists() || (await file.length()) == 0) {
+                await file.writeAsBytes(bytes, flush: true);
+              }
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '$displayLabel downloaded successfully: $fileName',
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: const Color(0xFF16A34A),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            }
+          } catch (pickerErr) {
+            final shared =
+                await Printing.sharePdf(bytes: bytes, filename: fileName);
+            if (!shared && mounted) {
+              _showError(pickerErr);
+            }
+          }
+          break;
+
+        case SalaryExportAction.print:
+          await Printing.layoutPdf(
+            onLayout: (_) async => bytes,
+            name: fileName,
+            dynamicLayout: false,
+          );
+          break;
+
+        case SalaryExportAction.share:
+          await SharePlus.instance.share(
+            ShareParams(
+              subject: '$displayLabel $periodId',
+              text: '$displayLabel for ${_employee!.name} ($periodId)',
+              files: [
+                XFile.fromData(
+                  bytes,
+                  name: fileName,
+                  mimeType: 'application/pdf',
+                ),
+              ],
+            ),
+          );
+          break;
+      }
     } catch (e) {
       if (mounted) {
         _showError(e);
@@ -1631,20 +1722,22 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
               ),
             ),
             const SizedBox(width: 10),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Staff Salary Khata',
-                  style: TextStyle(
+                  AppLocalizations.of(context)?.staffSalaryKhata ??
+                      'Staff Salary Khata',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF0F172A),
                   ),
                 ),
                 Text(
-                  'Advance ledger, attendance reconciliation & payroll settlements',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                  AppLocalizations.of(context)?.staffSalarySubtitle ??
+                      'Advance ledger, attendance reconciliation & payroll settlements',
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                 ),
               ],
             ),
@@ -1766,21 +1859,25 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                               Icons.calendar_month_outlined,
                               size: 18,
                             ),
-                            text: 'Salary Periods (${_periods.length})',
+                            text:
+                                '${AppLocalizations.of(context)?.salaryPeriodsTab ?? "Salary Periods"} (${_periods.length})',
                           ),
                           Tab(
                             icon: const Icon(
                               Icons.menu_book_outlined,
                               size: 18,
                             ),
-                            text: 'Khata Passbook (${_entries.length})',
+                            text:
+                                '${AppLocalizations.of(context)?.khataPassbookTab ?? "Khata Passbook"} (${_entries.length})',
                           ),
                           Tab(
                             icon: const Icon(
                               Icons.tune_rounded,
                               size: 18,
                             ),
-                            text: 'Salary Profile & Splits',
+                            text: AppLocalizations.of(context)
+                                    ?.salaryProfileAndSplitsTab ??
+                                'Salary Profile & Splits',
                           ),
                         ],
                       ),
@@ -1846,9 +1943,10 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                 color: Color(0xFF132B45),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Select Staff Member',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)?.selectStaffMember ??
+                    'Select Staff Member',
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0F172A),
@@ -1859,9 +1957,10 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                 TextButton.icon(
                   onPressed: _addTemporaryWorker,
                   icon: const Icon(Icons.add_rounded, size: 16),
-                  label: const Text(
-                    '+ Add Daily Worker',
-                    style: TextStyle(fontSize: 12),
+                  label: Text(
+                    AppLocalizations.of(context)?.addDailyWorker ??
+                        '+ Add Daily Worker',
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
             ],
@@ -1870,7 +1969,8 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
           if (candidates.length > 3) ...[
             TextField(
               decoration: InputDecoration(
-                hintText: 'Search staff by name or code...',
+                hintText: AppLocalizations.of(context)?.searchStaffHint ??
+                    'Search staff by name or code...',
                 prefixIcon: const Icon(Icons.search, size: 18),
                 isDense: true,
                 filled: true,
@@ -1885,12 +1985,13 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
             const SizedBox(height: 10),
           ],
           if (filtered.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
-                  'No staff members match the criteria.',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                  AppLocalizations.of(context)?.noStaffMatched ??
+                      'No staff members match the criteria.',
+                  style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
                 ),
               ),
             )
@@ -1903,6 +2004,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                     _StaffSelectionChip(
                       employee: emp,
                       roleLabel: _roleNames(emp),
+                      outletLabel: _formatEmployeeOutletLabel(emp),
                       isSelected: emp.employeeId == _employee?.employeeId,
                       onTap: () {
                         setState(() => _employee = emp);
@@ -1920,7 +2022,10 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
   }
 
   String _roleNames(EmployeeModel employee) {
-    if (employee.roleIds.isEmpty) return 'No role assigned';
+    if (employee.roleIds.isEmpty) {
+      return AppLocalizations.of(context)?.noRoleAssigned ??
+          'No role assigned';
+    }
     return employee.roleIds.map((id) {
       final role = c.activeRoles.where((item) => item.roleId == id).firstOrNull;
       return role?.roleName ?? id;
@@ -2045,6 +2150,24 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                             ),
                           ],
                         ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.storefront_outlined,
+                              size: 12,
+                              color: Color(0xFF94A3B8),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Outlets: ${_getOutletNames(employee.outletIds)}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFFCBD5E1),
+                              ),
+                            ),
+                          ],
+                        ),
                         if (employee.mobile != null &&
                             employee.mobile!.isNotEmpty)
                           Row(
@@ -2099,25 +2222,27 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
         LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 650;
+            final l10n = AppLocalizations.of(context);
             final cards = [
               _SalaryKpiMetricCard(
-                title: 'Base Rate & Type',
+                title: l10n?.salaryBaseRateAndType ?? 'Base Rate & Type',
                 value: baseRatePaise > 0
                     ? '${_money(baseRatePaise)} / ${salaryType.toLowerCase()}'
-                    : 'Not Configured',
+                    : (l10n?.salaryNotConfigured ?? 'Not Configured'),
                 subtitle: baseRatePaise > 0
                     ? '$paymentCycle cycle'
-                    : 'Tap to configure rate',
+                    : (l10n?.tapToConfigureRate ?? 'Tap to configure rate'),
                 icon: Icons.payments_rounded,
                 accentColor: const Color(0xFF2563EB),
                 onTap: c.canManageStaffSalary() ? _profile : null,
               ),
               _SalaryKpiMetricCard(
-                title: 'Outstanding Advances',
+                title: l10n?.outstandingAdvances ?? 'Outstanding Advances',
                 value: _money(advancePaise),
                 subtitle: advancePaise > 0
-                    ? 'Mid-month cash/UPI advances'
-                    : 'No advance due',
+                    ? (l10n?.midMonthAdvancesSubtitle ??
+                        'Mid-month cash/UPI advances')
+                    : (l10n?.noAdvanceDue ?? 'No advance due'),
                 icon: Icons.arrow_outward_rounded,
                 accentColor: advancePaise > 0
                     ? const Color(0xFFDC2626)
@@ -2126,11 +2251,11 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                 onTap: c.canPayStaffSalary() ? _advance : null,
               ),
               _SalaryKpiMetricCard(
-                title: 'Store Purchases Credit',
+                title: l10n?.storePurchasesCredit ?? 'Store Purchases Credit',
                 value: _money(staffPurchaseBalancePaise),
                 subtitle: staffPurchaseBalancePaise > 0
-                    ? 'Store goods on credit'
-                    : 'No store credit due',
+                    ? (l10n?.storeGoodsOnCredit ?? 'Store goods on credit')
+                    : (l10n?.noStoreCreditDue ?? 'No store credit due'),
                 icon: Icons.shopping_bag_outlined,
                 accentColor: staffPurchaseBalancePaise > 0
                     ? const Color(0xFFD97706)
@@ -2138,11 +2263,12 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                 isAlert: staffPurchaseBalancePaise > 0,
               ),
               _SalaryKpiMetricCard(
-                title: 'Net Salary Payable',
+                title: l10n?.netSalaryPayable ?? 'Net Salary Payable',
                 value: _money(totalUnpaidSalaryPaise),
                 subtitle: totalUnpaidSalaryPaise > 0
-                    ? 'Across unpaid approved periods'
-                    : 'All periods settled',
+                    ? (l10n?.acrossUnpaidPeriods ??
+                        'Across unpaid approved periods')
+                    : (l10n?.allPeriodsSettled ?? 'All periods settled'),
                 icon: Icons.account_balance_rounded,
                 accentColor: totalUnpaidSalaryPaise > 0
                     ? const Color(0xFF16A34A)
@@ -2180,6 +2306,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
   // ---------------------------------------------------------------------------
 
   Widget _buildActionBar() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -2196,7 +2323,9 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
             FilledButton.icon(
               onPressed: _advance,
               icon: const Icon(Icons.payments_outlined, size: 16),
-              label: const Text('+ Give Advance (Peshgi)'),
+              label: Text(
+                l10n?.giveAdvancePeshgi ?? '+ Give Advance (Peshgi)',
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFDC2626),
                 foregroundColor: Colors.white,
@@ -2213,7 +2342,9 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
             FilledButton.icon(
               onPressed: _approve,
               icon: const Icon(Icons.verified_outlined, size: 16),
-              label: const Text('Approve Period Salary'),
+              label: Text(
+                l10n?.approvePeriodSalary ?? 'Approve Period Salary',
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF132B45),
                 foregroundColor: Colors.white,
@@ -2230,7 +2361,9 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
             OutlinedButton.icon(
               onPressed: _profile,
               icon: const Icon(Icons.tune, size: 16),
-              label: const Text('Salary Profile & Rate'),
+              label: Text(
+                l10n?.salaryProfileAndRate ?? 'Salary Profile & Rate',
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF0F172A),
                 side: const BorderSide(color: Color(0xFFCBD5E1)),
@@ -2247,7 +2380,9 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
             OutlinedButton.icon(
               onPressed: _futureAllocation,
               icon: const Icon(Icons.pie_chart_outline, size: 16),
-              label: const Text('Outlet Allocation Split'),
+              label: Text(
+                l10n?.outletAllocationSplit ?? 'Outlet Allocation Split',
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF0F172A),
                 side: const BorderSide(color: Color(0xFFCBD5E1)),
@@ -2274,6 +2409,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
     required int availableAdvancePaise,
     required int staffPurchaseBalancePaise,
   }) {
+    final l10n = AppLocalizations.of(context);
     if (periods.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(32),
@@ -2291,26 +2427,30 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
               color: Color(0xFF94A3B8),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'No Salary Periods Approved Yet',
-              style: TextStyle(
+            Text(
+              l10n?.noSalaryPeriodsApprovedYet ??
+                  'No Salary Periods Approved Yet',
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF0F172A),
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Click "Approve Period Salary" above to calculate and lock this month’s earnings.',
+            Text(
+              l10n?.approvePeriodSalaryDesc ??
+                  'Click "Approve Period Salary" above to calculate and lock this month’s earnings.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
             ),
             if (c.canApproveStaffSalary()) ...[
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: _approve,
                 icon: const Icon(Icons.verified_outlined, size: 16),
-                label: const Text('Approve Current Period'),
+                label: Text(
+                  l10n?.approveCurrentPeriod ?? 'Approve Current Period',
+                ),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF132B45),
                 ),
@@ -2354,6 +2494,7 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
   Widget _buildPassbookTab({
     required List<Map<String, dynamic>> entries,
   }) {
+    final l10n = AppLocalizations.of(context);
     final filtered = entries.where((e) {
       final type = (e['transactionType'] as String? ?? '').toUpperCase();
       return switch (_passbookFilter) {
@@ -2391,10 +2532,13 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
                 spacing: 6,
                 children: [
                   for (final opt in [
-                    ('ALL', 'All Events'),
-                    ('ADVANCES', 'Advances'),
-                    ('STORE', 'Store Purchases'),
-                    ('SETTLEMENTS', 'Payments & Offsets'),
+                    ('ALL', l10n?.allEvents ?? 'All Events'),
+                    ('ADVANCES', l10n?.advancesFilter ?? 'Advances'),
+                    ('STORE', l10n?.storePurchasesFilter ?? 'Store Purchases'),
+                    (
+                      'SETTLEMENTS',
+                      l10n?.paymentsAndOffsetsFilter ?? 'Payments & Offsets'
+                    ),
                   ])
                     ChoiceChip(
                       label: Text(
@@ -2431,26 +2575,27 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
-            child: const Column(
+            child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.receipt_long_outlined,
                   size: 40,
                   color: Color(0xFF94A3B8),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
-                  'No Ledger Transactions Found',
-                  style: TextStyle(
+                  l10n?.noLedgerTransactions ?? 'No Ledger Transactions Found',
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF0F172A),
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Advances, store credits, and salary payments will appear here.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  l10n?.noLedgerTransactionsDesc ??
+                      'No cash advances, purchase debits, or payments recorded for this staff member.',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                 ),
               ],
             ),
@@ -2492,15 +2637,16 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
     required List<Map<String, dynamic>> profiles,
     required List<OutletModel> outlets,
   }) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Salary Rate History',
-              style: TextStyle(
+            Text(
+              l10n?.salaryRateHistory ?? 'Salary Rate History',
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF0F172A),
@@ -2510,7 +2656,9 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
               FilledButton.icon(
                 onPressed: _profile,
                 icon: const Icon(Icons.add_rounded, size: 16),
-                label: const Text('Update Rate / Add Profile'),
+                label: Text(
+                  l10n?.updateRateAddProfile ?? 'Update Rate / Add Profile',
+                ),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF132B45),
                   shape: RoundedRectangleBorder(
@@ -2530,7 +2678,10 @@ class _StaffSalaryPageState extends State<StaffSalaryPage>
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
-            child: const Text('No salary rate profile configured.'),
+            child: Text(
+              l10n?.noSalaryProfileConfigured ??
+                  'No salary rate profile configured.',
+            ),
           )
         else
           for (final prof in profiles) ...[
@@ -2641,12 +2792,14 @@ class _StaffSelectionChip extends StatelessWidget {
   const _StaffSelectionChip({
     required this.employee,
     required this.roleLabel,
+    required this.outletLabel,
     required this.isSelected,
     required this.onTap,
   });
 
   final EmployeeModel employee;
   final String roleLabel;
+  final String outletLabel;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -2710,7 +2863,7 @@ class _StaffSelectionChip extends StatelessWidget {
                   style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
                 ),
                 Text(
-                  roleLabel,
+                  '$roleLabel • $outletLabel',
                   style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
                 ),
               ],
@@ -3036,7 +3189,7 @@ class _SalaryPeriodCard extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onPay,
                     icon: const Icon(Icons.add_card_rounded, size: 15),
-                    label: const Text('Record Payment'),
+                    label: Text(AppLocalizations.of(context)?.recordPayment ?? 'Record Payment'),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF16A34A),
                       foregroundColor: Colors.white,
@@ -3053,7 +3206,7 @@ class _SalaryPeriodCard extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onAdjustAdvance,
                     icon: const Icon(Icons.remove_circle_outline, size: 15),
-                    label: const Text('Adjust Advance'),
+                    label: Text(AppLocalizations.of(context)?.advanceAdjusted ?? 'Adjust Advance'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFDC2626),
                       side: const BorderSide(color: Color(0xFFDC2626)),
@@ -3070,7 +3223,7 @@ class _SalaryPeriodCard extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onOffsetPurchase,
                     icon: const Icon(Icons.shopping_bag_outlined, size: 15),
-                    label: const Text('Offset Shop Goods'),
+                    label: Text(AppLocalizations.of(context)?.storePurchaseAdjusted ?? 'Offset Shop Goods'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFD97706),
                       side: const BorderSide(color: Color(0xFFD97706)),
@@ -3195,54 +3348,55 @@ class _PassbookTile extends StatelessWidget {
     final mode = entry['paymentMode']?.toString() ?? 'CASH';
 
     final isStorePurchase = type == 'STORE_PURCHASE';
+    final l10n = AppLocalizations.of(context);
 
     final (color, icon, displayType, sign) = switch (type) {
       'CASH_ADVANCE' => (
         const Color(0xFFDC2626),
         Icons.payments_outlined,
-        'Cash Advance Given',
+        l10n?.cashAdvanceGiven ?? 'Cash Advance Given',
         '− ',
       ),
       'UPI_ADVANCE' => (
         const Color(0xFFDC2626),
         Icons.qr_code_2_rounded,
-        'UPI Advance Given',
+        l10n?.upiAdvanceGiven ?? 'UPI Advance Given',
         '− ',
       ),
       'BANK_ADVANCE' => (
         const Color(0xFFDC2626),
         Icons.account_balance_outlined,
-        'Bank Advance Given',
+        l10n?.bankAdvanceGiven ?? 'Bank Advance Given',
         '− ',
       ),
       'STORE_PURCHASE' => (
         const Color(0xFFD97706),
         Icons.shopping_bag_outlined,
-        'Store Goods Credit',
+        l10n?.storeGoodsCredit ?? 'Store Goods Credit',
         '− ',
       ),
       'SALARY_PAYMENT' => (
         const Color(0xFF16A34A),
         Icons.check_circle_outline_rounded,
-        'Salary Payment Paid',
+        l10n?.salaryPaymentPaid ?? 'Salary Payment Paid',
         '+ ',
       ),
       'ADVANCE_ADJUSTMENT' => (
         const Color(0xFF2563EB),
         Icons.sync_rounded,
-        'Advance Adjusted in Salary',
+        l10n?.advanceAdjustedInSalary ?? 'Advance Adjusted in Salary',
         '✓ ',
       ),
       'STORE_CREDIT_ADJUSTMENT' => (
         const Color(0xFF7C3AED),
         Icons.sync_rounded,
-        'Store Credit Offset in Salary',
+        l10n?.storeCreditOffsetInSalary ?? 'Store Credit Offset in Salary',
         '✓ ',
       ),
       'STAFF_PURCHASE_PAYMENT' => (
         const Color(0xFF16A34A),
         Icons.paid_outlined,
-        'Staff Invoice Direct Paid',
+        l10n?.staffInvoiceDirectPaid ?? 'Staff Invoice Direct Paid',
         '✓ ',
       ),
       _ => (
@@ -3392,6 +3546,7 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
@@ -3412,7 +3567,10 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Record Staff Advance (Peshgi)'),
+                Text(
+                  l10n?.disburseStaffAdvance ??
+                      'Record Staff Advance (Peshgi)',
+                ),
                 Text(
                   'Employee: ${widget.employeeName}',
                   style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
@@ -3440,7 +3598,8 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
                   fontWeight: FontWeight.bold,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Advance Amount (₹) *',
+                  labelText:
+                      '${l10n?.advanceAmount ?? "Advance Amount (₹)"} *',
                   prefixText: '₹ ',
                   prefixStyle: const TextStyle(
                     fontSize: 20,
@@ -3459,7 +3618,8 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
                     child: DropdownButtonFormField<String>(
                       initialValue: _mode,
                       decoration: InputDecoration(
-                        labelText: 'Payment Mode *',
+                        labelText:
+                            '${l10n?.paymentMode ?? "Payment Mode"} *',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -3513,7 +3673,8 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
               TextField(
                 controller: _refController,
                 decoration: InputDecoration(
-                  labelText: 'Reference Number / UPI Transaction ID',
+                  labelText: l10n?.referenceNumber ??
+                      'Reference Number / UPI Transaction ID',
                   hintText: 'e.g. UPI-928421 or Cheque #102',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -3524,7 +3685,7 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
               TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
-                  labelText: 'Reason / Notes',
+                  labelText: l10n?.notesOptional ?? 'Reason / Notes',
                   hintText: 'e.g. Family medical emergency, festival advance',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -3538,7 +3699,7 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: () {
@@ -3562,7 +3723,7 @@ class _RecordAdvanceDialogState extends State<_RecordAdvanceDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFFDC2626),
           ),
-          child: const Text('Record Advance'),
+          child: Text(l10n?.disburseAdvance ?? 'Record Advance'),
         ),
       ],
     );
@@ -3600,6 +3761,7 @@ class _SalaryProfileDialog extends StatefulWidget {
 
 class _SalaryProfileDialogState extends State<_SalaryProfileDialog> {
   final _rateController = TextEditingController();
+  late final List<TextEditingController> _allocationControllers;
   String _type = 'MONTHLY';
   String _cycle = 'MONTHLY';
   String? _error;
@@ -3614,16 +3776,42 @@ class _SalaryProfileDialogState extends State<_SalaryProfileDialog> {
       _type = widget.existingProfile!['salaryType'] as String? ?? 'MONTHLY';
       _cycle = widget.existingProfile!['paymentCycle'] as String? ?? 'MONTHLY';
     }
+    final count = widget.outlets.length;
+    if (count > 1) {
+      final evenSplit = (100.0 / count).toStringAsFixed(1);
+      _allocationControllers = [
+        for (var i = 0; i < count; i++)
+          TextEditingController(text: evenSplit),
+      ];
+    } else {
+      _allocationControllers = [];
+    }
   }
 
   @override
   void dispose() {
     _rateController.dispose();
+    for (final ctrl in _allocationControllers) {
+      ctrl.dispose();
+    }
     super.dispose();
+  }
+
+  int _currentAllocationTotal() {
+    var total = 0.0;
+    for (final ctrl in _allocationControllers) {
+      total += double.tryParse(ctrl.text.trim()) ?? 0.0;
+    }
+    return total.round();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final count = widget.outlets.length;
+    final totalAlloc = count > 1 ? _currentAllocationTotal() : 100;
+    final isAllocValid = totalAlloc == 100;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
@@ -3641,7 +3829,10 @@ class _SalaryProfileDialogState extends State<_SalaryProfileDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Configure Salary Rate Profile'),
+                Text(
+                  l10n?.configureSalaryRateProfile ??
+                      'Configure Salary Rate Profile',
+                ),
                 Text(
                   'Employee: ${widget.employeeName}',
                   style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
@@ -3653,111 +3844,276 @@ class _SalaryProfileDialogState extends State<_SalaryProfileDialog> {
       ),
       content: SizedBox(
         width: 440,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _rateController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              decoration: InputDecoration(
-                labelText: 'Base Salary Rate (₹) *',
-                prefixText: '₹ ',
-                prefixStyle: const TextStyle(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _rateController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                decoration: InputDecoration(
+                  labelText: '${l10n?.baseSalaryRate ?? "Base Salary Rate"} (₹) *',
+                  prefixText: '₹ ',
+                  prefixStyle: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  errorText: _error,
                 ),
-                errorText: _error,
               ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _type,
-                    decoration: InputDecoration(
-                      labelText: 'Wage Type *',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _type,
+                      decoration: InputDecoration(
+                        labelText: '${l10n?.wageType ?? "Wage Type"} *',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'MONTHLY',
+                          child: Text(l10n?.monthlyFixed ?? 'Monthly Fixed'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'DAILY',
+                          child: Text(l10n?.dailyWage ?? 'Daily Wage'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'HOURLY',
+                          child: Text(l10n?.hourlyRate ?? 'Hourly Rate'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'SHIFT_BASED',
+                          child: Text(l10n?.shiftBased ?? 'Shift-based'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => _type = v ?? 'MONTHLY'),
                     ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'MONTHLY',
-                        child: Text('Monthly Fixed'),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _cycle,
+                      decoration: InputDecoration(
+                        labelText: '${l10n?.paymentCycle ?? "Payment Cycle"} *',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                      DropdownMenuItem(
-                        value: 'DAILY',
-                        child: Text('Daily Wage'),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'MONTHLY',
+                          child: Text(l10n?.monthly ?? 'Monthly'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'FORTNIGHTLY',
+                          child: Text(l10n?.fourteenDays ?? '14 Days'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'WEEKLY',
+                          child: Text(l10n?.weekly ?? 'Weekly'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => _cycle = v ?? 'MONTHLY'),
+                    ),
+                  ),
+                ],
+              ),
+              if (widget.outlets.isEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFEF4444)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Color(0xFFDC2626),
+                        size: 18,
                       ),
-                      DropdownMenuItem(
-                        value: 'HOURLY',
-                        child: Text('Hourly Rate'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'SHIFT_BASED',
-                        child: Text('Shift-based'),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n?.noOutletsAssignedToEmployee ??
+                              'No outlets are assigned to this employee under this business. Please assign an outlet under Staff Management first.',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF991B1B),
+                          ),
+                        ),
                       ),
                     ],
-                    onChanged: (v) => setState(() => _type = v ?? 'MONTHLY'),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _cycle,
-                    decoration: InputDecoration(
-                      labelText: 'Payment Cycle *',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+              ] else if (widget.outlets.length == 1) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.storefront_outlined,
+                        size: 16,
+                        color: Color(0xFF132B45),
                       ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'MONTHLY',
-                        child: Text('Monthly'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'FORTNIGHTLY',
-                        child: Text('14 Days'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'WEEKLY',
-                        child: Text('Weekly'),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${l10n?.allocatedOutlet ?? "Allocated Outlet"}: ${widget.outlets.single.outletName} (100%)',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
                       ),
                     ],
-                    onChanged: (v) => setState(() => _cycle = v ?? 'MONTHLY'),
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(height: 14),
+                Text(
+                  l10n?.outletAllocationPercent ?? 'Outlet Allocation Split (%)',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n?.outletAllocationDesc ??
+                      'Specify the percentage split of salary expense across outlets. Must total exactly 100%.',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (var i = 0; i < widget.outlets.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          widget.outlets[i].outletName,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          controller: _allocationControllers[i],
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            suffixText: '%',
+                            isDense: true,
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
+                            ),
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isAllocValid
+                        ? const Color(0xFFDCFCE7)
+                        : const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n?.totalAllocation ?? 'Total Allocation:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isAllocValid
+                              ? const Color(0xFF166534)
+                              : const Color(0xFF991B1B),
+                        ),
+                      ),
+                      Text(
+                        '$totalAlloc%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isAllocValid
+                              ? const Color(0xFF166534)
+                              : const Color(0xFF991B1B),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Changes become effective from the start of the next calendar month.',
-              style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
-            ),
-          ],
+              const SizedBox(height: 12),
+              const Text(
+                'Changes become effective from the start of the next calendar month.',
+                style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: () {
-            final parsed =
-                double.tryParse(_rateController.text.trim().replaceAll(',', ''));
+            if (widget.outlets.isEmpty) {
+              setState(() => _error = l10n?.noOutletsAssignedToEmployee ??
+                  'Assign at least one outlet to this staff member first.');
+              return;
+            }
+            final parsed = double.tryParse(
+              _rateController.text.trim().replaceAll(',', ''),
+            );
             if (parsed == null || parsed <= 0) {
               setState(() => _error = 'Enter a valid rate greater than 0');
               return;
@@ -3765,6 +4121,36 @@ class _SalaryProfileDialogState extends State<_SalaryProfileDialog> {
             Map<String, int>? basisPoints;
             if (widget.outlets.length == 1) {
               basisPoints = {widget.outlets.single.outletId: 10000};
+            } else if (widget.outlets.length > 1) {
+              if (_currentAllocationTotal() != 100) {
+                setState(() => _error =
+                    'Outlet allocations must total exactly 100%');
+                return;
+              }
+              basisPoints = <String, int>{};
+              var accumulated = 0;
+              final positiveIdxs = <int>[];
+              for (var i = 0; i < widget.outlets.length; i++) {
+                final pct =
+                    double.tryParse(_allocationControllers[i].text.trim()) ??
+                    0.0;
+                if (pct > 0) {
+                  positiveIdxs.add(i);
+                }
+              }
+              for (var idx = 0; idx < positiveIdxs.length; idx++) {
+                final i = positiveIdxs[idx];
+                final pct =
+                    double.tryParse(_allocationControllers[i].text.trim()) ??
+                    0.0;
+                final bp = idx == positiveIdxs.length - 1
+                    ? 10000 - accumulated
+                    : (pct * 100).round();
+                accumulated += bp;
+                if (bp > 0) {
+                  basisPoints[widget.outlets[i].outletId] = bp;
+                }
+              }
             }
             Navigator.pop(
               context,
@@ -3779,7 +4165,7 @@ class _SalaryProfileDialogState extends State<_SalaryProfileDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF132B45),
           ),
-          child: const Text('Save Salary Profile'),
+          child: Text(l10n?.saveSalaryProfile ?? 'Save Salary Profile'),
         ),
       ],
     );
@@ -3837,6 +4223,7 @@ class _RecordPaymentDialogState extends State<_RecordPaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
@@ -3857,7 +4244,7 @@ class _RecordPaymentDialogState extends State<_RecordPaymentDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Record Salary Payment'),
+                Text(l10n?.recordSalaryPaymentTitle ?? 'Record Salary Payment'),
                 Text(
                   '${widget.employeeName}  •  ${widget.periodLabel}',
                   style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
@@ -3882,9 +4269,9 @@ class _RecordPaymentDialogState extends State<_RecordPaymentDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Remaining Net Payable:',
-                    style: TextStyle(
+                  Text(
+                    l10n?.remainingNetPayable ?? 'Remaining Net Payable:',
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF166534),
@@ -3987,7 +4374,7 @@ class _RecordPaymentDialogState extends State<_RecordPaymentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: () {
@@ -4014,7 +4401,7 @@ class _RecordPaymentDialogState extends State<_RecordPaymentDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF16A34A),
           ),
-          child: const Text('Disburse Payment'),
+          child: Text(l10n?.disbursePayment ?? 'Disburse Payment'),
         ),
       ],
     );
@@ -4058,13 +4445,14 @@ class _AdjustAdvanceDialogState extends State<_AdjustAdvanceDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.remove_circle_outline, color: Color(0xFFDC2626)),
-          SizedBox(width: 10),
-          Text('Adjust Mid-Month Advance'),
+          const Icon(Icons.remove_circle_outline, color: Color(0xFFDC2626)),
+          const SizedBox(width: 10),
+          Text(l10n?.adjustMidMonthAdvance ?? 'Adjust Mid-Month Advance'),
         ],
       ),
       content: Column(
@@ -4072,7 +4460,8 @@ class _AdjustAdvanceDialogState extends State<_AdjustAdvanceDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Deduct mid-month cash/UPI advances against this approved salary period.',
+            l10n?.adjustMidMonthAdvanceDesc ??
+                'Deduct mid-month cash/UPI advances against this approved salary period.',
             style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 12),
@@ -4085,9 +4474,9 @@ class _AdjustAdvanceDialogState extends State<_AdjustAdvanceDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Available Advance:',
-                  style: TextStyle(fontSize: 12),
+                Text(
+                  l10n?.availableAdvance ?? 'Available Advance:',
+                  style: const TextStyle(fontSize: 12),
                 ),
                 Text(
                   widget.moneyFormatter(widget.availableAdvancePaise),
@@ -4104,7 +4493,7 @@ class _AdjustAdvanceDialogState extends State<_AdjustAdvanceDialog> {
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              labelText: 'Deduction Amount (₹)',
+              labelText: '${l10n?.adjustment ?? "Deduction Amount"} (₹)',
               prefixText: '₹ ',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -4117,7 +4506,7 @@ class _AdjustAdvanceDialogState extends State<_AdjustAdvanceDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: () {
@@ -4137,7 +4526,7 @@ class _AdjustAdvanceDialogState extends State<_AdjustAdvanceDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFFDC2626),
           ),
-          child: const Text('Apply Advance Deduction'),
+          child: Text(l10n?.adjustMidMonthAdvance ?? 'Apply Advance Deduction'),
         ),
       ],
     );
@@ -4181,22 +4570,26 @@ class _OffsetPurchaseDialogState extends State<_OffsetPurchaseDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.shopping_bag_outlined, color: Color(0xFFD97706)),
-          SizedBox(width: 10),
-          Text('Offset Store Purchase Credit'),
+          const Icon(Icons.shopping_bag_outlined, color: Color(0xFFD97706)),
+          const SizedBox(width: 10),
+          Text(
+            l10n?.offsetStorePurchaseCredit ?? 'Offset Store Purchase Credit',
+          ),
         ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Deduct shop goods taken on credit by this staff member against their salary.',
-            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+          Text(
+            l10n?.offsetStorePurchaseCreditDesc ??
+                'Deduct shop goods taken on credit by this staff member against their salary.',
+            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 12),
           Container(
@@ -4208,9 +4601,9 @@ class _OffsetPurchaseDialogState extends State<_OffsetPurchaseDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Store Credit Due:',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
+                Text(
+                  l10n?.storeCreditDue ?? 'Store Credit Due:',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF92400E)),
                 ),
                 Text(
                   widget.moneyFormatter(widget.availableReceivablePaise),
@@ -4227,7 +4620,7 @@ class _OffsetPurchaseDialogState extends State<_OffsetPurchaseDialog> {
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              labelText: 'Offset Amount (₹)',
+              labelText: '${l10n?.adjustment ?? "Offset Amount"} (₹)',
               prefixText: '₹ ',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -4240,7 +4633,7 @@ class _OffsetPurchaseDialogState extends State<_OffsetPurchaseDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: () {
@@ -4260,7 +4653,7 @@ class _OffsetPurchaseDialogState extends State<_OffsetPurchaseDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFFD97706),
           ),
-          child: const Text('Apply Purchase Offset'),
+          child: Text(l10n?.applyPurchaseOffset ?? 'Apply Purchase Offset'),
         ),
       ],
     );
@@ -4320,10 +4713,17 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
   @override
   void initState() {
     super.initState();
+    final double displayUnits = widget.initialUnits > 0
+        ? widget.initialUnits / 1000.0
+        : (widget.salaryType == 'MONTHLY' ? 1.0 : 30.0);
     _unitsController = TextEditingController(
-      text: widget.initialUnits > 0
-          ? (widget.initialUnits / 1000).toStringAsFixed(1)
-          : (widget.salaryType == 'MONTHLY' ? '1' : '30'),
+      text: displayUnits.toStringAsFixed(
+        displayUnits.truncateToDouble() == displayUnits
+            ? 0
+            : ((displayUnits * 10).truncateToDouble() == displayUnits * 10
+                ? 1
+                : 2),
+      ),
     );
   }
 
@@ -4338,8 +4738,10 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
   }
 
   int _calcNet() {
-    final unitsMilli =
-        ((double.tryParse(_unitsController.text.trim()) ?? 0.0) * 1000).round();
+    final unitsMilli = widget.attendanceCount > 0
+        ? widget.initialUnits
+        : ((double.tryParse(_unitsController.text.trim()) ?? 0.0) * 1000)
+            .round();
     final bonus =
         ((double.tryParse(_bonusController.text.trim()) ?? 0.0) * 100).round();
     final extraOvertime =
@@ -4368,6 +4770,7 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final netEarned = _calcNet();
 
     return AlertDialog(
@@ -4390,7 +4793,7 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Approve Period Salary'),
+                Text(l10n?.approveSalaryPeriodTitle ?? 'Approve Period Salary'),
                 Text(
                   '${widget.employeeName}  •  ${widget.start.day}/${widget.start.month} to ${widget.end.day}/${widget.end.month}/${widget.end.year}',
                   style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
@@ -4421,14 +4824,14 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Base Rate: ${widget.moneyFormatter(widget.baseRatePaise)} (${widget.salaryType.toLowerCase()})',
+                          '${l10n?.baseSalaryRate ?? "Base Rate"}: ${widget.moneyFormatter(widget.baseRatePaise)} (${widget.salaryType.toLowerCase()})',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          'Approved Attendance: ${widget.attendanceCount} records',
+                          '${l10n?.approvedWorkUnits ?? "Approved Attendance"}: ${widget.attendanceCount} records',
                           style: const TextStyle(
                             fontSize: 11,
                             color: Color(0xFF64748B),
@@ -4453,12 +4856,17 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
               if (widget.salaryType != 'MONTHLY') ...[
                 TextField(
                   controller: _unitsController,
+                  readOnly: widget.attendanceCount > 0,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                   decoration: InputDecoration(
                     labelText:
-                        'Approved Work Units (${widget.salaryType == 'HOURLY' ? 'Hours' : 'Days/Shifts'})',
+                        '${l10n?.approvedWorkUnits ?? "Approved Work Units"} (${widget.salaryType == 'HOURLY' ? 'Hours' : 'Days/Shifts'})',
+                    helperText: widget.attendanceCount > 0
+                        ? (l10n?.lockedFromApprovedAttendance ??
+                            'Calculated from ${widget.attendanceCount} approved attendance records')
+                        : null,
                     border: const OutlineInputBorder(),
                   ),
                   onChanged: (_) => setState(() {}),
@@ -4474,10 +4882,10 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Bonus (₹)',
+                      decoration: InputDecoration(
+                        labelText: l10n?.bonusLabel ?? 'Bonus (₹)',
                         prefixText: '₹ ',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -4489,10 +4897,11 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Extra Overtime (₹)',
+                      decoration: InputDecoration(
+                        labelText:
+                            l10n?.extraOvertimeLabel ?? 'Extra Overtime (₹)',
                         prefixText: '₹ ',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -4509,10 +4918,11 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Deduction per Absent Day (₹)',
+                      decoration: InputDecoration(
+                        labelText: l10n?.deductionPerAbsentDay ??
+                            'Deduction per Absent Day (₹)',
                         prefixText: '₹ ',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -4524,10 +4934,11 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Other Deductions (₹)',
+                      decoration: InputDecoration(
+                        labelText: l10n?.otherDeductionsLabel ??
+                            'Other Deductions (₹)',
                         prefixText: '₹ ',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -4547,9 +4958,9 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Calculated Net Earned:',
-                      style: TextStyle(
+                    Text(
+                      l10n?.calculatedNetEarned ?? 'Calculated Net Earned:',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF166534),
@@ -4573,25 +4984,29 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: () {
-            final units =
-                ((double.tryParse(_unitsController.text.trim()) ?? 0.0) * 1000)
+            final units = widget.attendanceCount > 0
+                ? widget.initialUnits
+                : ((double.tryParse(_unitsController.text.trim()) ?? 0.0) *
+                        1000)
                     .round();
             final bonus =
                 ((double.tryParse(_bonusController.text.trim()) ?? 0.0) * 100)
                     .round();
             final extraOT =
-                ((double.tryParse(_overtimeController.text.trim()) ?? 0.0) * 100)
+                ((double.tryParse(_overtimeController.text.trim()) ?? 0.0) *
+                        100)
                     .round();
             final deductions =
                 ((double.tryParse(_deductionsController.text.trim()) ?? 0.0) *
                         100)
                     .round();
             final perLeave =
-                ((double.tryParse(_leaveDeductionController.text.trim()) ?? 0.0) *
+                ((double.tryParse(_leaveDeductionController.text.trim()) ??
+                            0.0) *
                         100)
                     .round();
 
@@ -4609,9 +5024,300 @@ class _ApprovePeriodDialogState extends State<_ApprovePeriodDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF132B45),
           ),
-          child: const Text('Confirm & Approve Salary'),
+          child:
+              Text(l10n?.confirmAndApproveSalary ?? 'Confirm & Approve Salary'),
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SALARY DOCUMENT EXPORT DIALOG & ACTIONS
+// ---------------------------------------------------------------------------
+
+enum SalaryExportAction {
+  download,
+  print,
+  share,
+}
+
+class SalaryExportRequest {
+  const SalaryExportRequest({
+    required this.action,
+    required this.language,
+  });
+
+  final SalaryExportAction action;
+  final SalaryDocumentLanguage language;
+}
+
+class SalaryDocumentExportDialog extends StatefulWidget {
+  const SalaryDocumentExportDialog({
+    super.key,
+    required this.title,
+    required this.employeeName,
+    required this.periodLabel,
+    required this.isSlip,
+    required this.initialLanguage,
+  });
+
+  final String title;
+  final String employeeName;
+  final String periodLabel;
+  final bool isSlip;
+  final SalaryDocumentLanguage initialLanguage;
+
+  @override
+  State<SalaryDocumentExportDialog> createState() =>
+      _SalaryDocumentExportDialogState();
+}
+
+class _SalaryDocumentExportDialogState
+    extends State<SalaryDocumentExportDialog> {
+  late SalaryDocumentLanguage _selectedLanguage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLanguage = widget.initialLanguage;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+      actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF132B45).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              widget.isSlip
+                  ? Icons.receipt_long_rounded
+                  : Icons.picture_as_pdf_rounded,
+              color: const Color(0xFF132B45),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${widget.employeeName} • ${widget.periodLabel}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF64748B),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Divider(height: 1, color: Color(0xFFE2E8F0)),
+            const SizedBox(height: 16),
+            Text(
+              l10n?.selectSalarySlipLanguage ?? 'Select Document Language',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF334155),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildLanguageOption(
+              language: SalaryDocumentLanguage.english,
+              title: 'English (Default)',
+              subtitle: 'Latin font layout',
+            ),
+            const SizedBox(height: 8),
+            _buildLanguageOption(
+              language: SalaryDocumentLanguage.bengali,
+              title: 'বাংলা (Bengali)',
+              subtitle: 'Noto Sans Bengali script',
+            ),
+            const SizedBox(height: 8),
+            _buildLanguageOption(
+              language: SalaryDocumentLanguage.hindi,
+              title: 'हिन्दी (Hindi)',
+              subtitle: 'Noto Sans Devanagari script',
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        Wrap(
+          alignment: WrapAlignment.end,
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                l10n?.cancel ?? 'Cancel',
+                style: const TextStyle(color: Color(0xFF64748B)),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.pop(
+                context,
+                SalaryExportRequest(
+                  action: SalaryExportAction.share,
+                  language: _selectedLanguage,
+                ),
+              ),
+              icon: const Icon(Icons.share_outlined, size: 16),
+              label: Text(l10n?.sharePdf ?? 'Share PDF'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF334155),
+                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.pop(
+                context,
+                SalaryExportRequest(
+                  action: SalaryExportAction.print,
+                  language: _selectedLanguage,
+                ),
+              ),
+              icon: const Icon(Icons.print_outlined, size: 16),
+              label: Text(
+                switch (l10n?.localeName) {
+                  'bn' => 'প্রিন্ট',
+                  'hi' => 'प्रिंट',
+                  _ => 'Print',
+                },
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF334155),
+                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            FilledButton.icon(
+              onPressed: () => Navigator.pop(
+                context,
+                SalaryExportRequest(
+                  action: SalaryExportAction.download,
+                  language: _selectedLanguage,
+                ),
+              ),
+              icon: const Icon(Icons.download_rounded, size: 16),
+              label: Text(l10n?.downloadPdf ?? 'Download PDF'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF132B45),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLanguageOption({
+    required SalaryDocumentLanguage language,
+    required String title,
+    required String subtitle,
+  }) {
+    final isSelected = _selectedLanguage == language;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedLanguage = language;
+        });
+      },
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF132B45).withValues(alpha: 0.06)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF132B45)
+                : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_off,
+              size: 20,
+              color: isSelected
+                  ? const Color(0xFF132B45)
+                  : const Color(0xFF94A3B8),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

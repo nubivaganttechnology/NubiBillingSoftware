@@ -383,7 +383,7 @@ class SyncEngine extends ChangeNotifier {
           'sync_outbox',
           {'status': 'PENDING', 'lastError': null},
           where:
-              "status='FAILED' AND (lastError LIKE 'Remote version changed for document_sequences/%' OR lastError LIKE 'Remote version changed for staff_attendance/%')",
+              "status='FAILED' AND (lastError LIKE 'Remote version changed for document_sequences/%' OR lastError LIKE 'Remote version changed for staff_attendance/%' OR lastError LIKE 'Remote version changed for product_variants/%' OR lastError LIKE 'Remote version changed for products/%')",
         );
       }
       var uploaded = 0;
@@ -762,7 +762,7 @@ class SyncEngine extends ChangeNotifier {
           final queryKey = query['queryKey'] as String?;
           final collName = query['collectionName'] as String?;
           rawDiagnosticError = e.toString();
-          pullError = e.toString();
+          final isIndexError = e.toString().contains('requires an index');
           if (kDebugMode) {
             debugPrint(
               '[sync] pull failed collection=$collName '
@@ -772,7 +772,10 @@ class SyncEngine extends ChangeNotifier {
           }
           await source.db.update(
             'sync_queries',
-            {'lastError': rawDiagnosticError},
+            {
+              'lastError': rawDiagnosticError,
+              if (isIndexError) 'active': 0,
+            },
             where: 'queryKey=?',
             whereArgs: [queryKey],
           );
@@ -782,6 +785,10 @@ class SyncEngine extends ChangeNotifier {
             collection: collName,
             location: 'Pull query: $queryKey ($collName)',
           );
+          if (isIndexError) {
+            continue;
+          }
+          pullError = e.toString();
           break;
         }
       }
@@ -1113,6 +1120,18 @@ class SyncEngine extends ChangeNotifier {
           doc['fields']?['status']?['stringValue'] == 'ACTIVE';
     }
 
+    bool isRetireOrDeleteMutation(
+      Map<String, dynamic> write,
+      Map<String, dynamic>? doc,
+    ) {
+      if (write['operation'] != 'UPDATE') return false;
+      if (doc == null) return false;
+      final decoded = FirestoreRestService.decodeFields(write['fields']);
+      return decoded['isDeleted'] == true ||
+          decoded['status'] == 'DELETED' ||
+          decoded['status'] == 'INACTIVE';
+    }
+
     try {
       // An acknowledged response may have been lost, or the app may have died
       // after commit. Verify the WHOLE atomic batch before treating it as done.
@@ -1193,18 +1212,18 @@ class SyncEngine extends ChangeNotifier {
             }
             expected = row['remoteUpdateTime'] as String?;
           }
-          final restoring = writes.any(
+          final allowingRemoteUpdate = writes.any(
             (w) =>
                 w['collection'] == read['collection'] &&
                 w['id'] == read['id'] &&
-                isRestoreMutation(w, doc),
+                (isRestoreMutation(w, doc) || isRetireOrDeleteMutation(w, doc)),
           );
-          if (restoring && doc != null) {
+          if (allowingRemoteUpdate && doc != null) {
             expected = doc['updateTime'] as String?;
           }
           final exists =
               doc != null &&
-              (!tombstone(doc) || (restoring && expected == doc['updateTime']));
+              (!tombstone(doc) || (allowingRemoteUpdate && expected == doc['updateTime']));
           if ((read['exists'] == true) != exists ||
               (doc != null && expected != doc['updateTime'])) {
             throw AppException(

@@ -61,11 +61,24 @@ class ProductUnitContract {
         final rowOptions = attr == null
             ? null
             : declaredRows[attr.attributeId]?['options'];
-        // Read the authored row, not resolved attribute options: an empty
-        // row can inherit global definition options in the legacy resolver.
-        final fromRow = rowOptions is List
-            ? rowOptions.whereType<String>().toList()
-            : <String>[];
+        // If the authored row explicitly defines options (even if empty, e.g. []),
+        // adhere strictly to that authored list.
+        // If the row leaves options null, use the attribute's resolved options.
+        final List<String> fromRow;
+        if (rowOptions is List) {
+          fromRow = rowOptions.whereType<String>().toList();
+        } else if (attr != null && attr.options.isNotEmpty) {
+          final seen = <String>{};
+          fromRow = <String>[];
+          for (final o in attr.options) {
+            final canon = aliases[o.name.trim().toLowerCase()] ?? o.name.trim();
+            if (seen.add(canon.toLowerCase())) {
+              fromRow.add(canon);
+            }
+          }
+        } else {
+          fromRow = <String>[];
+        }
         if (fromProfile.isNotEmpty && fromRow.isNotEmpty) {
           final common = fromProfile
               .where(
@@ -96,14 +109,22 @@ class ProductUnitContract {
       );
       final sellChoices = sells.isNotEmpty
           ? sells
-          : (selling == null ? packs : <String>[]);
+          : (selling == null || sells.isEmpty ? packs : <String>[]);
       String? validDefault(
         ResolvedTemplateAttribute? attr,
         List<String> choices,
         dynamic profileDefault,
       ) {
         final value = attr?.defaultValue ?? profileDefault;
-        return value is String && choices.contains(value) ? value : null;
+        if (value is String && value.trim().isNotEmpty) {
+          final canonical = aliases[value.trim().toLowerCase()] ?? value.trim();
+          final match = choices.firstWhere(
+            (c) => c.toLowerCase() == canonical.toLowerCase(),
+            orElse: () => '',
+          );
+          if (match.isNotEmpty) return match;
+        }
+        return null;
       }
 
       final defaults = activeProfile['defaults'] is Map

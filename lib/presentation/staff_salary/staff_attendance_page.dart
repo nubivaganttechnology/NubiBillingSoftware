@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/employee_model.dart';
+import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 import 'face_attendance_page.dart';
 
@@ -47,6 +49,15 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
   String? get _outlet => c.appContext?.outletId;
   bool get _canApprove => c.canApproveStaffAttendance();
   bool get _canManage => c.canManageStaffAttendance();
+  bool get _isMobile =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+  bool _canClock(EmployeeModel emp) {
+    if (_canManage) return true;
+    final myId = c.appContext?.employeeId ?? c.employee?.employeeId;
+    return myId != null && myId == emp.employeeId;
+  }
 
   @override
   void initState() {
@@ -59,6 +70,9 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    if (c.appContext?.accountType == 'employee') {
+      _approvalFilter = 'ALL';
+    }
     _loadEmployees();
     _load();
   }
@@ -105,9 +119,14 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
         return;
       }
       final employees = await c.loadStaffKhataEmployees();
+      final effective = <EmployeeModel>[...employees];
+      if (c.employee != null &&
+          !effective.any((e) => e.employeeId == c.employee!.employeeId)) {
+        effective.add(c.employee!);
+      }
       if (mounted) {
         setState(() {
-          _employees = employees;
+          _employees = effective;
           _employeesLoaded = true;
         });
       }
@@ -187,9 +206,40 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
 
   List<EmployeeModel> get _outletEmployees {
     final list = _employeesLoaded ? _employees : c.employees;
-    return list.where((e) {
-      final matchesBusiness = e.businessIds.contains(c.appContext?.businessId);
-      final matchesOutlet = _outlet == null || e.outletIds.contains(_outlet);
+    final all = <EmployeeModel>[
+      ...list,
+      if (c.employee != null &&
+          !list.any((e) => e.employeeId == c.employee!.employeeId))
+        c.employee!,
+    ];
+    if (c.appContext?.accountType == 'employee') {
+      final myId = c.appContext?.employeeId ?? c.employee?.employeeId;
+      final myEmployees = all.where((e) => e.employeeId == myId).toList();
+      if (myEmployees.isNotEmpty) return myEmployees;
+      if (c.employee != null) return [c.employee!];
+      if (myId != null) {
+        return [
+          EmployeeModel(
+            employeeId: myId,
+            uid: c.appContext?.uid ?? '',
+            ownerUid: c.appContext?.ownerUid ?? '',
+            name: c.user?.name ?? 'My Attendance',
+            email: c.user?.email ?? '',
+            status: 'active',
+            businessIds: [c.appContext?.businessId ?? ''],
+            outletIds: [c.appContext?.outletId ?? ''],
+            roleIds: const [],
+          ),
+        ];
+      }
+    }
+    return all.where((e) {
+      final matchesBusiness = c.appContext?.businessId == null ||
+          e.businessIds.isEmpty ||
+          e.businessIds.contains(c.appContext?.businessId);
+      final matchesOutlet = _outlet == null ||
+          e.outletIds.isEmpty ||
+          e.outletIds.contains(_outlet);
       return e.isActive && matchesBusiness && matchesOutlet;
     }).toList();
   }
@@ -233,8 +283,8 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
     final existing = _getDailyRecord(employee.employeeId, _date);
     if (existing != null && existing['checkInAt'] != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Attendance check-in is already recorded for today.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.attendanceCheckInRecorded ?? 'Attendance check-in is already recorded for today.'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -284,8 +334,8 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
     }
     if (record['checkOutAt'] != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Checkout is already completed for today. Only 1 checkout allowed per day.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.checkoutCompletedToday ?? 'Checkout is already completed for today. Only 1 checkout allowed per day.'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -315,7 +365,7 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
                 child: Icon(Icons.warning_amber_rounded, color: Colors.amber.shade900),
               ),
               const SizedBox(width: 12),
-              const Text('Early Checkout Notice'),
+              Text(AppLocalizations.of(context)?.earlyCheckoutNotice ?? 'Early Checkout Notice'),
             ],
           ),
           content: Column(
@@ -699,7 +749,12 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
   }
 
   List<Map<String, dynamic>> get _filteredApprovalRows {
+    final isEmployee = c.appContext?.accountType == 'employee';
+    final myId = c.appContext?.employeeId ?? c.employee?.employeeId;
     return _monthlyRows.where((row) {
+      if (isEmployee && myId != null && row['employeeId']?.toString() != myId) {
+        return false;
+      }
       final workDate = _parseDate(row['workDate']);
       if (workDate == null) return false;
       final inMonth = workDate.year == _approvalMonth.year && workDate.month == _approvalMonth.month;
@@ -758,20 +813,21 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF0F172A),
         actions: [
-          IconButton(
-            tooltip: 'Face attendance and enrollment',
-            icon: const Icon(Icons.face_retouching_natural),
-            onPressed: (_loading || _saving || _approving)
-                ? null
-                : () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => FaceAttendancePage(controller: c),
-                      ),
-                    );
-                    if (mounted) await _load();
-                  },
-          ),
+          if (_isMobile)
+            IconButton(
+              tooltip: 'Face attendance and enrollment',
+              icon: const Icon(Icons.face_retouching_natural),
+              onPressed: (_loading || _saving || _approving)
+                  ? null
+                  : () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => FaceAttendancePage(controller: c),
+                        ),
+                      );
+                      if (mounted) await _load();
+                    },
+            ),
           if (_loading || _saving || _approving)
             const Center(
               child: Padding(
@@ -818,7 +874,9 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
                     backgroundColor: const Color(0xFFEA580C),
                     child: const Icon(Icons.verified_user_rounded),
                   ),
-                  text: 'Approval Panel',
+                  text: c.appContext?.accountType == 'employee'
+                      ? 'Attendance History'
+                      : 'Approval Panel',
                 ),
               ],
             ),
@@ -866,7 +924,40 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
   // --- TAB 1: DAILY REGISTER ---
 
   Widget _buildDailyRegisterTab() {
-    final employees = _outletEmployees;
+    final baseEmployees = _outletEmployees;
+    final knownEmployeeIds = baseEmployees.map((e) => e.employeeId).toSet();
+    final extraEmployees = <EmployeeModel>[];
+    for (final row in _monthlyRows) {
+      final workDate = _parseDate(row['workDate']);
+      if (workDate != null &&
+          workDate.year == _date.year &&
+          workDate.month == _date.month &&
+          workDate.day == _date.day) {
+        final id = row['employeeId']?.toString();
+        if (id != null && !knownEmployeeIds.contains(id)) {
+          final existing = _employees.where((e) => e.employeeId == id).firstOrNull ??
+              c.employees.where((e) => e.employeeId == id).firstOrNull;
+          if (existing != null) {
+            extraEmployees.add(existing);
+            knownEmployeeIds.add(id);
+          } else {
+            extraEmployees.add(EmployeeModel(
+              employeeId: id,
+              uid: row['recordedBy']?.toString() ?? '',
+              ownerUid: c.appContext?.ownerUid ?? '',
+              name: row['employeeName']?.toString() ?? id,
+              email: '',
+              status: 'active',
+              businessIds: [c.appContext?.businessId ?? ''],
+              outletIds: [row['outletId']?.toString() ?? ''],
+              roleIds: const [],
+            ));
+            knownEmployeeIds.add(id);
+          }
+        }
+      }
+    }
+    final employees = [...baseEmployees, ...extraEmployees];
     final isToday = _date.year == DateTime.now().year &&
         _date.month == DateTime.now().month &&
         _date.day == DateTime.now().day;
@@ -919,6 +1010,72 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
+          // 0. Face Attendance Quick Punch Banner (Mobile Only)
+          if (_isMobile) ...[
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(color: const Color(0xFF0284C7).withValues(alpha: 0.3)),
+              ),
+              color: const Color(0xFFF0F9FF),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.face_retouching_natural, color: Color(0xFF0284C7), size: 26),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Face Attendance Punch / ফেস উপস্থিতি পাঞ্চ',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Use phone camera to punch check-in or checkout with AI face recognition',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF0284C7),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => FaceAttendancePage(controller: c),
+                          ),
+                        );
+                        if (mounted) await _load();
+                      },
+                      icon: const Icon(Icons.videocam_rounded, size: 18),
+                      label: const Text('Open Face Punch'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
           // 1. Date Navigator Bar
           Card(
             elevation: 0,
@@ -1438,10 +1595,30 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
                       backgroundColor: const Color(0xFF0284C7),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: (_saving || !_canManage) ? null : () => _clockIn(emp),
+                    onPressed: (_saving || !_canClock(emp)) ? null : () => _clockIn(emp),
                     icon: const Icon(Icons.login, size: 18),
                     label: const Text('Clock In'),
                   ),
+                  if (_isMobile) ...[
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF0284C7),
+                        side: const BorderSide(color: Color(0xFF0284C7)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => FaceAttendancePage(controller: c),
+                          ),
+                        );
+                        if (mounted) await _load();
+                      },
+                      icon: const Icon(Icons.face_retouching_natural, size: 18),
+                      label: const Text('Face Punch'),
+                    ),
+                  ],
                   const SizedBox(width: 8),
                   // Action 2: Mark Leave / Status Dropdown Menu
                   PopupMenuButton<String>(
@@ -1475,10 +1652,30 @@ class _StaffAttendancePageState extends State<StaffAttendancePage>
                       backgroundColor: const Color(0xFFEA580C),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: (_saving || !_canManage) ? null : () => _clockOut(emp, record),
+                    onPressed: (_saving || !_canClock(emp)) ? null : () => _clockOut(emp, record),
                     icon: const Icon(Icons.logout, size: 18),
                     label: const Text('Clock Out'),
                   ),
+                  if (_isMobile) ...[
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFEA580C),
+                        side: const BorderSide(color: Color(0xFFEA580C)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => FaceAttendancePage(controller: c),
+                          ),
+                        );
+                        if (mounted) await _load();
+                      },
+                      icon: const Icon(Icons.face_retouching_natural, size: 18),
+                      label: const Text('Face Punch Out'),
+                    ),
+                  ],
                   const SizedBox(width: 8),
                   const Text(
                     'Checked in ✓',

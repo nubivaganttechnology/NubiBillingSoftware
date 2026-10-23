@@ -33,11 +33,13 @@ abstract interface class FirestoreTransactionContext {
 
 class FirestoreTransactionDocument {
   const FirestoreTransactionDocument({
+    this.id,
     required this.exists,
     required this.fields,
     this.updateTime,
   });
 
+  final String? id;
   final bool exists;
   final Map<String, dynamic> fields;
 

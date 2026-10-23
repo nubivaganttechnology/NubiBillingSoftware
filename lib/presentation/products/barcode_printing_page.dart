@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import '../../core/utils/stock_quantity_formatter.dart';
 import '../../data/models/product_model.dart';
 import '../../data/models/product_variant_model.dart';
+import '../../data/repositories/product_repository.dart';
 import '../../data/services/barcode_label_print_service.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -23,9 +24,13 @@ class BarcodePrintingPage extends StatefulWidget {
     required this.businessName,
     required this.loadReceivedVariantIds,
     this.loadReceivedVariantPricing,
+    this.loadVariantBatches,
     this.availableQuantities = const {},
     this.initialProductId,
     this.initialVariantId,
+    this.initialCopies,
+    this.initialMrpOverrides,
+    this.initialSellingPriceOverrides,
     this.onClose,
     this.showBackButton = false,
     // Retained for source compatibility with product-row shortcuts.
@@ -37,9 +42,14 @@ class BarcodePrintingPage extends StatefulWidget {
   final Future<Set<String>> Function() loadReceivedVariantIds;
   final Future<Map<String, ({int mrp, int sellingPrice})>> Function()?
   loadReceivedVariantPricing;
+  final Future<List<VariantBatchPriceOption>> Function(String variantId)?
+  loadVariantBatches;
   final Map<String, int> availableQuantities;
   final String? initialProductId;
   final String? initialVariantId;
+  final Map<String, int>? initialCopies;
+  final Map<String, int>? initialMrpOverrides;
+  final Map<String, int>? initialSellingPriceOverrides;
   final VoidCallback? onClose;
   final bool showBackButton;
   final bool showBulkTools;
@@ -71,6 +81,8 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
   Map<String, ({int mrp, int sellingPrice})> _receivedPricing = {};
   final Map<String, int> _mrpOverrides = {};
   final Map<String, int> _sellingPriceOverrides = {};
+  final Map<String, List<VariantBatchPriceOption>> _variantBatches = {};
+  final Set<String> _loadingBatches = {};
   _BarcodeSearchType _searchType = _BarcodeSearchType.product;
   _BarcodeTemplate _template = _BarcodeTemplate.standard;
   String _query = '';
@@ -89,6 +101,15 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialCopies != null) {
+      _copies.addAll(widget.initialCopies!);
+    }
+    if (widget.initialMrpOverrides != null) {
+      _mrpOverrides.addAll(widget.initialMrpOverrides!);
+    }
+    if (widget.initialSellingPriceOverrides != null) {
+      _sellingPriceOverrides.addAll(widget.initialSellingPriceOverrides!);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadEligibility());
   }
 
@@ -115,6 +136,12 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
         _received = received;
         _receivedPricing = pricing;
         _checkingEligibility = false;
+        if (widget.initialCopies != null && widget.initialCopies!.isNotEmpty) {
+          for (final vid in widget.initialCopies!.keys) {
+            _selected.add(vid);
+            _focusedVariantId ??= vid;
+          }
+        }
       });
       final initial = _allVariants
           .where(
@@ -142,6 +169,39 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
       _message(
         'Could not read local receipt history. Barcode output is blocked.',
       );
+    }
+    if (widget.loadVariantBatches != null) {
+      for (final entry in _allVariants) {
+        final vid = entry.$2.variantId;
+        final stock = widget.availableQuantities[vid];
+        if (stock != null && stock > 0) {
+          _fetchBatchesForVariant(vid);
+        }
+      }
+    }
+  }
+
+  Future<void> _fetchBatchesForVariant(String variantId) async {
+    if (widget.loadVariantBatches == null) return;
+    if (_variantBatches.containsKey(variantId) ||
+        _loadingBatches.contains(variantId)) {
+      return;
+    }
+    _loadingBatches.add(variantId);
+    try {
+      final batches = await widget.loadVariantBatches!(variantId);
+      if (mounted) {
+        setState(() {
+          _variantBatches[variantId] = batches;
+          _loadingBatches.remove(variantId);
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _loadingBatches.remove(variantId);
+        });
+      }
     }
   }
 
@@ -969,7 +1029,7 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
             headingRowHeight: 46,
             headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
             dataRowMinHeight: 56,
-            dataRowMaxHeight: 72,
+            dataRowMaxHeight: 84,
             columnSpacing: 18,
             columns: const [
               DataColumn(label: Text('Select')),
@@ -1005,6 +1065,8 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
     final effectiveSell = _effectiveSellingPrice(variant);
     final stock = widget.availableQuantities[id];
     final hasStock = stock != null && stock > 0;
+    final batches = _variantBatches[id] ?? const [];
+    final activeBatches = batches.where((b) => b.availableQty > 0).toList();
     return DataRow(
       selected: selected,
       onSelectChanged: base
@@ -1118,73 +1180,116 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
           ),
         ),
         DataCell(
-          hasStock
-              ? Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFBBF7D0)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF16A34A),
-                          shape: BoxShape.circle,
-                        ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              hasStock
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
                       ),
-                      const SizedBox(width: 5),
-                      Text(
-                        formatStockQuantity(stock),
-                        style: const TextStyle(
-                          color: Color(0xFF15803D),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFBBF7D0)),
                       ),
-                    ],
-                  ),
-                )
-              : Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFECACA)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFDC2626),
-                          shape: BoxShape.circle,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF16A34A),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            formatStockQuantity(stock),
+                            style: const TextStyle(
+                              color: Color(0xFF15803D),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 5),
-                      const Text(
-                        '0',
-                        style: TextStyle(
-                          color: Color(0xFFDC2626),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
                       ),
-                    ],
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFECACA)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFDC2626),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          const Text(
+                            '0',
+                            style: TextStyle(
+                              color: Color(0xFFDC2626),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+              if (activeBatches.length > 1) ...[
+                const SizedBox(height: 3),
+                InkWell(
+                  onTap: () => _showLotSelectionDialog(product, variant),
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: const Color(0xFFBFDBFE)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.layers_outlined,
+                          size: 11,
+                          color: Color(0xFF2563EB),
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${activeBatches.length} Lots',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1D4ED8),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+              ],
+            ],
+          ),
         ),
         DataCell(
           SizedBox(
@@ -1255,17 +1360,38 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
           ),
         ),
         DataCell(
-          Text(
-            effectiveSell > 0
-                ? 'INR ${(effectiveSell / 100).toStringAsFixed(2)}'
-                : 'Unavailable',
-            style: TextStyle(
-              color: effectiveSell > 0
-                  ? const Color(0xFF0F172A)
-                  : const Color(0xFFDC2626),
-              fontWeight: effectiveSell > 0 ? FontWeight.w700 : null,
-              fontSize: 12,
-            ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                effectiveSell > 0
+                    ? 'INR ${(effectiveSell / 100).toStringAsFixed(2)}'
+                    : 'Unavailable',
+                style: TextStyle(
+                  color: effectiveSell > 0
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFDC2626),
+                  fontWeight: effectiveSell > 0 ? FontWeight.w700 : null,
+                  fontSize: 12,
+                ),
+              ),
+              if (activeBatches.length > 1) ...[
+                const SizedBox(height: 2),
+                InkWell(
+                  onTap: () => _showLotSelectionDialog(product, variant),
+                  child: const Text(
+                    'Choose lot price ▾',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF2563EB),
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         DataCell(_statusPill(status, enabled)),
@@ -1399,6 +1525,148 @@ class _BarcodePrintingPageState extends State<BarcodePrintingPage> {
               setState(() {});
             },
             child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showLotSelectionDialog(
+    ProductModel product,
+    ProductVariantModel variant,
+  ) async {
+    final id = _key(variant);
+    var batches = _variantBatches[id];
+    if (batches == null && widget.loadVariantBatches != null) {
+      try {
+        batches = await widget.loadVariantBatches!(id);
+        if (mounted) {
+          setState(() => _variantBatches[id] = batches!);
+        }
+      } catch (_) {}
+    }
+    final activeBatches =
+        batches?.where((b) => b.availableQty > 0).toList() ?? [];
+    if (!mounted) return;
+    if (activeBatches.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No active purchase lots found for this variant.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.layers_outlined, color: Color(0xFF2563EB)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Select Purchase Lot · ${variant.name}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 460,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This product has multiple active purchase lots with different prices. Choose which lot to print barcode stickers for:',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < activeBatches.length; i++) ...[
+                        () {
+                          final batch = activeBatches[i];
+                          final qtyUnits = batch.availableQty ~/ 1000;
+                          final sellPrice =
+                              (batch.sellingPricePaise / 100).toStringAsFixed(2);
+                          final mrpPrice =
+                              (batch.mrpPaise / 100).toStringAsFixed(2);
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: const Color(0xFFCBD5E1)),
+                              borderRadius: BorderRadius.circular(8),
+                              color: const Color(0xFFF8FAFC),
+                            ),
+                            child: ListTile(
+                              title: Text(
+                                'Lot #${i + 1} (${batch.internalBatchNo})',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Stock: $qtyUnits units  |  Selling Price: ₹$sellPrice  |  MRP: ₹$mrpPrice',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              trailing: FilledButton.tonal(
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  setState(() {
+                                    _selected.add(id);
+                                    _focusedVariantId = id;
+                                    if (qtyUnits > 0) {
+                                      _copies[id] = qtyUnits;
+                                      _copyControllers[id]?.text = '$qtyUnits';
+                                      _invalidCopies.remove(id);
+                                    }
+                                    _sellingPriceOverrides[id] =
+                                        batch.sellingPricePaise;
+                                    if (batch.mrpPaise > 0) {
+                                      _mrpOverrides[id] = batch.mrpPaise;
+                                    }
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Applied Lot #${i + 1}: $qtyUnits copies @ ₹$sellPrice',
+                                      ),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Apply Lot'),
+                              ),
+                            ),
+                          );
+                        }(),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
           ),
         ],
       ),

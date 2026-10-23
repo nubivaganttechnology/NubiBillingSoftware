@@ -942,4 +942,72 @@ void main() {
     expect(result.isValid, isTrue);
     expect(result.errors, isEmpty);
   });
+
+  test('central product adoption with explicit template succeeds even if templateSelectable is false', () async {
+    const stencilId =
+        'SYS_SUBCATEGORY_SYS_CATEGORY_TEXTURES_SPECIAL_EFFECTS_STENCILS_WALL_ART';
+    firestore.records['product_subcategories']!.add({
+      'id': stencilId,
+      'subcategoryId': stencilId,
+      'categoryId': 'CAT_PAINTS',
+      'name': 'Stencils & Wall Art',
+      'scopeType': 'SYSTEM',
+      'status': 'ACTIVE',
+      'profileId': 'EXPLICIT_METADATA',
+      'templateStatus': 'READY',
+      'templateSelectable': false,
+    });
+    firestore.records['subcategory_attribute_templates']!.addAll([
+      {
+        'id': 'TPL_STENCIL_FINISH',
+        'subcategoryId': stencilId,
+        'attributeId': 'finish',
+        'attributeLevel': 'PRODUCT',
+        'scopeType': 'SYSTEM',
+        'status': 'ACTIVE',
+      },
+      {
+        'id': 'TPL_STENCIL_PACK_SIZE',
+        'subcategoryId': stencilId,
+        'attributeId': 'packSize',
+        'attributeLevel': 'VARIANT',
+        'scopeType': 'SYSTEM',
+        'status': 'ACTIVE',
+        'required': true,
+      },
+      {
+        'id': 'TPL_STENCIL_UNIT',
+        'subcategoryId': stencilId,
+        'attributeId': 'unit',
+        'attributeLevel': 'VARIANT',
+        'scopeType': 'SYSTEM',
+        'status': 'ACTIVE',
+        'required': true,
+      },
+    ]);
+
+    final result = await validator.validateProduct(
+      tenantId: 'T',
+      businessId: 'B',
+      productName: 'circles',
+      productFields: {
+        'masterProductId': 'CPM-D9CBCAD7D8BE5F83',
+        'categoryId': 'CAT_PAINTS',
+        'subcategoryId': stencilId,
+        'attributeValues': {'finish': 'Matt'},
+      },
+      variants: [
+        {
+          'sku': 'SKU-CIRCLES-1',
+          'packUnitId': 'Litre',
+          'attributeValues': {'packSize': 1, 'unit': 'Litre'},
+        },
+      ],
+      token: 'TOK',
+      isNew: true,
+    );
+
+    expect(result.isValid, isTrue, reason: result.errors.toString());
+    expect(result.errors, isEmpty);
+  });
 }

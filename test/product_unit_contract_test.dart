@@ -263,6 +263,42 @@ void main() {
       expect(result.unitRules.conversionAllowed, false);
     },
   );
+  test(
+    'unrestricted template row inherits definition options for pack and selling units',
+    () async {
+      await seed('product_subcategories', 'unrestricted', {
+        'subcategoryId': 'unrestricted',
+        'categoryId': 'C',
+        'name': 'Unrestricted Template',
+      });
+      await seed('product_attributes', 'GLOBAL_UNIT_UNRESTRICTED', {
+        'attributeId': 'unit',
+        'name': 'Pack Unit',
+        'dataType': 'SELECT',
+        'attributeLevel': 'VARIANT',
+        'options': units,
+      });
+      // Template row without options key (null options)
+      await seed('subcategory_attribute_templates', 'unrestricted-unit', {
+        'subcategoryId': 'unrestricted',
+        'attributeId': 'unit',
+        'attributeLevel': 'VARIANT',
+      });
+      final result = await resolve('unrestricted');
+      expect(result.unitRules.allowedPackUnits, isNotEmpty);
+      expect(result.unitRules.allowedPackUnits, containsAll(['Litre', 'Piece']));
+      expect(result.unitRules.allowedSellingUnits, isNotEmpty);
+      expect(result.unitRules.allowedSellingUnits, containsAll(['Litre', 'Piece']));
+
+      // Test reconcileVariantState automatically defaulting soldAs to selected unit
+      final row = <String, dynamic>{
+        'unit': 'Piece',
+      };
+      result.unitRules.reconcileVariantState(row);
+      expect(row['soldAs'], 'Piece');
+      expect(row['_commercialUnit'], 'Piece');
+    },
+  );
   for (final bad in ['Can', 'Cartridge', 'Tube', 'Pouch', 'Piece']) {
     test('$bad never becomes a measurement base', () async {
       final rules = contract(

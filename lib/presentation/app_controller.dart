@@ -23,6 +23,7 @@ import '../core/errors/app_exception.dart';
 import '../core/permissions/permission_catalog.dart';
 import '../core/permissions/permission_id_matcher.dart';
 import '../core/utils/validators.dart';
+import '../domain/customers/customer_validators.dart';
 import '../data/models/app_config_model.dart';
 import '../data/models/auth_session_model.dart';
 import '../data/models/business_model.dart';
@@ -243,6 +244,37 @@ class AppController extends ChangeNotifier {
 
   void retryCatalogueSynchronization() {
     sync?.schedule(pull: true, reason: 'CATALOGUE_RETRY');
+  }
+
+  Future<bool> syncNowWithServer({
+    bool refreshCatalogue = false,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    final s = sync;
+    if (s == null) return false;
+    try {
+      if (s.state == SyncState.offline || !s.connectivity.available) {
+        return false;
+      }
+      await s
+          .sync(
+            push: true,
+            pull: true,
+            refreshCatalogue: refreshCatalogue,
+          )
+          .timeout(
+            timeout,
+            onTimeout: () {
+              debugPrint(
+                '[syncNowWithServer] Sync timed out after ${timeout.inSeconds}s',
+              );
+            },
+          );
+      return s.state == SyncState.synced || s.pendingCount == 0;
+    } catch (e) {
+      debugPrint('[syncNowWithServer] error: $e');
+      return false;
+    }
   }
 
   static String? _safeDiagnosticError(String? error) {
@@ -600,10 +632,13 @@ class AppController extends ChangeNotifier {
     bool includeOffDayAsPaidWork = false,
     String? earlyCheckoutReason,
   }) async {
-    if (!canManageStaffAttendance()) {
+    final context = appContext;
+    final myEmployeeId = context?.employeeId ?? employee?.employeeId;
+    final isSelf = myEmployeeId != null && myEmployeeId == employeeId;
+    if (!canManageStaffAttendance() && !isSelf) {
       throw const AppException('Attendance permission is required.');
     }
-    final context = appContext, session = await _getUsableSession();
+    final session = await _getUsableSession();
     if (context == null ||
         session == null ||
         context.businessId == null ||
@@ -868,6 +903,7 @@ class AppController extends ChangeNotifier {
   bool productSaving = false;
   String? productsError;
   List<PurchaseBillModel> purchaseBills = [];
+  PurchaseBillModel? lastCreatedPurchaseBill;
   bool purchasesLoading = false;
   bool purchaseSaving = false;
   String? purchasesError;
@@ -1155,6 +1191,7 @@ class AppController extends ChangeNotifier {
     suppliers = [];
     tenantSuppliers = [];
     purchaseBills = [];
+    lastCreatedPurchaseBill = null;
     await _setSyncScope(tenant: business.ownerUid, business: businessId);
     _startupLog('Business sync scope registration completed');
     outlets = [];
@@ -1283,11 +1320,13 @@ class AppController extends ChangeNotifier {
     final context = appContext;
     return context != null &&
         (context.accountType == 'owner' ||
+            context.accountType == 'employee' ||
             PermissionCatalog.allows('SALARY_VIEW', context.permissions) ||
             PermissionCatalog.allows('SALARY_MANAGE', context.permissions) ||
             PermissionCatalog.allows('SALARY_APPROVE', context.permissions) ||
             PermissionCatalog.allows('SALARY_PAY', context.permissions) ||
-            PermissionCatalog.allows('SALARY_REPORT', context.permissions));
+            PermissionCatalog.allows('SALARY_REPORT', context.permissions) ||
+            PermissionCatalog.allows('salary', context.permissions));
   }
 
   bool canManageStaffAttendance() {
@@ -1301,6 +1340,7 @@ class AppController extends ChangeNotifier {
     final context = appContext;
     return context != null &&
         (context.accountType == 'owner' ||
+            context.accountType == 'employee' ||
             PermissionCatalog.allows('BIOMETRIC_ENROLL', context.permissions));
   }
 
@@ -1367,11 +1407,13 @@ class AppController extends ChangeNotifier {
     final session = await _getUsableSession();
     final context = appContext;
     final repository = staffAttendanceRepository;
+    final myEmployeeId = context?.employeeId ?? employee?.employeeId;
+    final isSelf = myEmployeeId != null && myEmployeeId == employeeId;
     if (session == null ||
         context == null ||
         context.businessId == null ||
         context.outletId == null ||
-        !canManageStaffAttendance()) {
+        (!canManageStaffAttendance() && !isSelf)) {
       throw const AppException(
         'Face attendance is unavailable for this account or outlet.',
       );
@@ -1415,6 +1457,7 @@ class AppController extends ChangeNotifier {
       canViewStaffSalary() ||
       (appContext != null &&
           (appContext!.accountType == 'owner' ||
+              appContext!.accountType == 'employee' ||
               PermissionCatalog.allows(
                 'ATTENDANCE_VIEW',
                 appContext!.permissions,
@@ -2236,6 +2279,8 @@ class AppController extends ChangeNotifier {
     int? unitCostPaise,
     String? unit,
     String? transactionId,
+    int? sellingPricePaise,
+    int? mrpPaise,
   }) async {
     final context = appContext;
     final session = await _getUsableSession();
@@ -2260,6 +2305,8 @@ class AppController extends ChangeNotifier {
       unitCostPaise: unitCostPaise,
       unit: unit,
       transactionId: transactionId,
+      sellingPricePaise: sellingPricePaise,
+      mrpPaise: mrpPaise,
     );
     await loadProducts();
     return result;
@@ -2467,6 +2514,23 @@ class AppController extends ChangeNotifier {
       tenantId: context.ownerUid,
       businessId: context.businessId!,
       outletId: context.outletId!,
+    );
+  }
+
+  Future<List<VariantBatchPriceOption>> loadVariantBatches(
+    String variantId,
+  ) async {
+    final context = appContext;
+    final session = auth.currentSession;
+    if (context == null || session == null || context.outletId == null) {
+      return const [];
+    }
+    return productRepository.loadVariantBatches(
+      token: session.idToken,
+      tenantId: context.ownerUid,
+      businessId: context.businessId!,
+      outletId: context.outletId!,
+      variantId: variantId,
     );
   }
 
@@ -3640,7 +3704,7 @@ class AppController extends ChangeNotifier {
     error = '';
     notifyListeners();
     try {
-      await purchaseRepository.createDraft(
+      final bill = await purchaseRepository.createDraft(
         tenantId: context!.ownerUid,
         businessId: context.businessId!,
         outletId: context.outletId!,
@@ -3661,7 +3725,9 @@ class AppController extends ChangeNotifier {
         createdBy: context.uid,
         token: session.idToken,
       );
+      lastCreatedPurchaseBill = bill;
       await loadPurchases();
+      if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
       error = e is AppException
@@ -3707,7 +3773,7 @@ class AppController extends ChangeNotifier {
       if (business == null) {
         throw const AppException('Purchase business was not found.');
       }
-      await purchaseRepository.updateDraft(
+      final billResult = await purchaseRepository.updateDraft(
         tenantId: context!.ownerUid,
         businessId: bill.businessId,
         outletId: bill.outletId,
@@ -3725,7 +3791,9 @@ class AppController extends ChangeNotifier {
         updatedBy: context.uid,
         token: session.idToken,
       );
+      lastCreatedPurchaseBill = billResult;
       await loadPurchases();
+      if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
       error = e is AppException
@@ -3772,6 +3840,7 @@ class AppController extends ChangeNotifier {
         token: session.idToken,
       );
       await loadPurchases();
+      if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
       error = e is AppException
@@ -3919,6 +3988,7 @@ class AppController extends ChangeNotifier {
         token: session.idToken,
       );
       await loadPurchases();
+      if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
       error = e is AppException ? e.message : 'Unable to approve purchase.';
@@ -3959,6 +4029,7 @@ class AppController extends ChangeNotifier {
         token: session.idToken,
       );
       await loadPurchases();
+      if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
       error = e is AppException
@@ -4084,7 +4155,7 @@ class AppController extends ChangeNotifier {
           '"${EnvironmentConfig.projectId}" '
           '($status): '
           '$detail. The catch-all rule you shared allows reads and writes, so '
-          'verify it is Published for this project’s (default) database. If it '
+          'verify it is Published for this project\'s (default) database. If it '
           'is, check whether App Check enforcement is enabled; REST requests '
           'from this app may be missing an App Check token.';
     }
@@ -4397,6 +4468,12 @@ class AppController extends ChangeNotifier {
     businessSaving = true;
     notifyListeners();
     try {
+      final normalizedGstin = gstin == null || gstin.trim().isEmpty
+          ? null
+          : AppValidators.normalizeGstin(gstin);
+      final derivedState = CustomerValidators.stateNameFromCode(
+        CustomerValidators.stateCodeFromGstin(normalizedGstin),
+      );
       final business = await businessesRepository.createBusiness(
         ownerUid: session.uid,
         businessName: businessName,
@@ -4407,9 +4484,8 @@ class AppController extends ChangeNotifier {
         email: AppValidators.normalizeEmail(email),
         phone: AppValidators.normalizeIndianPhone(phone),
         address: address,
-        gstin: gstin == null || gstin.trim().isEmpty
-            ? null
-            : AppValidators.normalizeGstin(gstin),
+        gstin: normalizedGstin,
+        gstState: derivedState,
         gstinVerified: false,
         token: session.idToken,
       );
@@ -4472,6 +4548,12 @@ class AppController extends ChangeNotifier {
     outletSaving = true;
     notifyListeners();
     try {
+      final normalizedGstin = gstin == null || gstin.trim().isEmpty
+          ? null
+          : AppValidators.normalizeGstin(gstin);
+      final derivedState = CustomerValidators.stateNameFromCode(
+        CustomerValidators.stateCodeFromGstin(normalizedGstin),
+      );
       final outlet = await outletsRepository.createOutlet(
         businessId: businessId,
         ownerUid: appContext!.ownerUid,
@@ -4481,9 +4563,8 @@ class AppController extends ChangeNotifier {
         outletType: subTypes.first,
         address: address,
         contactNumber: AppValidators.normalizeIndianPhone(contactNumber),
-        gstin: gstin == null || gstin.trim().isEmpty
-            ? null
-            : AppValidators.normalizeGstin(gstin),
+        gstin: normalizedGstin,
+        gstState: derivedState,
         gstinVerified: false,
         token: session.idToken,
       );

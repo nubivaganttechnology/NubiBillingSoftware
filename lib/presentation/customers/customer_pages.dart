@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import '../../data/models/customer_model.dart';
 import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
-import '../billing/widgets/upi_qr_widget.dart';
 import 'customer_due_collection_dialog.dart';
 import 'customer_form.dart';
 import 'customer_ledger_dialog.dart';
@@ -1015,13 +1014,11 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
                               label: const Text('Ledger'),
                             ),
                           ],
-                          if (hasDue) ...[
+                          if (hasDue && controller.canCollectDue()) ...[
                             FilledButton.tonalIcon(
-                              onPressed: () => showUpiPaymentDialog(
-                                context,
-                                amount: customer.duePaise / 100.0,
-                                customerName: customer.name,
-                                note: 'Customer Due Payment',
+                              onPressed: () => _openCollectDueDialog(
+                                customer,
+                                initialPaymentMode: 'UPI',
                               ),
                               style: FilledButton.styleFrom(
                                 visualDensity: VisualDensity.compact,
@@ -1101,13 +1098,11 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
                       icon: const Icon(Icons.receipt_long_outlined, size: 16),
                       label: const Text('Ledger'),
                     ),
-                  if (hasDue)
+                  if (hasDue && controller.canCollectDue())
                     FilledButton.tonalIcon(
-                      onPressed: () => showUpiPaymentDialog(
-                        context,
-                        amount: customer.duePaise / 100.0,
-                        customerName: customer.name,
-                        note: 'Customer Due Payment',
+                      onPressed: () => _openCollectDueDialog(
+                        customer,
+                        initialPaymentMode: 'UPI',
                       ),
                       style: FilledButton.styleFrom(
                         visualDensity: VisualDensity.compact,
@@ -1288,12 +1283,16 @@ class _CustomerManagementPageState extends State<CustomerManagementPage> {
     );
   }
 
-  void _openCollectDueDialog(CustomerModel customer) {
+  void _openCollectDueDialog(
+    CustomerModel customer, {
+    String initialPaymentMode = 'CASH',
+  }) {
     showDialog(
       context: context,
       builder: (_) => CustomerDueCollectionDialog(
         controller: widget.controller,
         customer: customer,
+        initialPaymentMode: initialPaymentMode,
         onPaymentCompleted: _loadCustomers,
       ),
     );

@@ -749,7 +749,8 @@ class StaffAttendanceRepository {
         })
         .toList()
       ..sort(
-        (a, b) => (a['workDate'] as String).compareTo(b['workDate'] as String),
+        (a, b) => (a['workDate']?.toString() ?? '')
+            .compareTo(b['workDate']?.toString() ?? ''),
       );
   }
 }

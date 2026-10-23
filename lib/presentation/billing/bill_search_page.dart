@@ -53,6 +53,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
   bool _loading = false;
   String _status = 'ALL';
   String _borrowTimelineFilter = 'ALL';
+  String _outletScope = 'CURRENT';
   BusinessSettingsModel? _businessSettings;
 
   RepaymentInfo _getRepaymentInfo(Map<String, dynamic> fields) {
@@ -1222,6 +1223,18 @@ class _BillSearchPageState extends State<BillSearchPage> {
                   _search();
                 },
               ),
+              if (widget.controller.outlets.length > 1) ...[
+                FilterChip(
+                  selected: _outletScope == 'ALL',
+                  label: Text(l10n?.allOutlets ?? 'All Outlets'),
+                  avatar: const Icon(Icons.storefront_outlined, size: 16),
+                  selectedColor: const Color(0xFF2563EB).withValues(alpha: 0.12),
+                  onSelected: (val) {
+                    setState(() => _outletScope = val ? 'ALL' : 'CURRENT');
+                    _search();
+                  },
+                ),
+              ],
             ],
           ),
           if (_status == 'PENDING') ...[
@@ -1537,6 +1550,28 @@ class _BillSearchPageState extends State<BillSearchPage> {
                       ),
                     ),
                   ),
+                  if (fields['outletId'] is String &&
+                      (fields['outletId'] as String).isNotEmpty &&
+                      fields['outletId'] != _currentOutletId)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFBFDBFE)),
+                      ),
+                      child: Text(
+                        'Outlet: ${fields['outletId']}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1D4ED8),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               if (due > 0 || status == 'PENDING') ...[
@@ -2160,39 +2195,76 @@ class _BillSearchPageState extends State<BillSearchPage> {
       }
       final businessId = appContext!.businessId!;
       final outletId = appContext.outletId;
+      final effectiveOutletId = _outletScope == 'ALL' ? null : outletId;
       setState(() => _loading = true);
       final custTerm = _customer.text.trim().toLowerCase();
       final hasDateFilter = _startDate != null || _endDate != null;
 
-      final allRows = await service.queryDocuments(
-        collection: FirebaseConstants.invoices,
-        filters: [
-          FirestoreFilter('businessId', 'EQUAL', businessId),
-          if (outletId != null && outletId.isNotEmpty)
-            FirestoreFilter('outletId', 'EQUAL', outletId),
-          if (_billId.text.trim().isNotEmpty)
-            FirestoreFilter('invoiceNumber', 'EQUAL', _billId.text.trim()),
-          if (_phone.text.trim().isNotEmpty)
-            FirestoreFilter('customerPhone', 'EQUAL', _phone.text.trim()),
-          if (_status != 'ALL') FirestoreFilter('status', 'EQUAL', _status),
-        ],
-        orderBy: 'createdAt',
-        descending: true,
-        limit: (hasDateFilter || custTerm.isNotEmpty || _status == 'PENDING')
-            ? 500
-            : 35,
-        idToken: token,
-      );
+      final filters = [
+        FirestoreFilter('businessId', 'EQUAL', businessId),
+        if (effectiveOutletId != null && effectiveOutletId.isNotEmpty)
+          FirestoreFilter('outletId', 'EQUAL', effectiveOutletId),
+        if (_billId.text.trim().isNotEmpty)
+          FirestoreFilter('invoiceNumber', 'EQUAL', _billId.text.trim()),
+        if (_phone.text.trim().isNotEmpty)
+          FirestoreFilter('customerPhone', 'EQUAL', _phone.text.trim()),
+        if (_status != 'ALL') FirestoreFilter('status', 'EQUAL', _status),
+      ];
+
+      List<Map<String, dynamic>> allRows = [];
+      try {
+        if (_outletScope == 'ALL' ||
+            (_status == 'PENDING' && custTerm.isNotEmpty)) {
+          allRows = await service.remote.queryDocuments(
+            collection: FirebaseConstants.invoices,
+            filters: filters,
+            orderBy: 'createdAt',
+            descending: true,
+            limit: 500,
+            idToken: token,
+          );
+          if (service.localDataSource != null && allRows.isNotEmpty) {
+            try {
+              await service.localDataSource!.upsertRemote(
+                FirebaseConstants.invoices,
+                allRows,
+              );
+            } catch (_) {}
+          }
+        } else {
+          allRows = await service.queryDocuments(
+            collection: FirebaseConstants.invoices,
+            filters: filters,
+            orderBy: 'createdAt',
+            descending: true,
+            limit: (hasDateFilter || custTerm.isNotEmpty || _status == 'PENDING')
+                ? 500
+                : 35,
+            idToken: token,
+          );
+        }
+      } catch (_) {
+        allRows = await service.queryDocuments(
+          collection: FirebaseConstants.invoices,
+          filters: filters,
+          orderBy: 'createdAt',
+          descending: true,
+          limit: (hasDateFilter || custTerm.isNotEmpty || _status == 'PENDING')
+              ? 500
+              : 35,
+          idToken: token,
+        );
+      }
 
       _rows = allRows.where((row) {
         final fields = FirestoreRestService.decodeFields(row['fields']);
 
         // Outlet filter fallback
-        if (outletId != null && outletId.isNotEmpty) {
+        if (effectiveOutletId != null && effectiveOutletId.isNotEmpty) {
           final rowOutletId = fields['outletId'] as String?;
           if (rowOutletId != null &&
               rowOutletId.isNotEmpty &&
-              rowOutletId != outletId) {
+              rowOutletId != effectiveOutletId) {
             return false;
           }
         }
@@ -2495,6 +2567,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
           mode: mode.value,
           paymentAt: DateTime.now(),
           nextDueDate: nextDueDate,
+          collectedAtOutletId: widget.controller.appContext?.outletId,
           token: token!,
         );
       }

@@ -120,6 +120,11 @@ class ReportsRepository {
       purchaseRatio = (purchasesPaise / netSalesPaise) * 100;
     }
 
+    final grossProfitPaise = netSalesPaise - purchasesPaise;
+    final double? grossProfitMarginPct = netSalesPaise > 0
+        ? (grossProfitPaise / netSalesPaise) * 100
+        : null;
+
     // Receivables outstanding (from invoices due or customers)
     int receivablesOutstandingPaise = 0;
     for (final inv in invoices) {
@@ -334,6 +339,8 @@ class ReportsRepository {
       topCategories: topCategories,
       totalSkusCount: variants.length,
       overdueReceivablesPaise: overdueReceivablesPaise,
+      grossProfitPaise: grossProfitPaise,
+      grossProfitMarginPercentage: grossProfitMarginPct,
     );
   }
 
@@ -779,11 +786,13 @@ class ReportsRepository {
     final validInvoiceIds = <String>{};
     for (final inv in validInvoices) {
       final remoteId = inv['remoteId'] as String?;
-      if (remoteId != null && remoteId.isNotEmpty)
+      if (remoteId != null && remoteId.isNotEmpty) {
         validInvoiceIds.add(remoteId);
+      }
       final invoiceId = inv['invoiceId'] as String?;
-      if (invoiceId != null && invoiceId.isNotEmpty)
+      if (invoiceId != null && invoiceId.isNotEmpty) {
         validInvoiceIds.add(invoiceId);
+      }
       final requestId = inv['requestId'] as String?;
       if (requestId != null && requestId.isNotEmpty) {
         validInvoiceIds.add(requestId);
@@ -1867,11 +1876,13 @@ class ReportsRepository {
     final validInvoiceIds = <String>{};
     for (final inv in validInvoices) {
       final remoteId = inv['remoteId'] as String?;
-      if (remoteId != null && remoteId.isNotEmpty)
+      if (remoteId != null && remoteId.isNotEmpty) {
         validInvoiceIds.add(remoteId);
+      }
       final invoiceId = inv['invoiceId'] as String?;
-      if (invoiceId != null && invoiceId.isNotEmpty)
+      if (invoiceId != null && invoiceId.isNotEmpty) {
         validInvoiceIds.add(invoiceId);
+      }
       final requestId = inv['requestId'] as String?;
       if (requestId != null && requestId.isNotEmpty) {
         validInvoiceIds.add(requestId);
@@ -2223,11 +2234,13 @@ class ReportsRepository {
     final validInvoiceIds = <String>{};
     for (final inv in validInvoices) {
       final remoteId = inv['remoteId'] as String?;
-      if (remoteId != null && remoteId.isNotEmpty)
+      if (remoteId != null && remoteId.isNotEmpty) {
         validInvoiceIds.add(remoteId);
+      }
       final invoiceId = inv['invoiceId'] as String?;
-      if (invoiceId != null && invoiceId.isNotEmpty)
+      if (invoiceId != null && invoiceId.isNotEmpty) {
         validInvoiceIds.add(invoiceId);
+      }
       final requestId = inv['requestId'] as String?;
       if (requestId != null && requestId.isNotEmpty) {
         validInvoiceIds.add(requestId);
@@ -2251,8 +2264,14 @@ class ReportsRepository {
     final costMap = <String, int>{};
     for (final v in variants) {
       final vid = v['variantId'] as String? ?? '';
-      final cost = (v['purchaseRate'] as num?)?.toInt() ?? 0;
-      costMap[vid] = cost;
+      final cost = (v['purchaseRate'] as num?)?.toInt() ??
+          (v['purchasePricePaise'] as num?)?.toInt() ??
+          (v['costPrice'] as num?)?.toInt() ??
+          (v['costPaise'] as num?)?.toInt() ??
+          0;
+      if (vid.isNotEmpty && cost > 0) {
+        costMap[vid] = cost;
+      }
     }
 
     final profitMap = <String, _ProfitItemSummary>{};
@@ -2264,13 +2283,19 @@ class ReportsRepository {
       processedInvoiceIds.add(invId);
 
       final vid = it['variantId'] as String? ?? '';
-      final name = (it['name'] ?? 'Product') as String;
+      final name = (it['name'] ?? it['productName'] ?? 'Product') as String;
       final qty = (it['quantity'] as num?)?.toDouble() ?? 0;
-      final revenue = (it['taxablePaise'] as num?)?.toInt() ?? 0;
+      final revenue = (it['taxablePaise'] as num?)?.toInt() ??
+          (it['lineTotalPaise'] as num?)?.toInt() ??
+          (it['totalPaise'] as num?)?.toInt() ??
+          (it['taxableAmount'] as num?)?.toInt() ??
+          (it['totalAmount'] as num?)?.toInt() ??
+          0;
 
-      final unitCost =
-          costMap[vid] ??
-          (revenue > 0 && qty > 0 ? (revenue ~/ qty * 0.7).toInt() : 0);
+      int unitCost = costMap[vid] ?? 0;
+      if (unitCost <= 0 && revenue > 0 && qty > 0) {
+        unitCost = (revenue ~/ qty * 0.7).toInt();
+      }
       final totalCost = (unitCost * qty).toInt();
 
       final s = profitMap.putIfAbsent(
@@ -2304,12 +2329,16 @@ class ReportsRepository {
           final qty = (item['quantity'] as num?)?.toDouble() ?? 0;
           final revenue =
               (item['taxablePaise'] as num?)?.toInt() ??
+              (item['lineTotalPaise'] as num?)?.toInt() ??
+              (item['totalPaise'] as num?)?.toInt() ??
               (item['taxableAmount'] as num?)?.toInt() ??
+              (item['totalAmount'] as num?)?.toInt() ??
               0;
 
-          final unitCost =
-              costMap[vid] ??
-              (revenue > 0 && qty > 0 ? (revenue ~/ qty * 0.7).toInt() : 0);
+          int unitCost = costMap[vid] ?? 0;
+          if (unitCost <= 0 && revenue > 0 && qty > 0) {
+            unitCost = (revenue ~/ qty * 0.7).toInt();
+          }
           final totalCost = (unitCost * qty).toInt();
 
           final s = profitMap.putIfAbsent(
@@ -2320,6 +2349,25 @@ class ReportsRepository {
           s.revenuePaise += revenue;
           s.costPaise += totalCost;
         }
+      }
+    }
+
+    if (profitMap.isEmpty && validInvoices.isNotEmpty) {
+      int invRev = 0;
+      for (final inv in validInvoices) {
+        invRev += (inv['grandTotalPaise'] as num?)?.toInt() ??
+            (inv['totalAmount'] as num?)?.toInt() ??
+            0;
+      }
+      if (invRev > 0) {
+        final estimatedCost = (invRev * 0.7).toInt();
+        final s = profitMap.putIfAbsent(
+          'General Sales (Invoices)',
+          () => _ProfitItemSummary(name: 'General Sales (Invoices)'),
+        );
+        s.quantity = validInvoices.length.toDouble();
+        s.revenuePaise = invRev;
+        s.costPaise = estimatedCost;
       }
     }
 
@@ -2536,8 +2584,9 @@ class ReportsRepository {
       );
       if (dt == null ||
           dt.isBefore(dateRange.start) ||
-          dt.isAfter(dateRange.end))
+          dt.isAfter(dateRange.end)) {
         continue;
+      }
       final amount = (fields['amount'] as num?)?.toInt() ?? 0;
       if (amount <= 0) continue;
       totalOutflow += amount;
@@ -2735,7 +2784,12 @@ class ReportsRepository {
       fields['remoteId'] = (doc['name'] as String?)?.split('/').last ?? '';
 
       if (range != null) {
-        final dt = _parseDateTime(fields['createdAt']);
+        final dt = _parseDateTime(
+          fields['invoiceDate'] ??
+              fields['entryDate'] ??
+              fields['billDate'] ??
+              fields['createdAt'],
+        );
         if (dt != null) {
           if (dt.isBefore(range.start) || dt.isAfter(range.end)) {
             continue;

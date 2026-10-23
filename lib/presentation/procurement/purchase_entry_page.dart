@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/errors/app_exception.dart';
 import '../../data/models/product_variant_model.dart';
 import '../../data/models/purchase_bill_model.dart';
 import '../../data/models/storage_location_model.dart';
 import '../../data/models/supplier_model.dart';
 import '../app_controller.dart';
+import '../widgets/sync_task_dialog.dart';
 import '../../l10n/app_localizations.dart';
 import 'supplier_pages.dart' show showSupplierFormFromPurchase;
 
@@ -50,10 +52,12 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
   bool _preview = false;
   int _activeGridRow = 0;
   int _activeGridColumn = 0;
+  PurchaseBillModel? _activeDraft;
 
   @override
   void initState() {
     super.initState();
+    _activeDraft = widget.draftToEdit;
     final outletId = widget.controller.currentOutlet?.outletId;
     for (final row in _rows) {
       row.locationType = 'OUTLET';
@@ -220,9 +224,22 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-            onPressed: _saving ? null : _reviewAndPost,
-            icon: const Icon(Icons.fact_check_outlined, size: 16),
-            label: Text(l10n?.reviewAndPost ?? 'Review & Post'),
+            onPressed: _saving ? null : (_review ? _postExistingWorkflow : _reviewAndPost),
+            icon: _saving && _review
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.fact_check_outlined, size: 16),
+            label: Text(
+              _review
+                  ? (_saving ? 'Posting...' : 'Confirm & Post')
+                  : (l10n?.reviewAndPost ?? 'Review & Post'),
+            ),
           ),
         ],
       );
@@ -268,9 +285,22 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
           child: const Text('Save Draft'),
         ),
         FilledButton.icon(
-          onPressed: _saving ? null : _reviewAndPost,
-          icon: const Icon(Icons.fact_check_outlined),
-          label: const Text('Review & Post'),
+          onPressed: _saving ? null : (_review ? _postExistingWorkflow : _reviewAndPost),
+          icon: _saving && _review
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(Icons.fact_check_outlined),
+          label: Text(
+            _review
+                ? (_saving ? 'Posting...' : 'Confirm & Post')
+                : const Text('Review & Post').data!,
+          ),
         ),
       ],
     ),
@@ -2608,23 +2638,41 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
                 setState(() {
                   _paymentStatus = v ?? 'UNPAID';
                   if (_paymentStatus == 'UNPAID') _paidNow.text = '0';
-                  if (_paymentStatus == 'PAID') _paidNow.text = _rupees(grand);
+                  if (_paymentStatus == 'PAID') {
+                    _paidNow.text = _rupees(grand);
+                    _dueDate = null;
+                  }
                   _dirty = true;
                 });
               },
             ),
           ),
           SizedBox(
-            width: 130,
+            width: 140,
             child: TextField(
               controller: _paidNow,
-              enabled: _paymentStatus != 'UNPAID',
+              enabled: _paymentStatus == 'PARTIALLY_PAID',
+              readOnly: _paymentStatus != 'PARTIALLY_PAID',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Paid Now ₹',
                 isDense: true,
+                filled: _paymentStatus != 'PARTIALLY_PAID',
+                fillColor: _paymentStatus != 'PARTIALLY_PAID'
+                    ? Colors.grey.shade100
+                    : null,
+                suffixIcon: _paymentStatus == 'PAID'
+                    ? const Tooltip(
+                        message: 'Full payment (locked to Grand Total)',
+                        child: Icon(
+                          Icons.lock_outline,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : null,
               ),
               onChanged: (_) => setState(() => _dirty = true),
             ),
@@ -2676,23 +2724,37 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
               onChanged: (_) => _markDirty(),
             ),
           ),
-          OutlinedButton.icon(
-            onPressed: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: _dueDate ?? DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime.now().add(const Duration(days: 3650)),
+          Builder(
+            builder: (context) {
+              final paidPaise = _moneyToPaise(_paidNow.text) ?? 0;
+              final isFullyPaid = _paymentStatus == 'PAID' ||
+                  (_paymentStatus != 'UNPAID' && paidPaise >= grand && grand > 0);
+              return OutlinedButton.icon(
+                onPressed: isFullyPaid
+                    ? null
+                    : () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: _dueDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 3650)),
+                        );
+                        if (date != null) {
+                          setState(() {
+                            _dueDate = date;
+                            _dirty = true;
+                          });
+                        }
+                      },
+                icon: const Icon(Icons.event, size: 16),
+                label: Text(
+                  isFullyPaid
+                      ? 'No Due Date (Fully Paid)'
+                      : (_dueDate == null ? 'Due Date' : _date(_dueDate!)),
+                ),
               );
-              if (date != null) {
-                setState(() {
-                  _dueDate = date;
-                  _dirty = true;
-                });
-              }
             },
-            icon: const Icon(Icons.event, size: 16),
-            label: Text(_dueDate == null ? 'Due Date' : _date(_dueDate!)),
           ),
           SizedBox(
             width: 180,
@@ -2825,7 +2887,21 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
               10000
         : discount;
     setState(() => _saving = true);
-    final draftToEdit = widget.draftToEdit;
+    if (_activeDraft == null) {
+      final existingDraft = widget.controller.purchaseBills
+          .where(
+            (b) =>
+                b.supplierInvoiceNumber.trim().toLowerCase() ==
+                    _invoice.text.trim().toLowerCase() &&
+                b.supplierId == _supplierId &&
+                b.status == 'DRAFT',
+          )
+          .firstOrNull;
+      if (existingDraft != null) {
+        _activeDraft = existingDraft;
+      }
+    }
+    final draftToEdit = _activeDraft;
     final saved = draftToEdit == null
         ? await widget.controller.createPurchaseDraft(
             supplierId: _supplierId!,
@@ -2857,15 +2933,19 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
             items: validRows,
           );
     if (saved && mounted) {
-      final savedBill = widget.controller.purchaseBills
-          .where(
-            (bill) => draftToEdit != null
-                ? bill.purchaseBillId == draftToEdit.purchaseBillId
-                : bill.supplierInvoiceNumber == _invoice.text.trim() &&
-                      bill.supplierId == _supplierId,
-          )
-          .firstOrNull;
+      final savedBill = widget.controller.lastCreatedPurchaseBill ??
+          widget.controller.purchaseBills
+              .where(
+                (bill) => draftToEdit != null
+                    ? bill.purchaseBillId == draftToEdit.purchaseBillId
+                    : bill.supplierInvoiceNumber.trim().toLowerCase() ==
+                            _invoice.text.trim().toLowerCase() &&
+                        bill.supplierId == _supplierId &&
+                        bill.status == 'DRAFT',
+              )
+              .firstOrNull;
       if (savedBill != null) {
+        _activeDraft = savedBill;
         final lineRows = _rows
             .where(
               (row) =>
@@ -2885,6 +2965,12 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
               savedBill.items[i].internalBatchNo ?? '';
         }
       }
+    } else if (!saved && mounted) {
+      _message(
+        widget.controller.error.isNotEmpty
+            ? widget.controller.error
+            : 'Failed to save purchase draft.',
+      );
     }
     if (mounted) setState(() => _saving = false);
     if (saved && mounted && closeAfterSave) {
@@ -3052,12 +3138,22 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
         spacing: 8,
         children: [
           OutlinedButton(
-            onPressed: () => setState(() => _review = false),
+            onPressed: _saving ? null : () => setState(() => _review = false),
             child: const Text('Back to Edit'),
           ),
-          FilledButton(
+          FilledButton.icon(
             onPressed: _saving ? null : _postExistingWorkflow,
-            child: const Text('Confirm & Post'),
+            icon: _saving
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.check_circle_outline, size: 18),
+            label: Text(_saving ? 'Posting...' : 'Confirm & Post'),
           ),
         ],
       ),
@@ -3120,39 +3216,98 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
   }
 
   Future<void> _postExistingWorkflow() async {
-    final saved = await _persistDraft(closeAfterSave: false);
-    if (!saved || !mounted) return;
-    final bill = widget.controller.purchaseBills
-        .where((b) => b.supplierInvoiceNumber == _invoice.text.trim())
-        .firstOrNull;
-    if (bill == null) {
-      _message(
-        'Draft was not saved; check the Supplier, invoice and Purchase rows.',
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      final success = await showSyncTaskDialog<bool>(
+        context: context,
+        title: 'Confirming & Posting Purchase',
+        task: (updateStatus) async {
+          updateStatus('Saving purchase draft...');
+          final saved = await _persistDraft(closeAfterSave: false);
+          if (!saved) return false;
+
+          final bill = _activeDraft ??
+              widget.controller.lastCreatedPurchaseBill ??
+              widget.controller.purchaseBills
+                  .where(
+                    (b) =>
+                        b.supplierInvoiceNumber.trim().toLowerCase() ==
+                            _invoice.text.trim().toLowerCase() &&
+                        b.supplierId == _supplierId &&
+                        b.status == 'DRAFT',
+                  )
+                  .firstOrNull;
+          if (bill == null) {
+            throw AppException(
+              widget.controller.error.isNotEmpty
+                  ? widget.controller.error
+                  : 'Draft was not saved; check the Supplier, invoice and Purchase rows.',
+            );
+          }
+
+          updateStatus('Approving purchase & updating inventory...');
+          final ok = await widget.controller.approvePurchase(bill.purchaseBillId);
+          if (!ok) {
+            throw AppException(
+              widget.controller.error.isNotEmpty
+                  ? widget.controller.error
+                  : 'Unable to approve and finish purchase.',
+            );
+          }
+
+          final amountToPay = _paymentStatus == 'PAID'
+              ? bill.grandTotal
+              : (_moneyToPaise(_paidNow.text) ?? 0);
+          if (amountToPay > 0) {
+            updateStatus('Recording cash payment...');
+            final postedBill = widget.controller.purchaseBills
+                    .where((candidate) => candidate.purchaseBillId == bill.purchaseBillId)
+                    .firstOrNull ??
+                bill;
+            final paid = await widget.controller.recordSupplierPayment(
+              bill: postedBill,
+              amount: amountToPay,
+              paymentMode: _paymentMethod,
+              reference: _paymentReference.text.trim().isNotEmpty
+                  ? _paymentReference.text.trim()
+                  : 'Paid on invoice confirmation',
+            );
+            if (!paid) {
+              debugPrint('Payment record notice: ${widget.controller.error}');
+            }
+          }
+
+          updateStatus('Uploading to server & syncing offline database...');
+          await widget.controller.syncNowWithServer();
+          await widget.controller.loadPurchases();
+          await widget.controller.loadProducts();
+
+          updateStatus('Purchase confirmed & synchronized with server!');
+          return true;
+        },
       );
-      return;
-    }
-    final ok = await widget.controller.approvePurchase(bill.purchaseBillId);
-    if (ok && mounted && (_moneyToPaise(_paidNow.text) ?? 0) > 0) {
-      final postedBill = widget.controller.purchaseBills
-          .where((candidate) => candidate.purchaseBillId == bill.purchaseBillId)
-          .firstOrNull;
-      if (postedBill != null) {
-        final paid = await widget.controller.recordSupplierPayment(
-          bill: postedBill,
-          amount: _moneyToPaise(_paidNow.text)!,
-          paymentMode: _paymentMethod,
-          reference: _paymentReference.text.trim(),
+
+      if (success == true && mounted) {
+        _dirty = false;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Purchase ${_invoice.text.trim()} confirmed & posted successfully!',
+            ),
+            backgroundColor: const Color(0xFF10263D),
+          ),
         );
-        if (!paid && mounted) {
-          _message(
-            'Purchase posted, but immediate payment was not recorded. Record it from the Purchase list.',
-          );
-        }
+        widget.onClose();
       }
-    }
-    if (ok && mounted) {
-      _dirty = false;
-      widget.onClose();
+    } catch (e) {
+      if (mounted) {
+        _message('Error posting purchase: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _saving = false);
+      }
     }
   }
 
@@ -3248,8 +3403,12 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
   void _importUnavailable() => _message(
     'Bill import review/storage is not connected to the current Firestore REST workflow yet.',
   );
-  void _message(String text) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  void _message(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(text)));
+  }
 }
 
 class _PurchaseEntryRow {

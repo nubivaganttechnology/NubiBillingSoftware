@@ -1,4 +1,5 @@
 import '../../core/constants/firebase_constants.dart';
+import '../catalogue/system_catalogue_metadata.dart';
 import '../models/product_master_value.dart';
 import '../models/resolved_product_template.dart';
 import 'firestore_data_service.dart';
@@ -318,20 +319,7 @@ class CatalogueSelectionResolver {
     }
 
     // These are explicit catalogue eligibility controls. A valid resolved
-    // template cannot override a disabled or unavailable subcategory record.
-    if (data['templateSelectable'] == false ||
-        data['templateSelectable'] == 'false') {
-      return CatalogueSelectionDiagnostic(
-        recordId: subcat.id,
-        displayName: subcat.name,
-        type: 'SUBCATEGORY',
-        scopeType: subcat.scopeType,
-        parentId: subcat.categoryId,
-        eligible: false,
-        exclusionReason: SelectionExclusionReason.notTemplateSelectable,
-        message: 'templateSelectable is false',
-      );
-    }
+    // template cannot override an explicitly unavailable or disabled subcategory record.
     final templateStatus = (data['templateStatus'] as String?)?.toUpperCase();
     if (templateStatus == 'UNAVAILABLE' || templateStatus == 'INVALID') {
       return CatalogueSelectionDiagnostic(
@@ -343,6 +331,27 @@ class CatalogueSelectionResolver {
         eligible: false,
         exclusionReason: SelectionExclusionReason.unavailableStatus,
         message: 'templateStatus is $templateStatus',
+      );
+    }
+
+    final isExplicitReady =
+        (data['profileId'] == 'EXPLICIT_METADATA' ||
+            SystemCatalogueMetadata.legacyExplicitSubcategories
+                .contains(subcat.id)) &&
+        templateStatus == 'READY';
+
+    if (!isExplicitReady &&
+        (data['templateSelectable'] == false ||
+            data['templateSelectable'] == 'false')) {
+      return CatalogueSelectionDiagnostic(
+        recordId: subcat.id,
+        displayName: subcat.name,
+        type: 'SUBCATEGORY',
+        scopeType: subcat.scopeType,
+        parentId: subcat.categoryId,
+        eligible: false,
+        exclusionReason: SelectionExclusionReason.notTemplateSelectable,
+        message: 'templateSelectable is false',
       );
     }
 

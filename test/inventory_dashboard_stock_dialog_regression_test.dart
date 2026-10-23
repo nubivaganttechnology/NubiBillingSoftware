@@ -105,6 +105,8 @@ class RegressionInventoryController extends EntryController {
     int? unitCostPaise,
     String? unit,
     String? transactionId,
+    int? sellingPricePaise,
+    int? mrpPaise,
   }) async {
     openingStockCallCount++;
     _openingStockInitialized[variantId] = true;

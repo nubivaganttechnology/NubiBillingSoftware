@@ -3,8 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:testflutter/core/constants/firebase_constants.dart';
 import 'package:testflutter/data/models/business_model.dart';
+import 'package:testflutter/data/models/outlet_model.dart';
 import 'package:testflutter/data/repositories/billing_repository.dart';
-import 'package:testflutter/data/services/firestore_data_service.dart';
 import 'package:testflutter/data/services/firestore_rest_service.dart';
 import 'package:testflutter/data/services/invoice_print_service.dart';
 import 'package:testflutter/data/services/offline_firestore_service.dart';
@@ -114,6 +114,30 @@ class TestFixesController extends EntryController {
           normalizedBusinessName: 'test business',
           businessTypeId: 'retail',
           businessTypeName: 'Retail',
+          isActive: true,
+        ),
+      ];
+
+  @override
+  List<OutletModel> get outlets => const [
+        OutletModel(
+          outletId: 'outlet-1',
+          tenantId: 'owner-1',
+          businessId: 'biz-1',
+          ownerUid: 'owner-1',
+          outletName: 'Outlet 1',
+          outletTypeId: 'retail',
+          outletTypeName: 'Retail',
+          isActive: true,
+        ),
+        OutletModel(
+          outletId: 'outlet-2',
+          tenantId: 'owner-1',
+          businessId: 'biz-1',
+          ownerUid: 'owner-1',
+          outletName: 'Outlet 2',
+          outletTypeId: 'retail',
+          outletTypeName: 'Retail',
           isActive: true,
         ),
       ];

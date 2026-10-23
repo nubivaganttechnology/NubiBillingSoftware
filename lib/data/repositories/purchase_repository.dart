@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import '../../core/constants/firebase_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
+import '../local/local_data_source.dart';
 import '../models/product_variant_model.dart';
 import '../models/inventory_batch_movement_model.dart';
 import '../models/purchase_bill_model.dart';
@@ -8,6 +11,7 @@ import '../models/purchase_correction_model.dart';
 import '../services/firestore_data_service.dart';
 import '../services/firestore_rest_service.dart';
 import '../services/firestore_transaction_service.dart';
+import '../services/offline_firestore_service.dart';
 import 'supplier_repository.dart';
 import 'inventory_batch_movement_repository.dart';
 
@@ -18,6 +22,16 @@ class PurchaseRepository {
   final SupplierRepository suppliers;
   final FirestoreTransactionService transactions;
   final InventoryBatchMovementRepository batchMovementRepository;
+
+  FirestoreTransactionService get serverTransactions {
+    if (transactions is OfflineFirestoreService) {
+      return (transactions as OfflineFirestoreService).serverTransactions;
+    }
+    if (firestore is OfflineFirestoreService) {
+      return (firestore as OfflineFirestoreService).serverTransactions;
+    }
+    return transactions;
+  }
 
   Future<List<ProductVariantModel>> getProductsForBusiness(
     String businessId,
@@ -601,7 +615,7 @@ class PurchaseRepository {
       final number = int.tryParse(match?.group(1) ?? '') ?? 0;
       if (number > highest) highest = number;
     }
-    await transactions.runAtomicOperation((transaction) async {
+    await serverTransactions.runAtomicOperation((transaction) async {
       final sequence = await transaction.get(
         FirebaseConstants.documentSequences,
         sequenceId,
@@ -683,6 +697,30 @@ class PurchaseRepository {
         });
       }
     }, idToken: token);
+
+    if (firestore is OfflineFirestoreService) {
+      final local = (firestore as OfflineFirestoreService).localDataSource;
+      if (local != null) {
+        try {
+          await local.db.transaction((localTx) async {
+            await LocalDataSource.put(
+              localTx,
+              FirebaseConstants.purchaseBills,
+              {
+                'remoteId': billId,
+                'payloadJson': jsonEncode(
+                  FirestoreRestService.encodeFields(savedFields),
+                ),
+                ...LocalDataSource.scopeColumns(savedFields),
+                'syncStatus': 'SYNCED',
+                'localUpdatedAt': LocalDataSource.now(),
+                'isDeleted': 0,
+              },
+            );
+          });
+        } catch (_) {}
+      }
+    }
     return PurchaseBillModel.fromData(billId, savedFields);
   }
 
@@ -691,11 +729,32 @@ class PurchaseRepository {
     required String billId,
     required String userId,
     required String token,
-  }) => transactions.runAtomicOperation((transaction) async {
-    final billDoc = await transaction.get(
+  }) async {
+    Map<String, dynamic>? localMerged;
+    final result = await serverTransactions.runAtomicOperation((transaction) async {
+    var billDoc = await transaction.get(
       FirebaseConstants.purchaseBills,
       billId,
     );
+    if (!billDoc.exists && firestore is OfflineFirestoreService) {
+      final local = (firestore as OfflineFirestoreService).localDataSource;
+      if (local != null) {
+        try {
+          final localDoc = await local.row(FirebaseConstants.purchaseBills, billId);
+          if (localDoc != null && localDoc['isDeleted'] != 1) {
+            final payload = jsonDecode(localDoc['payloadJson'] as String) as Map<String, dynamic>;
+            final fields = FirestoreRestService.decodeFields(payload);
+            transaction.create(FirebaseConstants.purchaseBills, billId, fields);
+            billDoc = FirestoreTransactionDocument(
+              id: billId,
+              exists: true,
+              fields: fields,
+              updateTime: null,
+            );
+          }
+        } catch (_) {}
+      }
+    }
     if (!billDoc.exists)
       throw const AppException('Purchase bill was not found.');
     final bill = PurchaseBillModel.fromData(billId, billDoc.fields);
@@ -941,6 +1000,42 @@ class PurchaseRepository {
           },
         );
       }
+
+      final variantDoc = await transaction.get(
+        FirebaseConstants.productVariants,
+        item.variantId,
+      );
+      final variantPricingUpdates = <String, dynamic>{
+        if (item.sellingPrice != null && item.sellingPrice! > 0)
+          'sellingPrice': item.sellingPrice,
+        if (item.mrp != null && item.mrp! > 0) 'mrp': item.mrp,
+        if (item.rate > 0) 'purchaseRate': item.rate,
+      };
+      if (variantPricingUpdates.isNotEmpty) {
+        variantPricingUpdates['updatedAt'] = now;
+        variantPricingUpdates['updatedBy'] = userId;
+        if (variantDoc.exists) {
+          transaction.update(
+            FirebaseConstants.productVariants,
+            item.variantId,
+            variantPricingUpdates,
+            updateTime: variantDoc.updateTime,
+          );
+        } else {
+          final productDoc = await transaction.get(
+            FirebaseConstants.products,
+            item.variantId,
+          );
+          if (productDoc.exists) {
+            transaction.update(
+              FirebaseConstants.products,
+              item.variantId,
+              variantPricingUpdates,
+              updateTime: productDoc.updateTime,
+            );
+          }
+        }
+      }
     }
 
     for (final line in inventoryLines) {
@@ -1036,8 +1131,16 @@ class PurchaseRepository {
         balanceFields,
       );
     }
-    transaction.update(FirebaseConstants.purchaseBills, billId, {
+    final effectiveDue = (bill.outstandingAmount > 0
+        ? bill.outstandingAmount
+        : (bill.grandTotal - bill.paidAmount)).clamp(0, bill.grandTotal);
+    final approvedFields = {
       'status': 'APPROVED',
+      'outstandingAmount': effectiveDue,
+      'paymentStatus':
+          bill.paidAmount >= bill.grandTotal && bill.grandTotal > 0
+              ? 'PAID'
+              : (bill.paidAmount > 0 ? 'PARTIAL' : 'UNPAID'),
       'autoGoodsReceiptId': grnId,
       'goodsReceiptIds': [grnId],
       'approvedBy': userId,
@@ -1045,14 +1148,45 @@ class PurchaseRepository {
       'updatedBy': userId,
       'updatedAt': now,
       'version': bill.version + 1,
-    }, updateTime: billDoc.updateTime);
-    return PurchaseBillModel.fromData(billId, {
+    };
+    transaction.update(
+      FirebaseConstants.purchaseBills,
+      billId,
+      approvedFields,
+      updateTime: billDoc.updateTime,
+    );
+    localMerged = {
       ...billDoc.fields,
-      'status': 'APPROVED',
-      'approvedAt': now,
-      'updatedAt': now,
-    });
+      ...approvedFields,
+    };
+    return PurchaseBillModel.fromData(billId, localMerged!);
   }, idToken: token);
+
+  if (localMerged != null && firestore is OfflineFirestoreService) {
+    final local = (firestore as OfflineFirestoreService).localDataSource;
+    if (local != null) {
+      try {
+        await local.db.transaction((localTx) async {
+          await LocalDataSource.put(
+            localTx,
+            FirebaseConstants.purchaseBills,
+            {
+              'remoteId': billId,
+              'payloadJson': jsonEncode(
+                FirestoreRestService.encodeFields(localMerged!),
+              ),
+              ...LocalDataSource.scopeColumns(localMerged!),
+              'syncStatus': 'SYNCED',
+              'localUpdatedAt': LocalDataSource.now(),
+              'isDeleted': 0,
+            },
+          );
+        });
+      } catch (_) {}
+    }
+  }
+  return result;
+}
 
   /// Updates an existing DRAFT in place. Existing line and batch identifiers
   /// are retained; removed draft lines are soft-deleted for sync/audit safety.
@@ -1085,7 +1219,7 @@ class PurchaseRepository {
         currentFields['outletId'] != outletId ||
         currentFields['status'] != 'DRAFT') {
       throw const AppException(
-        'Only this outlet’s draft purchase can be edited.',
+        'Only this outletâ€™s draft purchase can be edited.',
       );
     }
     final supplier = await firestore.getDocument(
@@ -1298,7 +1432,7 @@ class PurchaseRepository {
       'updatedAt': now,
       'version': oldBill.version + 1,
     };
-    await transactions.runAtomicOperation((tx) async {
+    await serverTransactions.runAtomicOperation((tx) async {
       final billDoc = await tx.get(FirebaseConstants.purchaseBills, billId);
       if (!billDoc.exists ||
           billDoc.fields['status'] != 'DRAFT' ||
@@ -1424,10 +1558,35 @@ class PurchaseRepository {
         }
       }
     }, idToken: token);
-    return PurchaseBillModel.fromData(billId, {
+
+    final merged = {
       ...currentFields,
       ...updatedFields,
-    });
+    };
+    if (firestore is OfflineFirestoreService) {
+      final local = (firestore as OfflineFirestoreService).localDataSource;
+      if (local != null) {
+        try {
+          await local.db.transaction((localTx) async {
+            await LocalDataSource.put(
+              localTx,
+              FirebaseConstants.purchaseBills,
+              {
+                'remoteId': billId,
+                'payloadJson': jsonEncode(
+                  FirestoreRestService.encodeFields(merged),
+                ),
+                ...LocalDataSource.scopeColumns(merged),
+                'syncStatus': 'SYNCED',
+                'localUpdatedAt': LocalDataSource.now(),
+                'isDeleted': 0,
+              },
+            );
+          });
+        } catch (_) {}
+      }
+    }
+    return PurchaseBillModel.fromData(billId, merged);
   }
 
   /// Corrects an approved purchase using the local transactional snapshot and
@@ -1715,7 +1874,7 @@ class PurchaseRepository {
     var supplierAdvanceAfter = 0;
     var supplierPayableDelta = 0;
     final allocationReleaseReferences = <Map<String, dynamic>>[];
-    await transactions.runAtomicOperation((tx) async {
+    await serverTransactions.runAtomicOperation((tx) async {
       final latest = await tx.get(FirebaseConstants.purchaseBills, billId);
       if (!latest.exists ||
           latest.fields['status'] != 'APPROVED' ||
@@ -2260,6 +2419,42 @@ class PurchaseRepository {
             'expiryDate': item.expiryDate,
             'updatedAt': now,
           }, updateTime: batch.updateTime);
+
+          final variantPricingUpdates = <String, dynamic>{
+            if (item.sellingPrice != null && item.sellingPrice! > 0)
+              'sellingPrice': item.sellingPrice,
+            if (item.mrp != null && item.mrp! > 0) 'mrp': item.mrp,
+            if (item.rate > 0) 'purchaseRate': item.rate,
+          };
+          if (variantPricingUpdates.isNotEmpty) {
+            variantPricingUpdates['updatedAt'] = now;
+            variantPricingUpdates['updatedBy'] = correctedByUid;
+            final variantDoc = await tx.get(
+              FirebaseConstants.productVariants,
+              item.variantId,
+            );
+            if (variantDoc.exists) {
+              tx.update(
+                FirebaseConstants.productVariants,
+                item.variantId,
+                variantPricingUpdates,
+                updateTime: variantDoc.updateTime,
+              );
+            } else {
+              final productDoc = await tx.get(
+                FirebaseConstants.products,
+                item.variantId,
+              );
+              if (productDoc.exists) {
+                tx.update(
+                  FirebaseConstants.products,
+                  item.variantId,
+                  variantPricingUpdates,
+                  updateTime: productDoc.updateTime,
+                );
+              }
+            }
+          }
         }
         final lineFields = {
           ...item.toData(),
@@ -2498,7 +2693,8 @@ class PurchaseRepository {
     if (amount <= 0)
       throw const AppException('Enter a payment greater than zero.');
     final paymentId = IdGenerator.create('SPAY');
-    await transactions.runAtomicOperation((transaction) async {
+    Map<String, dynamic>? localMergedBill;
+    await serverTransactions.runAtomicOperation((transaction) async {
       final relationDoc = await transaction.get(
         FirebaseConstants.supplierBusinesses,
         supplierBusinessId,
@@ -2524,19 +2720,68 @@ class PurchaseRepository {
           FirebaseConstants.purchaseBills,
           purchaseBillId,
         );
-        if (!billDoc.exists)
+        if (!billDoc.exists && firestore is OfflineFirestoreService) {
+          final local = (firestore as OfflineFirestoreService).localDataSource;
+          if (local != null) {
+            try {
+              final localDoc = await local.row(
+                FirebaseConstants.purchaseBills,
+                purchaseBillId,
+              );
+              if (localDoc != null && localDoc['isDeleted'] != 1) {
+                final payload =
+                    jsonDecode(localDoc['payloadJson'] as String)
+                        as Map<String, dynamic>;
+                final fields = FirestoreRestService.decodeFields(payload);
+                transaction.create(
+                  FirebaseConstants.purchaseBills,
+                  purchaseBillId,
+                  fields,
+                );
+                billDoc = FirestoreTransactionDocument(
+                  id: purchaseBillId,
+                  exists: true,
+                  fields: fields,
+                  updateTime: null,
+                );
+              }
+            } catch (_) {}
+          }
+        }
+        if (billDoc == null || !billDoc.exists) {
           throw const AppException('Purchase bill was not found.');
+        }
         bill = PurchaseBillModel.fromData(purchaseBillId, billDoc.fields);
-        if (bill.tenantId != tenantId ||
-            bill.supplierBusinessId != supplierBusinessId ||
-            bill.status != 'APPROVED' ||
-            amount > bill.outstandingAmount) {
+        if (bill.tenantId != tenantId) {
+          throw const AppException('Purchase bill belongs to another tenant.');
+        }
+        if (bill.supplierBusinessId != supplierBusinessId) {
           throw const AppException(
-            'Payment exceeds the approved bill balance.',
+            'Purchase bill does not match this supplier relation.',
+          );
+        }
+        if (bill.status != 'APPROVED') {
+          throw AppException(
+            'Purchase bill status is ${bill.status}; only APPROVED bills can be paid.',
+          );
+        }
+        final effectiveOutstanding = (bill.outstandingAmount > 0
+            ? bill.outstandingAmount
+            : (bill.grandTotal - bill.paidAmount)).clamp(0, bill.grandTotal);
+        if (amount > effectiveOutstanding) {
+          throw AppException(
+            'Payment exceeds the approved bill balance (₹${(amount / 100).toStringAsFixed(2)} > ₹${(effectiveOutstanding / 100).toStringAsFixed(2)}).',
           );
         }
       }
-      final newOutstanding = bill == null ? 0 : bill.outstandingAmount - amount;
+      final effectiveOutstanding = bill == null
+          ? 0
+          : ((bill.outstandingAmount > 0
+                  ? bill.outstandingAmount
+                  : (bill.grandTotal - bill.paidAmount))
+              .clamp(0, bill.grandTotal));
+      final newOutstanding =
+          (effectiveOutstanding - amount).clamp(0, effectiveOutstanding);
       final oldPayable =
           (balanceDoc.fields['totalPayable'] as num?)?.toInt() ?? 0;
       final oldAdvance =
@@ -2583,19 +2828,24 @@ class PurchaseRepository {
       });
       if (bill != null && billDoc != null) {
         final paymentStatus = newOutstanding == 0 ? 'PAID' : 'PARTIAL';
+        final updatedBillFields = {
+          'paidAmount': bill.paidAmount + amount,
+          'outstandingAmount': newOutstanding,
+          'paymentStatus': paymentStatus,
+          'updatedBy': userId,
+          'updatedAt': now,
+          'version': bill.version + 1,
+        };
         transaction.update(
           FirebaseConstants.purchaseBills,
           bill.purchaseBillId,
-          {
-            'paidAmount': bill.paidAmount + amount,
-            'outstandingAmount': newOutstanding,
-            'paymentStatus': paymentStatus,
-            'updatedBy': userId,
-            'updatedAt': now,
-            'version': bill.version + 1,
-          },
+          updatedBillFields,
           updateTime: billDoc.updateTime,
         );
+        localMergedBill = {
+          ...billDoc.fields,
+          ...updatedBillFields,
+        };
         transaction.create(FirebaseConstants.paymentAllocations, ledgerId, {
           'allocationId': ledgerId,
           'tenantId': tenantId,
@@ -2641,6 +2891,32 @@ class PurchaseRepository {
         );
       }
     }, idToken: token);
+
+    if (localMergedBill != null &&
+        purchaseBillId != null &&
+        firestore is OfflineFirestoreService) {
+      final local = (firestore as OfflineFirestoreService).localDataSource;
+      if (local != null) {
+        try {
+          await local.db.transaction((localTx) async {
+            await LocalDataSource.put(
+              localTx,
+              FirebaseConstants.purchaseBills,
+              {
+                'remoteId': purchaseBillId,
+                'payloadJson': jsonEncode(
+                  FirestoreRestService.encodeFields(localMergedBill!),
+                ),
+                ...LocalDataSource.scopeColumns(localMergedBill!),
+                'syncStatus': 'SYNCED',
+                'localUpdatedAt': LocalDataSource.now(),
+                'isDeleted': 0,
+              },
+            );
+          });
+        } catch (_) {}
+      }
+    }
   }
 
   static String stockBalanceId(

@@ -20,9 +20,39 @@ class ReportExportService {
   // ---------------------------------------------------------------------------
 
   static Future<Uint8List> generatePdf(ReportDetailData report) async {
-    final pdf = pw.Document();
+    pw.Font font;
+    pw.Font? bengali;
+    pw.Font? hindi;
+    try {
+      font = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'),
+      );
+      bengali = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansBengali-Regular.ttf'),
+      );
+      hindi = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansDevanagari-Regular.ttf'),
+      );
+    } catch (_) {
+      font = pw.Font.helvetica();
+    }
 
-    String clean(String s) => s.replaceAll('₹', 'Rs. ').replaceAll('–', '-');
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: font,
+        bold: font,
+        fontFallback: [
+          ?bengali,
+          ?hindi,
+        ],
+      ),
+    );
+
+    String clean(String s) => s
+        .replaceAll('₹', 'Rs. ')
+        .replaceAll('–', '-')
+        .replaceAll('—', '-')
+        .replaceAll('•', '*');
 
     pdf.addPage(
       pw.MultiPage(
@@ -192,7 +222,7 @@ class ReportExportService {
             pw.SizedBox(height: 12),
             for (final note in report.notes)
               pw.Text(
-                '• $note',
+                '* ${clean(note)}',
                 style: const pw.TextStyle(
                   fontSize: 8,
                   color: PdfColors.grey600,
@@ -217,13 +247,36 @@ class ReportExportService {
 
   static Future<String?> savePdf(ReportDetailData report) async {
     final bytes = await generatePdf(report);
-    final fileName =
-        '${report.title.toLowerCase().replaceAll(RegExp(r'\s+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
-    return (await FilePicker.saveFile(
-      dialogTitle: 'Save PDF Report',
-      fileName: fileName,
-      bytes: bytes,
-    ))?.toString();
+    final safeName = report.title.toLowerCase().replaceAll(
+      RegExp(r'[^a-zA-Z0-9_-]'),
+      '_',
+    );
+    final fileName = '${safeName}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+    Uri? output;
+    try {
+      output = await FilePicker.saveFile(
+        dialogTitle: 'Save PDF Report',
+        fileName: fileName,
+        bytes: bytes,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        mimeType: 'application/pdf',
+      );
+    } catch (_) {
+      final shared = await Printing.sharePdf(bytes: bytes, filename: fileName);
+      return shared ? 'Exported via System Print/Share' : null;
+    }
+    if (output == null) return null;
+    final filePath = output.hasScheme && output.scheme == 'file'
+        ? output.toFilePath()
+        : (output.path.isNotEmpty ? output.path : output.toString());
+    try {
+      final file = File(filePath);
+      if (!await file.exists() || (await file.length()) == 0) {
+        await file.writeAsBytes(bytes, flush: true);
+      }
+    } catch (_) {}
+    return filePath;
   }
 
   // ---------------------------------------------------------------------------
@@ -270,15 +323,36 @@ class ReportExportService {
     }
 
     final csvString = csv.encode(csvRows);
-    final bytes = utf8.encode(csvString);
-    final fileName =
-        '${report.title.toLowerCase().replaceAll(RegExp(r'\s+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.csv';
+    final bytes = Uint8List.fromList(utf8.encode(csvString));
+    final safeName = report.title.toLowerCase().replaceAll(
+      RegExp(r'[^a-zA-Z0-9_-]'),
+      '_',
+    );
+    final fileName = '${safeName}_${DateTime.now().millisecondsSinceEpoch}.csv';
 
-    return (await FilePicker.saveFile(
-      dialogTitle: 'Export CSV',
-      fileName: fileName,
-      bytes: Uint8List.fromList(bytes),
-    ))?.toString();
+    try {
+      final output = await FilePicker.saveFile(
+        dialogTitle: 'Export CSV',
+        fileName: fileName,
+        bytes: bytes,
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+        mimeType: 'text/csv',
+      );
+      if (output == null) return null;
+      final filePath = output.hasScheme && output.scheme == 'file'
+          ? output.toFilePath()
+          : (output.path.isNotEmpty ? output.path : output.toString());
+      try {
+        final file = File(filePath);
+        if (!await file.exists() || (await file.length()) == 0) {
+          await file.writeAsBytes(bytes, flush: true);
+        }
+      } catch (_) {}
+      return filePath;
+    } catch (_) {
+      return null;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -288,14 +362,12 @@ class ReportExportService {
   static Future<String?> exportExcel(ReportDetailData report) async {
     final excel = Excel.createExcel();
     final defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
-    excel.rename(
-      defaultSheet,
-      report.title.length > 30 ? report.title.substring(0, 30) : report.title,
-    );
-    final sheet =
-        excel[report.title.length > 30
+    final safeTitle = (report.title.length > 30
             ? report.title.substring(0, 30)
-            : report.title];
+            : report.title)
+        .replaceAll(RegExp(r'[:\\/?*\[\]]'), ' ');
+    excel.rename(defaultSheet, safeTitle);
+    final sheet = excel[safeTitle];
 
     // Meta Header
     sheet.appendRow([
@@ -343,15 +415,38 @@ class ReportExportService {
 
     final fileBytes = excel.save();
     if (fileBytes == null) return null;
-
+    final bytes = Uint8List.fromList(fileBytes);
+    final safeName = report.title.toLowerCase().replaceAll(
+      RegExp(r'[^a-zA-Z0-9_-]'),
+      '_',
+    );
     final fileName =
-        '${report.title.toLowerCase().replaceAll(RegExp(r'\s+'), '_')}_${DateTime.now().millisecondsSinceEpoch}.xlsx';
+        '${safeName}_${DateTime.now().millisecondsSinceEpoch}.xlsx';
 
-    return (await FilePicker.saveFile(
-      dialogTitle: 'Export Excel Workbook',
-      fileName: fileName,
-      bytes: Uint8List.fromList(fileBytes),
-    ))?.toString();
+    try {
+      final output = await FilePicker.saveFile(
+        dialogTitle: 'Export Excel Workbook',
+        fileName: fileName,
+        bytes: bytes,
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+        mimeType:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      if (output == null) return null;
+      final filePath = output.hasScheme && output.scheme == 'file'
+          ? output.toFilePath()
+          : (output.path.isNotEmpty ? output.path : output.toString());
+      try {
+        final file = File(filePath);
+        if (!await file.exists() || (await file.length()) == 0) {
+          await file.writeAsBytes(bytes, flush: true);
+        }
+      } catch (_) {}
+      return filePath;
+    } catch (_) {
+      return null;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -368,10 +463,11 @@ class ReportExportService {
     FinancialAuditReportData audit,
   ) async {
     final review = audit.reconciliation;
-    if (review == null)
+    if (review == null) {
       throw StateError(
         'Regenerate the legacy report; reconciliation evidence is required.',
       );
+    }
     final font = pw.Font.ttf(
       await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'),
     );
@@ -556,25 +652,32 @@ class ReportExportService {
         dialogTitle: 'Save financial reconciliation report (PDF)',
         fileName: fileName,
         bytes: bytes,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        mimeType: 'application/pdf',
       );
     } catch (_) {
       final shared = await Printing.sharePdf(bytes: bytes, filename: fileName);
       return shared ? 'Exported via System Print/Share' : null;
     }
     if (output == null) return null;
-    if (output.scheme.isEmpty || output.scheme == 'file') {
-      final file = File.fromUri(output);
-      await file.writeAsBytes(bytes, flush: true);
-      return file.path;
-    }
-    // Platform document providers persist the supplied bytes themselves.
-    return output.toString();
+    final filePath = output.hasScheme && output.scheme == 'file'
+        ? output.toFilePath()
+        : (output.path.isNotEmpty ? output.path : output.toString());
+    try {
+      final file = File(filePath);
+      if (!await file.exists() || (await file.length()) == 0) {
+        await file.writeAsBytes(bytes, flush: true);
+      }
+    } catch (_) {}
+    return filePath;
   }
 
   static Uint8List generateAuditWorkbook(FinancialAuditReportData audit) {
     final review = audit.reconciliation;
-    if (review == null)
+    if (review == null) {
       throw StateError('Reconciliation evidence is required.');
+    }
     final excel = Excel.createExcel();
     final defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
     excel.rename(defaultSheet, 'Report scope');
@@ -600,8 +703,9 @@ class ReportExportService {
       final sheet = excel[name.length > 31 ? name.substring(0, 31) : name];
       sheet.appendRow([TextCellValue(schedule.title)]);
       sheet.appendRow([TextCellValue(review.scopeLabel)]);
-      if (schedule.note.isNotEmpty)
+      if (schedule.note.isNotEmpty) {
         sheet.appendRow([TextCellValue(schedule.note)]);
+      }
       sheet.appendRow(schedule.columns.map((v) => TextCellValue(v)).toList());
       for (final row in schedule.rows) {
         sheet.appendRow(row.map((v) => TextCellValue(v)).toList());
@@ -616,13 +720,29 @@ class ReportExportService {
     final bytes = generateAuditWorkbook(audit);
     final filename =
         'Financial_Reconciliation_${DateTime.now().millisecondsSinceEpoch}.xlsx';
-    final output = await FilePicker.saveFile(
-      dialogTitle: 'Export financial reconciliation',
-      fileName: filename,
-      bytes: bytes,
-    );
-    if (output != null)
-      await File.fromUri(output).writeAsBytes(bytes, flush: true);
-    return output?.toFilePath();
+    try {
+      final output = await FilePicker.saveFile(
+        dialogTitle: 'Export financial reconciliation',
+        fileName: filename,
+        bytes: bytes,
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+        mimeType:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      if (output == null) return null;
+      final filePath = output.hasScheme && output.scheme == 'file'
+          ? output.toFilePath()
+          : (output.path.isNotEmpty ? output.path : output.toString());
+      try {
+        final file = File(filePath);
+        if (!await file.exists() || (await file.length()) == 0) {
+          await file.writeAsBytes(bytes, flush: true);
+        }
+      } catch (_) {}
+      return filePath;
+    } catch (_) {
+      return null;
+    }
   }
 }

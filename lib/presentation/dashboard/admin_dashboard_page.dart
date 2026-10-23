@@ -58,15 +58,45 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final modules = PermissionCatalog.visibleModules(permissions);
     if (isOwner) {
       if (modules.isEmpty) modules.addAll(PermissionCatalog.modules);
+      if (!modules.any((item) => item.id == 'attendance')) {
+        final attendanceMod = PermissionCatalog.modules
+            .where((item) => item.id == 'attendance')
+            .firstOrNull;
+        if (attendanceMod != null) modules.add(attendanceMod);
+      }
       if (!modules.any((item) => item.id == 'racks')) {
         modules.add(
           PermissionCatalog.modules.firstWhere((item) => item.id == 'racks'),
+        );
+      }
+      if (!modules.any((item) => item.id == 'salary')) {
+        modules.add(
+          PermissionCatalog.modules.firstWhere((item) => item.id == 'salary'),
         );
       }
       if (!modules.any((item) => item.id == 'barcode')) {
         modules.add(
           PermissionCatalog.modules.firstWhere((item) => item.id == 'barcode'),
         );
+      }
+    } else {
+      if (controller.canViewStaffAttendance() &&
+          !modules.any((item) => item.id == 'attendance')) {
+        final attendanceMod = PermissionCatalog.modules
+            .where((item) => item.id == 'attendance')
+            .firstOrNull;
+        if (attendanceMod != null) {
+          modules.add(attendanceMod);
+        }
+      }
+      if (_canViewSalary(controller) &&
+          !modules.any((item) => item.id == 'salary')) {
+        final salaryModule = PermissionCatalog.modules
+            .where((item) => item.id == 'salary')
+            .firstOrNull;
+        if (salaryModule != null) {
+          modules.add(salaryModule);
+        }
       }
     }
     if (modules.isNotEmpty &&
@@ -109,6 +139,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   // Products are outlet-scoped, so they keep the Outlet selector.
                   businessLevelModule: _selectedModule == 'godowns',
                   onOpenMenu: () => _scaffoldKey.currentState?.openDrawer(),
+                  onOpenAttendance: () {
+                    final target = modules.where((m) => m.id == 'attendance');
+                    if (target.isNotEmpty) _selectModule(target.first);
+                  },
                 ),
                 Expanded(
                   child: activeModule == null
@@ -119,8 +153,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           isOwner: isOwner,
                           attendanceInitialTab: _attendanceInitialTab,
                           onOpenModule: (id) {
-                            if (id == 'attendance') {
-                              _attendanceInitialTab = 1; // Open on Approval Panel
+                            if (id == 'attendance:approval') {
+                              _attendanceInitialTab = 1;
+                              final target = modules.where(
+                                (item) => item.id == 'attendance',
+                              );
+                              if (target.isNotEmpty) _selectModule(target.first);
+                              return;
                             }
                             final target = modules.where(
                               (item) => item.id == id,
@@ -394,7 +433,33 @@ class _Sidebar extends StatelessWidget {
                               : Colors.white70,
                         ),
                         title: Text(
-                          _localizedModuleLabel(context, module.id, module.label),
+                          _localizedModuleLabel(
+                            context,
+                            module.id,
+                            module.id == 'salary'
+                                ? (controller.appContext?.accountType == 'owner' ||
+                                        controller.canManageStaffSalary()
+                                    ? (AppLocalizations.of(context)?.staffSalaryKhata ?? 'Staff Salary')
+                                    : (switch (AppLocalizations.of(context)?.localeName) {
+                                        'bn' => 'আমার বেতন',
+                                        'hi' => 'मेरा वेतन',
+                                        _ => 'My Salary',
+                                      }))
+                                : module.id == 'attendance'
+                                    ? (controller.appContext?.accountType == 'owner' ||
+                                            controller.canManageStaffAttendance()
+                                        ? (switch (AppLocalizations.of(context)?.localeName) {
+                                            'bn' => 'স্টাফ উপস্থিতি',
+                                            'hi' => 'कर्मचारी उपस्थिति',
+                                            _ => 'Staff Attendance',
+                                          })
+                                        : (switch (AppLocalizations.of(context)?.localeName) {
+                                            'bn' => 'আমার উপস্থিতি',
+                                            'hi' => 'मेरी उपस्थिति',
+                                            _ => 'My Attendance',
+                                          }))
+                                    : module.label,
+                          ),
                           style: TextStyle(
                             color: active ? Colors.white : Colors.white70,
                             fontSize: 13,
@@ -638,10 +703,12 @@ class _TopBar extends StatelessWidget {
     required this.showMenu,
     required this.businessLevelModule,
     required this.onOpenMenu,
+    this.onOpenAttendance,
   });
   final AppController controller;
   final bool showMenu, businessLevelModule;
   final VoidCallback onOpenMenu;
+  final VoidCallback? onOpenAttendance;
 
   @override
   Widget build(BuildContext context) {
@@ -840,6 +907,9 @@ class _TopBar extends StatelessWidget {
                     PopupMenuButton<String>(
                       tooltip: 'Profile menu',
                       onSelected: (value) {
+                        if (value == 'attendance') {
+                          onOpenAttendance?.call();
+                        }
                         if (value == 'business') {
                           controller.openBusinessSelector();
                         }
@@ -879,6 +949,30 @@ class _TopBar extends StatelessWidget {
                               value: 'outlet',
                               child: Text(
                                 l10n?.switchOutlet ?? 'Switch outlet',
+                              ),
+                            ),
+                          if (controller.canViewStaffAttendance())
+                            PopupMenuItem(
+                              value: 'attendance',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.fact_check_outlined, size: 18, color: Color(0xFF0D9488)),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    controller.appContext?.accountType == 'owner' ||
+                                            controller.canManageStaffAttendance()
+                                        ? (switch (l10n?.localeName) {
+                                            'bn' => 'স্টাফ উপস্থিতি',
+                                            'hi' => 'कर्मचारी उपस्थिति',
+                                            _ => 'Staff Attendance',
+                                          })
+                                        : (switch (l10n?.localeName) {
+                                            'bn' => 'আমার উপস্থিতি',
+                                            'hi' => 'मेरी उपस्थिति',
+                                            _ => 'My Attendance',
+                                          }),
+                                  ),
+                                ],
                               ),
                             ),
                           PopupMenuItem(
@@ -1493,6 +1587,7 @@ class _ModuleBody extends StatelessWidget {
         loadReceivedVariantIds: controller.loadBarcodeReceivedVariantIds,
         loadReceivedVariantPricing:
             controller.loadBarcodeReceivedVariantPricing,
+        loadVariantBatches: controller.loadVariantBatches,
         availableQuantities: controller.productStock,
         initialProductId: initialBarcodeProductId,
         initialVariantId: initialBarcodeVariantId,
@@ -1539,6 +1634,14 @@ class _ModuleBody extends StatelessWidget {
         ),
         controller: controller,
         initialTab: attendanceInitialTab,
+      );
+    }
+    if (module.id == 'salary') {
+      return StaffSalaryPage(
+        key: ValueKey(
+          '${controller.appContext?.businessId}-${controller.appContext?.employeeId}',
+        ),
+        controller: controller,
       );
     }
     if (module.id == 'settings') {
@@ -1747,6 +1850,42 @@ class _DashboardOverview extends StatelessWidget {
               ),
           ],
         ),
+      if (isOwner || controller.canViewStaffAttendance())
+        _MetricData(
+          isOwner || controller.canManageStaffAttendance()
+              ? (switch (l10n?.localeName) {
+                  'bn' => 'স্টাফ উপস্থিতি',
+                  'hi' => 'कर्मचारी उपस्थिति',
+                  _ => 'Staff Attendance',
+                })
+              : (switch (l10n?.localeName) {
+                  'bn' => 'আমার উপস্থিতি',
+                  'hi' => 'मेरी उपस्थिति',
+                  _ => 'My Attendance',
+                }),
+          null,
+          null,
+          Icons.fact_check_outlined,
+          const Color(0xFF0D9488),
+          moduleId: 'attendance',
+          subBadges: [
+            if (controller.pendingAttendanceCount > 0 &&
+                (isOwner || controller.canApproveStaffAttendance()))
+              _MetricSubBadge(
+                label:
+                    '${controller.pendingAttendanceCount} Pending Review',
+                color: const Color(0xFFEA580C),
+                isAlert: true,
+              )
+            else
+              _MetricSubBadge(
+                label: isOwner || controller.canManageStaffAttendance()
+                    ? 'Shift Register & Biometrics'
+                    : 'Clock In / Out & History',
+                color: const Color(0xFF0D9488),
+              ),
+          ],
+        ),
     ];
 
     return ListView(
@@ -1832,7 +1971,7 @@ class _DashboardOverview extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: () => onOpenModule('attendance'),
+                    onPressed: () => onOpenModule('attendance:approval'),
                     icon: const Icon(Icons.verified_user_rounded, size: 18),
                     label: const Text('Review & Approve'),
                   ),
@@ -1849,34 +1988,48 @@ class _DashboardOverview extends StatelessWidget {
                 icon: const Icon(Icons.fact_check_outlined),
                 label: Text(
                   controller.pendingAttendanceCount > 0
-                      ? 'Attendance & Approvals (${controller.pendingAttendanceCount} Pending)'
-                      : 'Staff Attendance & Approvals',
+                      ? 'Attendance & Approvals ( Pending)'
+                      : (isOwner || controller.canManageStaffAttendance()
+                          ? 'Staff Attendance & Approvals'
+                          : (switch (l10n?.localeName) {
+                              'bn' => 'আমার উপস্থিতি বিবরণ',
+                              'hi' => 'मेरी উपस्থিতি विवरण',
+                              _ => 'My Attendance Details',
+                            })),
                 ),
               ),
-              if (isOwner && _canViewSalary(controller))
+              if (_canViewSalary(controller))
                 OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => StaffSalaryPage(controller: controller),
-                    ),
-                  ),
+                  onPressed: () => onOpenModule('salary'),
                   icon: const Icon(Icons.account_balance_wallet_outlined),
-                  label: const Text('Open Staff Salary Khata'),
+                  label: Text(
+                    isOwner || controller.canManageStaffSalary()
+                        ? (l10n?.staffSalaryKhata ?? 'Staff Salary Khata')
+                        : (switch (l10n?.localeName) {
+                            'bn' => '\u0986\u09ae\u09be\u09b0 \u09ac\u09c7\u09a4\u09a8 \u0993 \u09b8\u09cd\u09b2\u09bf\u09aa',
+                            'hi' => '\u092e\u0947\u0930\u093e \u0935\u0947\u0924\u0928 \u0914\u0930 \u092a\u0930\u094d\u091a\u0940',
+                            _ => 'My Salary & Slips',
+                          }),
+                  ),
                 ),
             ],
           ),
           const SizedBox(height: 18),
-        ] else if (isOwner && _canViewSalary(controller)) ...[
+        ] else if (_canViewSalary(controller)) ...[
           Align(
             alignment: Alignment.centerLeft,
             child: OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => StaffSalaryPage(controller: controller),
-                ),
-              ),
+              onPressed: () => onOpenModule('salary'),
               icon: const Icon(Icons.account_balance_wallet_outlined),
-              label: const Text('Open Staff Salary Khata'),
+              label: Text(
+                isOwner || controller.canManageStaffSalary()
+                    ? (l10n?.staffSalaryKhata ?? 'Staff Salary Khata')
+                    : (switch (l10n?.localeName) {
+                        'bn' => '\u0986\u09ae\u09be\u09b0 \u09ac\u09c7\u09a4\u09a8 \u0993 \u09b8\u09cd\u09b2\u09bf\u09aa',
+                        'hi' => '\u092e\u0947\u0930\u093e \u0935\u0947\u0924\u0928 \u0914\u0930 \u092a\u0930\u094d\u091a\u0940',
+                        _ => 'My Salary & Slips',
+                      }),
+              ),
             ),
           ),
           const SizedBox(height: 18),
@@ -2016,6 +2169,8 @@ class _ExecutiveHeroBanner extends StatelessWidget {
     final theme = Theme.of(context);
     final currentOutlet = controller.currentOutlet;
     final user = controller.user;
+    final l10n = AppLocalizations.of(context);
+    final isOwner = controller.appContext?.accountType == 'owner';
 
     return Container(
       decoration: BoxDecoration(
@@ -2222,6 +2377,40 @@ class _ExecutiveHeroBanner extends StatelessWidget {
                   color: const Color(0xFFA855F7),
                   onTap: () => onOpenModule('barcode'),
                 ),
+                if (controller.canViewStaffAttendance()) ...[
+                  const SizedBox(width: 8),
+                  _HeroQuickDockPill(
+                    icon: Icons.fact_check_rounded,
+                    label: isOwner || controller.canManageStaffAttendance()
+                        ? (switch (l10n?.localeName) {
+                            'bn' => 'উপস্থিতি',
+                            'hi' => 'उपस्थिति',
+                            _ => 'Attendance',
+                          })
+                        : (switch (l10n?.localeName) {
+                            'bn' => 'আমার উপস্থিতি',
+                            'hi' => 'मेरी उपस्थिति',
+                            _ => 'My Attendance',
+                          }),
+                    color: const Color(0xFF10B981),
+                    onTap: () => onOpenModule('attendance'),
+                  ),
+                ],
+                if (_canViewSalary(controller)) ...[
+                  const SizedBox(width: 8),
+                  _HeroQuickDockPill(
+                    icon: Icons.account_balance_wallet_rounded,
+                    label: isOwner || controller.canManageStaffSalary()
+                        ? (l10n?.staffSalaryKhata ?? 'Staff Salary')
+                        : (switch (l10n?.localeName) {
+                            'bn' => '\u0986\u09ae\u09be\u09b0 \u09ac\u09c7\u09a4\u09a8',
+                            'hi' => '\u092e\u0947\u0930\u093e \u0935\u0947\u0924\u0928',
+                            _ => 'My Salary',
+                          }),
+                    color: const Color(0xFF0EA5E9),
+                    onTap: () => onOpenModule('salary'),
+                  ),
+                ],
               ],
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/validators.dart';
 import '../../data/models/storage_location_model.dart';
+import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 
 class StorageManagementPage extends StatefulWidget {
@@ -40,15 +41,16 @@ class _StorageManagementPageState extends State<StorageManagementPage> {
       final business = controller.businesses.where(
         (item) => item.businessId == controller.appContext?.businessId,
       );
+      final l10n = AppLocalizations.of(context);
       if (!controller.canViewStorage()) {
-        return const Center(
-          child: Text('You do not have permission to view storage locations.'),
+        return Center(
+          child: Text(l10n?.noStoragePermission ?? 'You do not have permission to view storage locations.'),
         );
       }
       if (business.isEmpty) {
         return _StorageEmptyState(
-          title: 'Select a Business',
-          message: 'Select a business to manage its optional Godowns.',
+          title: l10n?.selectBusiness ?? 'Select a Business',
+          message: l10n?.selectBusinessToManageGodowns ?? 'Select a business to manage its optional Godowns.',
         );
       }
       final businessStorageLocations = controller.storageLocations
@@ -96,7 +98,7 @@ class _StorageManagementPageState extends State<StorageManagementPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Godown Management',
+                      l10n?.godownManagement ?? 'Godown Management',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
@@ -123,7 +125,7 @@ class _StorageManagementPageState extends State<StorageManagementPage> {
                             ? null
                             : () => _showCreateDialog(context),
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Godown'),
+                        label: Text(l10n?.addGodown ?? 'Add Godown'),
                       ),
                     if (controller.canCreateRacks()) ...[
                       OutlinedButton.icon(
@@ -131,7 +133,7 @@ class _StorageManagementPageState extends State<StorageManagementPage> {
                             ? null
                             : () => _showAddRackDialog(context),
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Rack'),
+                        label: Text(l10n?.addRack ?? 'Add Rack'),
                       ),
                     ],
                   ],
@@ -1719,6 +1721,7 @@ class _OutletRackManagementPageState extends State<OutletRackManagementPage> {
     animation: widget.controller,
     builder: (context, _) {
       final controller = widget.controller;
+      final l10n = AppLocalizations.of(context);
       final outlet = controller.currentOutlet;
       if (outlet == null) {
         return const Center(
@@ -1774,7 +1777,7 @@ class _OutletRackManagementPageState extends State<OutletRackManagementPage> {
                       FilledButton.icon(
                         onPressed: controller.storageSaving ? null : _addRack,
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Rack'),
+                        label: Text(l10n?.addRack ?? 'Add Rack'),
                       ),
                   ],
                 );

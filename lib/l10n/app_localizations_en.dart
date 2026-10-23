@@ -1818,4 +1818,555 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutAppDescription =>
       'High-performance, offline-first enterprise management solution engineered for retail, wholesale, godown logistics, and commercial trade operations.';
+
+  @override
+  String get staffSalaryKhata => 'Staff Salary Khata';
+
+  @override
+  String get staffSalarySubtitle =>
+      'Advance ledger, attendance reconciliation & payroll settlements';
+
+  @override
+  String get selectStaffMember => 'Select Staff Member';
+
+  @override
+  String get addDailyWorker => '+ Add Daily Worker';
+
+  @override
+  String get searchStaffHint => 'Search staff by name or code...';
+
+  @override
+  String get noStaffMatched => 'No staff members match the criteria.';
+
+  @override
+  String get noRoleAssigned => 'No role assigned';
+
+  @override
+  String get salaryBaseRateAndType => 'Base Rate & Type';
+
+  @override
+  String get salaryNotConfigured => 'Not Configured';
+
+  @override
+  String get tapToConfigureRate => 'Tap to configure rate';
+
+  @override
+  String get outstandingAdvances => 'Outstanding Advances';
+
+  @override
+  String get midMonthAdvancesSubtitle => 'Mid-month cash/UPI advances';
+
+  @override
+  String get noAdvanceDue => 'No advance due';
+
+  @override
+  String get storePurchasesCredit => 'Store Purchases Credit';
+
+  @override
+  String get storeGoodsOnCredit => 'Store goods on credit';
+
+  @override
+  String get noStoreCreditDue => 'No store credit due';
+
+  @override
+  String get netSalaryPayable => 'Net Salary Payable';
+
+  @override
+  String get acrossUnpaidPeriods => 'Across unpaid approved periods';
+
+  @override
+  String get allPeriodsSettled => 'All periods settled';
+
+  @override
+  String get giveAdvancePeshgi => '+ Give Advance (Peshgi)';
+
+  @override
+  String get approvePeriodSalary => 'Approve Period Salary';
+
+  @override
+  String get salaryProfileAndRate => 'Salary Profile & Rate';
+
+  @override
+  String get outletAllocationSplit => 'Outlet Allocation Split';
+
+  @override
+  String get salaryPeriodsTab => 'Salary Periods';
+
+  @override
+  String get khataPassbookTab => 'Khata Passbook';
+
+  @override
+  String get salaryProfileAndSplitsTab => 'Salary Profile & Splits';
+
+  @override
+  String get noSalaryPeriods => 'No salary periods calculated yet.';
+
+  @override
+  String get salaryRateHistory => 'Salary Rate History';
+
+  @override
+  String get updateRateAddProfile => 'Update Rate / Add Profile';
+
+  @override
+  String get noSalaryProfileConfigured => 'No salary rate profile configured.';
+
+  @override
+  String get configureSalaryRateProfile => 'Configure Salary Rate Profile';
+
+  @override
+  String get baseSalaryRate => 'Base Salary Rate';
+
+  @override
+  String get wageType => 'Wage Type';
+
+  @override
+  String get monthlyFixed => 'Monthly Fixed';
+
+  @override
+  String get dailyWage => 'Daily Wage';
+
+  @override
+  String get hourlyRate => 'Hourly Rate';
+
+  @override
+  String get shiftBased => 'Shift-based';
+
+  @override
+  String get paymentCycle => 'Payment Cycle';
+
+  @override
+  String get monthly => 'Monthly';
+
+  @override
+  String get fourteenDays => '14 Days';
+
+  @override
+  String get weekly => 'Weekly';
+
+  @override
+  String get saveSalaryProfile => 'Save Salary Profile';
+
+  @override
+  String get outletAllocationPercent => 'Outlet Allocation (%)';
+
+  @override
+  String get outletAllocationDesc =>
+      'Specify the percentage split of salary expense across outlets. Must total exactly 100%.';
+
+  @override
+  String get totalAllocation => 'Total Allocation:';
+
+  @override
+  String get saveHundredPercentSplit => 'Save 100% Split';
+
+  @override
+  String get allocatedOutlet => 'Allocated Outlet';
+
+  @override
+  String get noOutletsAssignedToEmployee =>
+      'This staff member has no assigned outlet under this business. Please assign an outlet under Staff Management first.';
+
+  @override
+  String get disburseStaffAdvance => 'Disburse Staff Advance (Peshgi)';
+
+  @override
+  String get advanceAmount => 'Advance Amount (₹)';
+
+  @override
+  String get paymentMode => 'Payment Mode';
+
+  @override
+  String get referenceNumber => 'Reference No (Optional)';
+
+  @override
+  String get notesOptional => 'Notes / Reason (Optional)';
+
+  @override
+  String get disburseAdvance => 'Disburse Advance';
+
+  @override
+  String get approveSalaryPeriodTitle => 'Approve Salary Period';
+
+  @override
+  String get grossEarned => 'Gross Earned';
+
+  @override
+  String get paid => 'Paid';
+
+  @override
+  String get advanceAdjusted => 'Advance Adjusted';
+
+  @override
+  String get storePurchaseAdjusted => 'Store Purchase Adjusted';
+
+  @override
+  String get balanceDue => 'Balance Due';
+
+  @override
+  String get generateSalarySlip => 'Generate Salary Slip';
+
+  @override
+  String get salaryAcknowledged => 'Acknowledged';
+
+  @override
+  String get salaryAcknowledge => 'Acknowledge';
+
+  @override
+  String get selectSalarySlipLanguage => 'Select Salary Slip Language';
+
+  @override
+  String get salaryRateSaved => 'Salary rate saved successfully.';
+
+  @override
+  String get advanceRecorded => 'Advance recorded successfully.';
+
+  @override
+  String get salaryPeriodApproved => 'Salary period approved successfully.';
+
+  @override
+  String get selectPrintFormat => 'Select Print Format';
+
+  @override
+  String get paperWidth => 'Paper Width:';
+
+  @override
+  String get saveAsDefaultFormat => 'Save as Default Format';
+
+  @override
+  String get confirmUpiReceipt =>
+      'Confirm UPI receipt manually before finalizing.';
+
+  @override
+  String get scanToPay => 'Scan to Pay';
+
+  @override
+  String get payUsingUpi => 'Pay using Google Pay, PhonePe, Paytm or BHIM';
+
+  @override
+  String get allOutlets => 'All Outlets';
+
+  @override
+  String get stepByStepDateSelection => 'Step-by-Step Date Selection';
+
+  @override
+  String get fromDateStep => '1. From Date';
+
+  @override
+  String get toDateStep => '2. To Date';
+
+  @override
+  String get step1Instruction => 'Select starting date from the calendar';
+
+  @override
+  String get step2Instruction => 'Select ending date from the calendar';
+
+  @override
+  String get applyRange => 'Apply Range';
+
+  @override
+  String get addEmployee => 'Add Employee';
+
+  @override
+  String get addGodown => 'Add Godown';
+
+  @override
+  String get addRack => 'Add Rack';
+
+  @override
+  String get adjustment => 'Adjustment';
+
+  @override
+  String get advanceBalance => 'Advance Credit';
+
+  @override
+  String get applicationInformation => 'Application Information';
+
+  @override
+  String get attendanceCheckInRecorded =>
+      'Attendance check-in is already recorded for today.';
+
+  @override
+  String get bankAndPaymentDetails => 'Bank & Payment Details for Invoices';
+
+  @override
+  String get barcodingAndItemIdentification =>
+      'Barcoding & Item Identification';
+
+  @override
+  String get billingAndInvoice => 'Billing & Invoice';
+
+  @override
+  String get businessInformation => 'Business Information';
+
+  @override
+  String get checkoutCompletedToday =>
+      'Checkout is already completed for today. Only 1 checkout allowed per day.';
+
+  @override
+  String get cloudDiagnosticsAndAnalytics =>
+      'Cloud Diagnostics & Error Analytics';
+
+  @override
+  String get cloudSyncEngineStatus => 'Cloud Synchronization Engine Status';
+
+  @override
+  String get creditSale => 'Credit Sale';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get discardUnsavedPurchaseSubtitle =>
+      'Your current spreadsheet edits have not been saved.';
+
+  @override
+  String get discardUnsavedPurchaseTitle => 'Discard unsaved Purchase?';
+
+  @override
+  String get earlyCheckoutNotice => 'Early Checkout Notice';
+
+  @override
+  String get editEmployee => 'Edit Employee';
+
+  @override
+  String get email => 'Email address';
+
+  @override
+  String get employees => 'Employees';
+
+  @override
+  String get enterpriseProcurement =>
+      'Enterprise Procurement · Invoice inwarding & item entry';
+
+  @override
+  String get excelGridMode => 'Excel Grid Mode';
+
+  @override
+  String get expiryDate => 'Expiry Date';
+
+  @override
+  String get forgotPassword => 'Forgot Password?';
+
+  @override
+  String get godownManagement => 'Godown Management';
+
+  @override
+  String get gstAndTax => 'GST & Tax';
+
+  @override
+  String get gstFilingScheme => 'GST Filing Scheme';
+
+  @override
+  String get internalBatchNo => 'Internal Batch No';
+
+  @override
+  String get inventoryPolicies => 'Inventory Policies';
+
+  @override
+  String get invoicePrintingLayout => 'Invoice Printing Layout';
+
+  @override
+  String get languageAndAppearance => 'Language & Appearance';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get maintenanceMessage =>
+      'We are making a few improvements. Please check back shortly.';
+
+  @override
+  String get mfgDate => 'Mfg Date';
+
+  @override
+  String get noLedgerTransactions => 'No Ledger Transactions Found';
+
+  @override
+  String get noStoragePermission =>
+      'You do not have permission to view storage locations.';
+
+  @override
+  String get numberingAndContentOptions => 'Numbering & Content Options';
+
+  @override
+  String get offlineCustomerLedgerNotice =>
+      'Offline Mode: Displaying locally cached ledger. Real-time balance and entries may be outdated until connected to server.';
+
+  @override
+  String get onlyOwnerCanManageEmployees =>
+      'Only an owner can manage employees.';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get product => 'Product';
+
+  @override
+  String get receiving => 'Receiving';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get scrollLeft => 'Scroll table left';
+
+  @override
+  String get scrollRight => 'Scroll table right';
+
+  @override
+  String get selectBusinessToManageGodowns =>
+      'Select a business to manage its optional Godowns.';
+
+  @override
+  String get settingsAndPreferences => 'Settings & Preferences';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get stay => 'Stay';
+
+  @override
+  String get stockAvailabilityRules => 'Stock Availability & Safety Rules';
+
+  @override
+  String get storeAt => 'Store At';
+
+  @override
+  String get storeProfile => 'Store Profile';
+
+  @override
+  String get supplierLot => 'Supplier Lot';
+
+  @override
+  String get syncAndDiagnostics => 'Sync & Diagnostics';
+
+  @override
+  String get systemMaintenance => 'System Maintenance';
+
+  @override
+  String get taxRate => 'GST %';
+
+  @override
+  String get taxSlabsAndReporting => 'Tax Slabs & Reporting Options';
+
+  @override
+  String get totalEntries => 'Total Ledger Entries';
+
+  @override
+  String get unifiedCustomerLedger => 'Unified Customer Ledger';
+
+  @override
+  String get variantSpecification => 'Variant / Specification';
+
+  @override
+  String get allEvents => 'All Events';
+
+  @override
+  String get advancesFilter => 'Advances';
+
+  @override
+  String get storePurchasesFilter => 'Store Purchases';
+
+  @override
+  String get paymentsAndOffsetsFilter => 'Payments & Offsets';
+
+  @override
+  String get noLedgerTransactionsDesc =>
+      'No cash advances, purchase debits, or payments recorded for this staff member.';
+
+  @override
+  String get cashAdvanceGiven => 'Cash Advance Given';
+
+  @override
+  String get upiAdvanceGiven => 'UPI Advance Given';
+
+  @override
+  String get bankAdvanceGiven => 'Bank Advance Given';
+
+  @override
+  String get storeGoodsCredit => 'Store Goods Credit';
+
+  @override
+  String get salaryPaymentPaid => 'Salary Payment Paid';
+
+  @override
+  String get advanceAdjustedInSalary => 'Advance Adjusted in Salary';
+
+  @override
+  String get storeCreditOffsetInSalary => 'Store Credit Offset in Salary';
+
+  @override
+  String get staffInvoiceDirectPaid => 'Staff Invoice Direct Paid';
+
+  @override
+  String get recordSalaryPaymentTitle => 'Record Salary Payment';
+
+  @override
+  String get remainingNetPayable => 'Remaining Net Payable:';
+
+  @override
+  String get disbursePayment => 'Disburse Payment';
+
+  @override
+  String get adjustMidMonthAdvance => 'Adjust Mid-Month Advance';
+
+  @override
+  String get adjustMidMonthAdvanceDesc =>
+      'Deduct mid-month cash/UPI advances against this approved salary period.';
+
+  @override
+  String get offsetStorePurchaseCredit => 'Offset Store Purchase Credit';
+
+  @override
+  String get offsetStorePurchaseCreditDesc =>
+      'Deduct shop goods taken on credit by this staff member against their salary.';
+
+  @override
+  String get storeCreditDue => 'Store Credit Due:';
+
+  @override
+  String get applyPurchaseOffset => 'Apply Purchase Offset';
+
+  @override
+  String get confirmAndApproveSalary => 'Confirm & Approve Salary';
+
+  @override
+  String get calculatedNetEarned => 'Calculated Net Earned:';
+
+  @override
+  String get bonusLabel => 'Bonus (₹)';
+
+  @override
+  String get extraOvertimeLabel => 'Extra Overtime (₹)';
+
+  @override
+  String get deductionPerAbsentDay => 'Deduction per Absent Day (₹)';
+
+  @override
+  String get otherDeductionsLabel => 'Other Deductions (₹)';
+
+  @override
+  String get approvedWorkUnits => 'Approved Work Units';
+
+  @override
+  String get lockedFromApprovedAttendance =>
+      'Calculated from approved attendance records';
+
+  @override
+  String get noSalaryPeriodsApprovedYet => 'No Salary Periods Approved Yet';
+
+  @override
+  String get approvePeriodSalaryDesc =>
+      'Click \"Approve Period Salary\" above to calculate and lock this month’s earnings.';
+
+  @override
+  String get approveCurrentPeriod => 'Approve Current Period';
 }

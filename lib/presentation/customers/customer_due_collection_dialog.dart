@@ -8,6 +8,7 @@ import '../../data/models/customer_payment_model.dart';
 import '../../data/sync/sync_engine.dart';
 import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
+import '../billing/widgets/upi_qr_widget.dart';
 
 enum PaymentSubmissionState {
   idle,
@@ -24,11 +25,13 @@ class CustomerDueCollectionDialog extends StatefulWidget {
     required this.controller,
     required this.customer,
     required this.onPaymentCompleted,
+    this.initialPaymentMode = 'CASH',
   });
 
   final AppController controller;
   final CustomerModel customer;
   final VoidCallback onPaymentCompleted;
+  final String initialPaymentMode;
 
   @override
   State<CustomerDueCollectionDialog> createState() =>
@@ -48,7 +51,7 @@ class _CustomerDueCollectionDialogState
   CustomerPaymentRecord? _confirmedPayment;
   String? _currentIdempotencyKey;
 
-  String _paymentMode = 'CASH';
+  late String _paymentMode;
   bool _isManualAllocation = false;
   final Set<String> _selectedInvoiceIds = {};
   final Map<String, TextEditingController> _manualAllocControllers = {};
@@ -57,6 +60,7 @@ class _CustomerDueCollectionDialogState
   @override
   void initState() {
     super.initState();
+    _paymentMode = widget.initialPaymentMode;
     final initialRupees = widget.customer.duePaise / 100.0;
     _amountController.text = initialRupees > 0
         ? (initialRupees % 1 == 0
@@ -89,6 +93,10 @@ class _CustomerDueCollectionDialogState
     }
 
     try {
+      final isOwner =
+          widget.controller.appContext?.accountType == 'owner' ||
+          widget.controller.user?.accountType == 'owner' ||
+          widget.controller.user?.uid == appContext?.ownerUid;
       final invoices = await repo.getOutstandingInvoices(
         tenantId: appContext!.ownerUid,
         businessId: appContext.businessId!,
@@ -96,8 +104,7 @@ class _CustomerDueCollectionDialogState
         token: token,
         employeePermissions: appContext.permissions,
         employeeOutletId: appContext.outletId,
-        isOwner: widget.controller.user?.accountType == 'owner' ||
-            widget.controller.user?.uid == appContext.ownerUid,
+        isOwner: isOwner,
       );
       if (mounted) {
         setState(() {
@@ -248,7 +255,8 @@ class _CustomerDueCollectionDialogState
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
-        isOwner: widget.controller.user?.accountType == 'owner' ||
+        isOwner: widget.controller.appContext?.accountType == 'owner' ||
+            widget.controller.user?.accountType == 'owner' ||
             widget.controller.user?.uid == appContext.ownerUid,
       );
 
@@ -656,6 +664,50 @@ class _CustomerDueCollectionDialogState
                                   ),
                                 ],
                               ),
+                              if (_paymentMode == 'UPI' && amountPaise > 0) ...[
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton.icon(
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: const Color(0xFF1B5E20),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                        horizontal: 16,
+                                      ),
+                                    ),
+                                    onPressed: (_state ==
+                                                PaymentSubmissionState.validating ||
+                                            _state ==
+                                                PaymentSubmissionState.submitting)
+                                        ? null
+                                        : () async {
+                                            final confirmed =
+                                                await showUpiPaymentDialog(
+                                              context,
+                                              amount: amountPaise / 100.0,
+                                              customerName: widget.customer.name,
+                                              note:
+                                                  'Due Settle - ${widget.customer.name}',
+                                            );
+                                            if (confirmed == true && mounted) {
+                                              _submit();
+                                            }
+                                          },
+                                    icon: const Icon(
+                                      Icons.qr_code_scanner,
+                                      size: 20,
+                                    ),
+                                    label: Text(
+                                      'Show Dynamic UPI QR (₹${_money(amountPaise)})',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: 12),
 
                               // Allocation Strategy Switch

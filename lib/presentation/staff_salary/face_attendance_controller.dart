@@ -55,6 +55,9 @@ extension StaffFaceAttendanceActions on AppController {
           employee.outletIds.contains(original.outletId),
     );
     if (matches.length != 1) {
+      if (employee != null && employee!.employeeId == employeeId) {
+        return employee!;
+      }
       throw const AppException('Employee is not active in this outlet.');
     }
     return matches.single;
@@ -369,7 +372,7 @@ extension StaffFaceAttendanceActions on AppController {
     if (original == null ||
         original.businessId == null ||
         original.outletId == null ||
-        !canManageStaffAttendance()) {
+        (!canManageStaffAttendance() && original.accountType != 'employee')) {
       throw const AppException('Attendance management permission is required.');
     }
     final device = await faceVaultStore.deviceId();
@@ -396,7 +399,7 @@ extension StaffFaceAttendanceActions on AppController {
         deviceId: device,
         clockReliable: await faceVaultStore.clockIsReliable(),
       );
-      if (appContext != original || !canManageStaffAttendance()) {
+      if (appContext != original || (!canManageStaffAttendance() && original.accountType != 'employee')) {
         throw const AppException('Workspace or attendance permission changed.');
       }
       return ticket;

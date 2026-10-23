@@ -16,6 +16,7 @@ import '../../core/utils/stock_quantity_formatter.dart';
 import '../app_controller.dart';
 import 'product_thumbnail.dart';
 import '../widgets/nubi_form.dart';
+import '../widgets/sync_task_dialog.dart';
 import 'barcode_printing_page.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -35,6 +36,8 @@ enum _ProductViewMode { table, cards }
 
 class _ProductManagementPageState extends State<ProductManagementPage> {
   final _search = TextEditingController();
+  final _tableHorizontalController = ScrollController();
+  final _tableVerticalController = ScrollController();
   ProductMasterValue? _brandFilter, _categoryFilter, _subcategoryFilter;
   String _statusFilter = 'ALL';
   bool _multiVariantOnly = false;
@@ -306,6 +309,8 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
   @override
   void dispose() {
     _search.dispose();
+    _tableHorizontalController.dispose();
+    _tableVerticalController.dispose();
     super.dispose();
   }
 
@@ -388,6 +393,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
           businessName: businessName,
           loadReceivedVariantIds: c.loadBarcodeReceivedVariantIds,
           loadReceivedVariantPricing: c.loadBarcodeReceivedVariantPricing,
+          loadVariantBatches: c.loadVariantBatches,
           availableQuantities: c.productStock,
           showBulkTools: false,
           initialProductId: _barcodeProductId,
@@ -613,14 +619,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                                 productId: product.productId,
                                 variantId: variant.variantId,
                               ),
-                              onEdit: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => _StructuredProductFormPage(
-                                    controller: c,
-                                    product: product,
-                                  ),
-                                ),
-                              ),
+                              onEdit: () => _editProduct(context, product),
                             ),
                           );
                         }
@@ -638,8 +637,8 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
 
           return Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 12 : 24,
-              vertical: isMobile ? 8 : 12,
+              horizontal: isMobile ? 12 : 18,
+              vertical: isMobile ? 6 : 8,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -655,17 +654,17 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                 ),
 
                 if (c.placementBackfillNotice != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Card(
                     color: Theme.of(context).colorScheme.secondaryContainer,
                     child: Padding(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(8),
                       child: Text(c.placementBackfillNotice!),
                     ),
                   ),
                 ],
 
-                SizedBox(height: isMobile ? 6 : 10),
+                SizedBox(height: isMobile ? 4 : 6),
 
                 // 2. EXECUTIVE KPI CARDS SECTION
                 _buildKpiSection(
@@ -681,7 +680,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                   activeRatio: activeRatio,
                 ),
 
-                SizedBox(height: isMobile ? 6 : 10),
+                SizedBox(height: isMobile ? 4 : 6),
 
                 // 3. SEARCH, FILTER & VIEW CONSOLE
                 if (c.products.isNotEmpty) ...[
@@ -693,11 +692,11 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                     filteredCount: products.length,
                     totalCount: totalCount,
                   ),
-                  SizedBox(height: isMobile ? 6 : 10),
+                  SizedBox(height: isMobile ? 4 : 6),
                 ],
 
                 if (c.productsError != null) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   MaterialBanner(
                     content: Text(c.productsError!),
                     actions: [
@@ -709,12 +708,12 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                   ),
                 ],
 
-                SizedBox(height: isMobile ? 6 : 12),
+                SizedBox(height: isMobile ? 3 : 5),
 
                 // 4. BULK SELECTION ACTION STRIP
                 _buildBulkActionStrip(context, c, products, l10n),
 
-                SizedBox(height: isMobile ? 4 : 8),
+                SizedBox(height: isMobile ? 3 : 5),
 
                 // 5. MAIN PRODUCTS DATA CONTENT (Table or Cards View)
                 Expanded(
@@ -757,28 +756,30 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
     required String currentCode,
     required bool isMobile,
   }) {
-    final title = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final title = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 10,
+      runSpacing: 4,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: const Color(0xFF132B45),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
                 Icons.widgets_rounded,
                 color: Color(0xFFC18B35),
-                size: 20,
+                size: 18,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Text(
               'Products',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFF0F172A),
                 letterSpacing: -0.5,
@@ -786,45 +787,33 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              controller.productsScopeLabel,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+        if (controller.currentOutlet != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xFF132B45).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(6),
             ),
-            if (controller.currentOutlet != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF132B45).withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.storefront_outlined,
+                  size: 13,
+                  color: Color(0xFF132B45),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.storefront_outlined,
-                      size: 13,
-                      color: Color(0xFF132B45),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      controller.currentOutlet!.outletName,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF132B45),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 4),
+                Text(
+                  controller.currentOutlet!.outletName,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF132B45),
+                  ),
                 ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          ),
       ],
     );
 
@@ -972,18 +961,18 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
 
     return LayoutBuilder(
       builder: (context, headerConstraints) {
-        final compact = isMobile || headerConstraints.maxWidth < 950;
+        final compact = isMobile || headerConstraints.maxWidth < 750;
         if (compact) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               title,
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               Wrap(
                 alignment: WrapAlignment.start,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 6,
+                runSpacing: 6,
                 children: actions,
               ),
             ],
@@ -993,13 +982,13 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(child: title),
-            const SizedBox(width: 16),
-            Flexible(
+            title,
+            const SizedBox(width: 12),
+            Expanded(
               child: Wrap(
                 alignment: WrapAlignment.end,
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 6,
+                runSpacing: 6,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: actions,
               ),
@@ -1117,373 +1106,362 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
     required int totalCount,
   }) {
     return Container(
-      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 10 : 12,
+        vertical: isMobile ? 6 : 6,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        alignment: WrapAlignment.spaceBetween,
         children: [
-          // Row 1: Search box + View switcher + Results counter
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            alignment: WrapAlignment.spaceBetween,
-            children: [
-              // Search Input Box
-              SizedBox(
-                width: isMobile ? double.infinity : 360,
-                child: TextField(
-                  controller: _search,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      size: 20,
-                      color: Color(0xFF64748B),
-                    ),
-                    suffixIcon: _search.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 16),
-                            onPressed: () {
-                              _search.clear();
-                              setState(() {});
-                            },
-                          )
-                        : null,
-                    hintText:
-                        l10n?.searchProductPlaceholder ??
-                        'Search product, brand, SKU, barcode, category...',
-                    hintStyle: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF94A3B8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    isDense: true,
-                    filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF132B45),
-                        width: 1.5,
-                      ),
-                    ),
+          // Search Input Box
+          SizedBox(
+            width: isMobile ? double.infinity : 230,
+            child: TextField(
+              controller: _search,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 18,
+                  color: Color(0xFF64748B),
+                ),
+                suffixIcon: _search.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 16),
+                        onPressed: () {
+                          _search.clear();
+                          setState(() {});
+                        },
+                      )
+                    : null,
+                hintText:
+                    l10n?.searchProductPlaceholder ??
+                    'Search product, brand, SKU...',
+                hintStyle: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF94A3B8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                isDense: true,
+                filled: true,
+                fillColor: const Color(0xFFF8FAFC),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF132B45),
+                    width: 1.5,
                   ),
                 ),
               ),
-
-              // View Mode Toggle + Counter Badge
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '$filteredCount of $totalCount products',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF475569),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  // Table / Cards View Switcher
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.all(3),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildViewModeButton(
-                          icon: Icons.table_chart_outlined,
-                          isSelected: _viewMode == _ProductViewMode.table,
-                          tooltip: l10n?.viewModeTable ?? 'Table View',
-                          onTap: () => setState(
-                            () => _viewMode = _ProductViewMode.table,
-                          ),
-                        ),
-                        _buildViewModeButton(
-                          icon: Icons.grid_view_rounded,
-                          isSelected: _viewMode == _ProductViewMode.cards,
-                          tooltip: l10n?.viewModeCards ?? 'Card View',
-                          onTap: () => setState(
-                            () => _viewMode = _ProductViewMode.cards,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
 
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-          const SizedBox(height: 12),
-
-          // Row 2: Brand, Category, Subcategory & Status Filter Dropdowns
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              // Brand dropdown
-              SizedBox(
-                width: isMobile ? 135 : 200,
-                child: DropdownButtonFormField<String>(
-                  initialValue: _brandFilter?.id,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: l10n?.brand ?? 'Brand',
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    isDense: true,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: '',
-                      child: Text(l10n?.allBrands ?? 'All Brands'),
-                    ),
-                    for (final value
-                        in controller.productMasterValues['BRAND'] ??
-                            const <ProductMasterValue>[])
-                      DropdownMenuItem(
-                        value: value.id,
-                        child: Text(
-                          value.name,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                  ],
-                  onChanged: (id) => setState(
-                    () => _brandFilter =
-                        (controller.productMasterValues['BRAND'] ??
-                                const <ProductMasterValue>[])
-                            .where((v) => v.id == id)
-                            .firstOrNull,
-                  ),
+          // Brand dropdown
+          SizedBox(
+            width: isMobile ? 130 : 145,
+            child: DropdownButtonFormField<String>(
+              initialValue: _brandFilter?.id,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: l10n?.brand ?? 'Brand',
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
                 ),
               ),
-
-              // Category dropdown
-              SizedBox(
-                width: isMobile ? 135 : 200,
-                child: DropdownButtonFormField<String>(
-                  initialValue: _categoryFilter?.id,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: l10n?.category ?? 'Category',
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    isDense: true,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+              items: [
+                DropdownMenuItem(
+                  value: '',
+                  child: Text(l10n?.allBrands ?? 'All Brands'),
+                ),
+                for (final value
+                    in controller.productMasterValues['BRAND'] ??
+                        const <ProductMasterValue>[])
+                  DropdownMenuItem(
+                    value: value.id,
+                    child: Text(
+                      value.name,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  items: [
-                    DropdownMenuItem(
-                      value: '',
-                      child: Text(l10n?.allCategories ?? 'All Categories'),
-                    ),
-                    for (final value
-                        in controller.productMasterValues['CATEGORY'] ??
+              ],
+              onChanged: (id) => setState(
+                () => _brandFilter =
+                    (controller.productMasterValues['BRAND'] ??
                             const <ProductMasterValue>[])
-                      DropdownMenuItem(
-                        value: value.id,
-                        child: Text(
-                          value.name,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                  ],
-                  onChanged: (id) async {
-                    final value =
-                        (controller.productMasterValues['CATEGORY'] ??
-                                const <ProductMasterValue>[])
-                            .where((v) => v.id == id)
-                            .firstOrNull;
-                    setState(() {
-                      _categoryFilter = value;
-                      _subcategoryFilter = null;
-                    });
-                    if (value != null) {
-                      await controller.loadProductMasters(categoryId: value.id);
-                    }
-                    if (mounted) setState(() {});
-                  },
+                        .where((v) => v.id == id)
+                        .firstOrNull,
+              ),
+            ),
+          ),
+
+          // Category dropdown
+          SizedBox(
+            width: isMobile ? 130 : 155,
+            child: DropdownButtonFormField<String>(
+              initialValue: _categoryFilter?.id,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: l10n?.category ?? 'Category',
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
                 ),
               ),
+              items: [
+                DropdownMenuItem(
+                  value: '',
+                  child: Text(l10n?.allCategories ?? 'All Categories'),
+                ),
+                for (final value
+                    in controller.productMasterValues['CATEGORY'] ??
+                        const <ProductMasterValue>[])
+                  DropdownMenuItem(
+                    value: value.id,
+                    child: Text(
+                      value.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (id) async {
+                final value =
+                    (controller.productMasterValues['CATEGORY'] ??
+                            const <ProductMasterValue>[])
+                        .where((v) => v.id == id)
+                        .firstOrNull;
+                setState(() {
+                  _categoryFilter = value;
+                  _subcategoryFilter = null;
+                });
+                if (value != null) {
+                  await controller.loadProductMasters(categoryId: value.id);
+                }
+                if (mounted) setState(() {});
+              },
+            ),
+          ),
 
-              // Subcategory dropdown (if category selected)
-              if (_categoryFilter != null)
-                SizedBox(
-                  width: isMobile ? 135 : 200,
-                  child: DropdownButtonFormField<String>(
-                    initialValue: _subcategoryFilter?.id,
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      labelText: 'Subcategory',
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      isDense: true,
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+          // Subcategory dropdown (if category selected)
+          if (_categoryFilter != null)
+            SizedBox(
+              width: isMobile ? 130 : 155,
+              child: DropdownButtonFormField<String>(
+                initialValue: _subcategoryFilter?.id,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Subcategory',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  isDense: true,
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: '',
+                    child: Text(
+                      l10n?.allSubcategories ?? 'All Subcategories',
+                    ),
+                  ),
+                  for (final value
+                      in controller
+                              .productMasterValues['SUBCATEGORY:${_categoryFilter!.id}'] ??
+                          const <ProductMasterValue>[])
+                    DropdownMenuItem(
+                      value: value.id,
+                      child: Text(
+                        value.name,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    items: [
-                      DropdownMenuItem(
-                        value: '',
-                        child: Text(
-                          l10n?.allSubcategories ?? 'All Subcategories',
-                        ),
-                      ),
-                      for (final value
-                          in controller
-                                  .productMasterValues['SUBCATEGORY:${_categoryFilter!.id}'] ??
+                ],
+                onChanged: (id) => setState(
+                  () => _subcategoryFilter =
+                      (controller.productMasterValues['SUBCATEGORY:${_categoryFilter!.id}'] ??
                               const <ProductMasterValue>[])
-                        DropdownMenuItem(
-                          value: value.id,
-                          child: Text(
-                            value.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
-                    onChanged: (id) => setState(
-                      () => _subcategoryFilter =
-                          (controller.productMasterValues['SUBCATEGORY:${_categoryFilter!.id}'] ??
-                                  const <ProductMasterValue>[])
-                              .where((v) => v.id == id)
-                              .firstOrNull,
-                    ),
-                  ),
-                ),
-
-              // Status Dropdown
-              SizedBox(
-                width: isMobile ? 135 : 170,
-                child: DropdownButtonFormField<String>(
-                  initialValue: _statusFilter,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Status',
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    isDense: true,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: 'ALL',
-                      child: Text(l10n?.allStatuses ?? 'All Statuses'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'ACTIVE',
-                      child: Text(l10n?.statusActive ?? 'Active'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'INACTIVE',
-                      child: Text(l10n?.statusInactive ?? 'Inactive'),
-                    ),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => _statusFilter = value ?? 'ALL'),
+                          .where((v) => v.id == id)
+                          .firstOrNull,
                 ),
               ),
+            ),
 
-              // Reset filters button
-              if (_brandFilter != null ||
-                  _categoryFilter != null ||
-                  _statusFilter != 'ALL' ||
-                  _multiVariantOnly ||
-                  _stockAlertsOnly)
-                TextButton.icon(
-                  onPressed: () => setState(() {
-                    _brandFilter = null;
-                    _categoryFilter = null;
-                    _subcategoryFilter = null;
-                    _statusFilter = 'ALL';
-                    _multiVariantOnly = false;
-                    _stockAlertsOnly = false;
-                  }),
-                  icon: const Icon(Icons.filter_alt_off_outlined, size: 16),
-                  label: const Text('Reset'),
+          // Status Dropdown
+          SizedBox(
+            width: isMobile ? 115 : 125,
+            child: DropdownButtonFormField<String>(
+              initialValue: _statusFilter,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: 'Status',
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
                 ),
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'ALL',
+                  child: Text(l10n?.allStatuses ?? 'All Statuses'),
+                ),
+                DropdownMenuItem(
+                  value: 'ACTIVE',
+                  child: Text(l10n?.statusActive ?? 'Active'),
+                ),
+                DropdownMenuItem(
+                  value: 'INACTIVE',
+                  child: Text(l10n?.statusInactive ?? 'Inactive'),
+                ),
+              ],
+              onChanged: (value) =>
+                  setState(() => _statusFilter = value ?? 'ALL'),
+            ),
+          ),
+
+          // Reset filters button
+          if (_brandFilter != null ||
+              _categoryFilter != null ||
+              _statusFilter != 'ALL' ||
+              _multiVariantOnly ||
+              _stockAlertsOnly)
+            TextButton.icon(
+              onPressed: () => setState(() {
+                _brandFilter = null;
+                _categoryFilter = null;
+                _subcategoryFilter = null;
+                _statusFilter = 'ALL';
+                _multiVariantOnly = false;
+                _stockAlertsOnly = false;
+              }),
+              icon: const Icon(Icons.filter_alt_off_outlined, size: 15),
+              label: const Text('Reset', style: TextStyle(fontSize: 12)),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              ),
+            ),
+
+          // View Mode Toggle + Counter Badge
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '$filteredCount of $totalCount',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF475569),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Table / Cards View Switcher
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildViewModeButton(
+                      icon: Icons.table_chart_outlined,
+                      isSelected: _viewMode == _ProductViewMode.table,
+                      tooltip: l10n?.viewModeTable ?? 'Table View',
+                      onTap: () => setState(
+                        () => _viewMode = _ProductViewMode.table,
+                      ),
+                    ),
+                    _buildViewModeButton(
+                      icon: Icons.grid_view_rounded,
+                      isSelected: _viewMode == _ProductViewMode.cards,
+                      tooltip: l10n?.viewModeCards ?? 'Card View',
+                      onTap: () => setState(
+                        () => _viewMode = _ProductViewMode.cards,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -1540,7 +1518,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
         products.every((p) => _selected.contains(p.productId));
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: _selected.isNotEmpty
             ? const Color(0xFF132B45).withValues(alpha: 0.04)
@@ -1733,30 +1711,36 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
       ),
       child: LayoutBuilder(
         builder: (context, cardConstraints) {
-          final isTablet = cardConstraints.maxWidth < 1100;
+          final isTablet = cardConstraints.maxWidth < 850;
           if (cardConstraints.maxWidth < 700) {
-            // Keep the phone list as the primary vertical scrollable. Nesting
-            // it inside a horizontal SingleChildScrollView can leave very
-            // little drag area for the product rows on touch screens.
-            return ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: products.length,
-              separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
-              itemBuilder: (context, i) => _ProductTile(
-                compact: true,
-                product: products[i],
-                controller: controller,
-                selected: _selected.contains(products[i].productId),
-                onSelect: (v) => setState(
-                  () => v
-                      ? _selected.add(products[i].productId)
-                      : _selected.remove(products[i].productId),
-                ),
-                onStatus: (status) => _status([products[i].productId], status),
-                onPrintBarcode: (variant) => _openBarcodePrinting(
-                  productId: products[i].productId,
-                  variantId: variant.variantId,
+            // Keep the phone list as the primary vertical scrollable.
+            return Scrollbar(
+              controller: _tableVerticalController,
+              thumbVisibility: true,
+              trackVisibility: true,
+              child: ListView.separated(
+                controller: _tableVerticalController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: products.length,
+                separatorBuilder: (_, _) =>
+                    const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                itemBuilder: (context, i) => _ProductTile(
+                  key: ValueKey('product-tile-compact-${products[i].productId}'),
+                  compact: true,
+                  product: products[i],
+                  controller: controller,
+                  selected: _selected.contains(products[i].productId),
+                  onSelect: (v) => setState(
+                    () => v
+                        ? _selected.add(products[i].productId)
+                        : _selected.remove(products[i].productId),
+                  ),
+                  onStatus: (status) => _status([products[i].productId], status),
+                  onPrintBarcode: (variant) => _openBarcodePrinting(
+                    productId: products[i].productId,
+                    variantId: variant.variantId,
+                  ),
                 ),
               ),
             );
@@ -1768,41 +1752,63 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
               ? minWidth
               : cardConstraints.maxWidth;
 
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: tableWidth,
-              height: cardConstraints.maxHeight,
-              child: Column(
-                children: [
-                  if (cardConstraints.maxWidth >= 700)
-                    ProductTableColumns.header(tablet: isTablet),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: products.length,
-                      separatorBuilder: (_, _) =>
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                      itemBuilder: (context, i) => _ProductTile(
-                        compact: cardConstraints.maxWidth < 700,
-                        tablet: isTablet,
-                        product: products[i],
-                        controller: controller,
-                        selected: _selected.contains(products[i].productId),
-                        onSelect: (v) => setState(
-                          () => v
-                              ? _selected.add(products[i].productId)
-                              : _selected.remove(products[i].productId),
-                        ),
-                        onStatus: (status) =>
-                            _status([products[i].productId], status),
-                        onPrintBarcode: (variant) => _openBarcodePrinting(
-                          productId: products[i].productId,
-                          variantId: variant.variantId,
+          return Scrollbar(
+            controller: _tableVerticalController,
+            thumbVisibility: true,
+            trackVisibility: true,
+            scrollbarOrientation: ScrollbarOrientation.right,
+            notificationPredicate: (notification) =>
+                notification.metrics.axis == Axis.vertical,
+            child: Scrollbar(
+              controller: _tableHorizontalController,
+              thumbVisibility: true,
+              trackVisibility: true,
+              scrollbarOrientation: ScrollbarOrientation.bottom,
+              notificationPredicate: (notification) =>
+                  notification.metrics.axis == Axis.horizontal,
+              child: SingleChildScrollView(
+                controller: _tableHorizontalController,
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(),
+                child: SizedBox(
+                  width: tableWidth,
+                  height: cardConstraints.maxHeight,
+                  child: Column(
+                    children: [
+                      if (cardConstraints.maxWidth >= 700)
+                        ProductTableColumns.header(tablet: isTablet),
+                      Expanded(
+                        child: ListView.separated(
+                          controller: _tableVerticalController,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: products.length,
+                          separatorBuilder: (_, _) =>
+                              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          itemBuilder: (context, i) => _ProductTile(
+                            key: ValueKey('product-tile-${products[i].productId}'),
+                            compact: cardConstraints.maxWidth < 700,
+                            tablet: isTablet,
+                            product: products[i],
+                            controller: controller,
+                            selected: _selected.contains(products[i].productId),
+                            onSelect: (v) => setState(
+                              () => v
+                                  ? _selected.add(products[i].productId)
+                                  : _selected.remove(products[i].productId),
+                            ),
+                            onStatus: (status) =>
+                                _status([products[i].productId], status),
+                            onPrintBarcode: (variant) => _openBarcodePrinting(
+                              productId: products[i].productId,
+                              variantId: variant.variantId,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           );
@@ -1823,41 +1829,47 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
         ? 2
         : 1;
 
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        mainAxisExtent: 220,
-      ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return _ProductCard(
-          product: product,
-          controller: controller,
-          selected: _selected.contains(product.productId),
-          onSelect: (v) => setState(
-            () => v
-                ? _selected.add(product.productId)
-                : _selected.remove(product.productId),
-          ),
-          onStatus: (status) => _status([product.productId], status),
-          onPrintBarcode: (variant) => _openBarcodePrinting(
-            productId: product.productId,
-            variantId: variant.variantId,
-          ),
-          onEdit: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => _StructuredProductFormPage(
-                controller: controller,
-                product: product,
-              ),
+    return Scrollbar(
+      controller: _tableVerticalController,
+      thumbVisibility: true,
+      trackVisibility: true,
+      child: GridView.builder(
+        controller: _tableVerticalController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          mainAxisExtent: 220,
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return _ProductCard(
+            product: product,
+            controller: controller,
+            selected: _selected.contains(product.productId),
+            onSelect: (v) => setState(
+              () => v
+                  ? _selected.add(product.productId)
+                  : _selected.remove(product.productId),
             ),
-          ),
-        );
-      },
+            onStatus: (status) => _status([product.productId], status),
+            onPrintBarcode: (variant) => _openBarcodePrinting(
+              productId: product.productId,
+              variantId: variant.variantId,
+            ),
+            onEdit: () => _editProduct(context, product),
+          );
+        },
+      ),
     );
+  }
+
+  Future<void> _refreshProducts() async {
+    await widget.controller.loadProducts();
+    await widget.controller.loadProductMasters();
+    if (mounted) setState(() {});
   }
 
   Future<void> _addProduct(BuildContext context) async {
@@ -1867,10 +1879,38 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
             _StructuredProductFormPage(controller: widget.controller),
       ),
     );
-    if (saved == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product and Variant saved.')),
-      );
+    if (saved == true && mounted) {
+      await _refreshProducts();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product and Variant saved and synced.'),
+            backgroundColor: Color(0xFF10263D),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _editProduct(BuildContext context, ProductModel product) async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => _StructuredProductFormPage(
+          controller: widget.controller,
+          product: product,
+        ),
+      ),
+    );
+    if (saved == true && mounted) {
+      await _refreshProducts();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product updated and synced.'),
+            backgroundColor: Color(0xFF10263D),
+          ),
+        );
+      }
     }
   }
 }
@@ -1900,7 +1940,7 @@ class _ProductKpiCard extends StatelessWidget {
       elevation: 0,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         side: isSelected
             ? BorderSide(color: accentColor, width: 2)
             : const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1911,72 +1951,65 @@ class _ProductKpiCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 18, color: accentColor),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                child: Icon(icon, size: 15, color: accentColor),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF64748B),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isAlert)
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFDC2626),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: isSelected ? accentColor : const Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
                 ),
-                if (isAlert)
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFDC2626),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: isSelected ? accentColor : const Color(0xFF0F172A),
-                letterSpacing: -0.5,
               ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: isAlert
-                    ? const Color(0xFFDC2626)
-                    : const Color(0xFF64748B),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -2123,7 +2156,7 @@ class _ProductCard extends StatelessWidget {
                     if (action == 'edit') {
                       onEdit();
                     } else if (action == 'duplicate') {
-                      Navigator.of(context).push(
+                      final saved = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
                           builder: (_) => _StructuredProductFormPage(
                             controller: controller,
@@ -2132,6 +2165,10 @@ class _ProductCard extends StatelessWidget {
                           ),
                         ),
                       );
+                      if (saved == true) {
+                        await controller.loadProducts();
+                        await controller.loadProductMasters();
+                      }
                     } else if (action == 'view') {
                       final attributes = await controller.loadProductTemplate(
                         product.subcategoryId ?? '',
@@ -2482,80 +2519,55 @@ String _displayValue(AppController c, dynamic value) {
 
 /// The header and rows share widths, padding, flex and alignment.
 class ProductTableColumns {
-  static const minimumWidth = 1225.0;
-  static const tabletMinimumWidth = 865.0;
+  static const minimumWidth = 880.0;
+  static const tabletMinimumWidth = 680.0;
   static const widths = <double?>[
-    48,
-    56,
+    38,
+    52,
     null,
     null,
     null,
+    64,
+    78,
     80,
-    110,
-    100,
-    105,
-    48,
-    48,
+    80,
+    36,
+    36,
   ];
-  static const descriptiveMinimums = {2: 230.0, 3: 140.0, 4: 160.0};
-  static const descriptiveFlex = {2: 3.0, 3: 1.5, 4: 1.5};
+  static const descriptiveFlex = {2: 3, 3: 2, 4: 2};
   static Widget row(List<Widget> cells, {bool tablet = false}) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 8),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        final fixed = widths.whereType<double>().fold<double>(
-          0,
-          (sum, width) => sum + width,
-        );
-        final minimum = descriptiveMinimums.entries
-            .where((e) => !tablet || e.key == 2)
-            .map((e) => e.value)
-            .fold<double>(0, (sum, width) => sum + width);
-        final spare =
-            (constraints.maxWidth - fixed - minimum - (tablet ? 16 : 48)).clamp(
-              0.0,
-              double.infinity,
-            );
-        return Row(
-          children: [
-            for (var i = 0; i < cells.length; i++)
-              if (tablet && (i == 3 || i == 4))
-                const SizedBox.shrink()
-              else if (widths[i] != null)
-                SizedBox(
-                  width: widths[i],
-                  child: Align(
-                    alignment: i == 6
-                        ? Alignment.centerRight
-                        : Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: cells[i],
-                    ),
-                  ),
-                )
-              else
-                Expanded(
-                  flex:
-                      ((descriptiveMinimums[i]! +
-                                  16 +
-                                  spare *
-                                      descriptiveFlex[i]! /
-                                      (tablet ? 3 : 6)) *
-                              1000)
-                          .round(),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: cells[i],
-                  ),
+    child: Row(
+      children: [
+        for (var i = 0; i < cells.length; i++)
+          if (tablet && (i == 3 || i == 4))
+            const SizedBox.shrink()
+          else if (widths[i] != null)
+            SizedBox(
+              width: widths[i],
+              child: Align(
+                alignment: i == 6
+                    ? Alignment.centerRight
+                    : Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: cells[i],
                 ),
-          ],
-        );
-      },
+              ),
+            )
+          else
+            Expanded(
+              flex: descriptiveFlex[i] ?? 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: cells[i],
+              ),
+            ),
+      ],
     ),
   );
   static Widget header({bool tablet = false}) => SizedBox(
-    height: 44,
+    height: 36,
     child: row([
       for (final title in [
         '',
@@ -2573,7 +2585,7 @@ class ProductTableColumns {
         Text(
           title,
           maxLines: 1,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
         ),
     ], tablet: tablet),
   );
@@ -2699,17 +2711,23 @@ class _ProductTileState extends State<_ProductTile> {
     );
   }
 
-  void edit(BuildContext context) => Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) =>
-          _StructuredProductFormPage(controller: controller, product: product),
-    ),
-  );
+  void edit(BuildContext context) async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) =>
+            _StructuredProductFormPage(controller: controller, product: product),
+      ),
+    );
+    if (saved == true) {
+      await controller.loadProducts();
+      await controller.loadProductMasters();
+    }
+  }
   @override
   Widget build(BuildContext context) => Column(
     children: [
       SizedBox(
-        height: widget.compact ? 140 : 76,
+        height: widget.compact ? 130 : 54,
         child: _row([
           Checkbox(value: selected, onChanged: (v) => onSelect(v ?? false)),
           ProductThumbnail(url: product.productImage, name: product.name),
@@ -2776,7 +2794,7 @@ class _ProductTileState extends State<_ProductTile> {
             key: ValueKey('product-actions-${product.productId}'),
             onSelected: (action) async {
               if (action == 'duplicate') {
-                Navigator.of(context).push(
+                final saved = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
                     builder: (_) => _StructuredProductFormPage(
                       controller: controller,
@@ -2785,6 +2803,10 @@ class _ProductTileState extends State<_ProductTile> {
                     ),
                   ),
                 );
+                if (saved == true) {
+                  await controller.loadProducts();
+                  await controller.loadProductMasters();
+                }
               } else if (action == 'view') {
                 final attributes = await controller.loadProductTemplate(
                   product.subcategoryId ?? '',
@@ -3828,7 +3850,10 @@ class _StructuredProductFormPageState
     if (unit.id == 'unit' ||
         unit.id == 'packUnit' ||
         unit.semanticRole == 'PACK_UNIT') {
-      return _resolvedTemplate?.unitRules.allowedPackUnits ?? const [];
+      final allowed = _resolvedTemplate?.unitRules.allowedPackUnits ?? const [];
+      if (allowed.isNotEmpty) return allowed;
+      if (unit.options.isNotEmpty) return unit.options;
+      return _values('UNIT').map((u) => u.name).toList();
     }
     final dimension = parent.measurementDimension ?? unit.measurementDimension;
     if (dimension == null) {
@@ -3962,7 +3987,13 @@ class _StructuredProductFormPageState
           (u) => rules.allows(u.id, allowed) || rules.allows(u.name, allowed),
         )
         .toList();
-    final soldAsOptions = filterUnits(rules.allowedSellingUnits);
+    final soldAsAllowed = rules.allowedSellingUnits.isNotEmpty
+        ? rules.allowedSellingUnits
+        : rules.allowedPackUnits;
+    var soldAsOptions = filterUnits(soldAsAllowed);
+    if (soldAsOptions.isEmpty) {
+      soldAsOptions = allUnits;
+    }
     final baseUnitOptions = filterUnits(rules.allowedBaseUnits);
 
     Widget unitPicker(
@@ -3972,8 +4003,12 @@ class _StructuredProductFormPageState
     ) => _ProductMasterPicker(
       label: label,
       selected:
-          options.where((u) => u.id == row[key]).firstOrNull ??
-          allUnits.where((u) => u.id == row[key]).firstOrNull,
+          options
+              .where((u) => u.id == row[key] || u.name == row[key])
+              .firstOrNull ??
+          allUnits
+              .where((u) => u.id == row[key] || u.name == row[key])
+              .firstOrNull,
       options: options,
       validator: (v) => v == null
           ? 'Select ${label.replaceAll(' *', '').toLowerCase()}'
@@ -4108,13 +4143,22 @@ class _StructuredProductFormPageState
     Map<String, dynamic>? fallback,
   }) {
     final rules = _resolvedTemplate?.unitRules ?? const ResolvedUnitRule();
+    final allUnits = _values('UNIT');
     final options =
         (a.id == 'unit' || a.id == 'packUnit' || a.semanticRole == 'PACK_UNIT')
-        ? rules.allowedPackUnits
+        ? (rules.allowedPackUnits.isNotEmpty
+            ? rules.allowedPackUnits
+            : (a.options.isNotEmpty
+                ? a.options
+                : allUnits.map((u) => u.name).toList()))
         : (a.id == 'soldAs' ||
               a.id == 'sellingUnit' ||
               a.semanticRole == 'SELLING_UNIT')
-        ? rules.allowedSellingUnits
+        ? (rules.allowedSellingUnits.isNotEmpty
+            ? rules.allowedSellingUnits
+            : (a.options.isNotEmpty
+                ? a.options
+                : allUnits.map((u) => u.name).toList()))
         : a.options;
     final required = a.isRequired(values, fallback);
     final label = '${a.name}${required ? ' *' : ''}';
@@ -4705,20 +4749,43 @@ class _StructuredProductFormPageState
       }
     }
 
-    final ok = !_editing
-        ? await widget.controller.createStructuredProduct(
-            name: _name.text,
-            productFields: fields,
-            variants: variants,
-          )
-        : await widget.controller.saveStructuredProductEdit(
-            productId: widget.product!.productId,
-            name: _name.text,
-            productFields: fields,
-            variants: variants,
-          );
     if (!mounted) return;
-    if (ok) {
+    final ok = await showSyncTaskDialog<bool>(
+      context: context,
+      title: _editing ? 'Saving Product Updates' : 'Saving New Product',
+      task: (updateStatus) async {
+        updateStatus('Saving product & variant specifications...');
+        final saveOk = !_editing
+            ? await widget.controller.createStructuredProduct(
+                name: _name.text,
+                productFields: fields,
+                variants: variants,
+              )
+            : await widget.controller.saveStructuredProductEdit(
+                productId: widget.product!.productId,
+                name: _name.text,
+                productFields: fields,
+                variants: variants,
+              );
+        if (!saveOk) return false;
+
+        updateStatus('Uploading data to cloud server...');
+        final synced = await widget.controller.syncNowWithServer();
+
+        if (synced) {
+          updateStatus('Syncing offline database...');
+          await widget.controller.loadProducts();
+          await widget.controller.loadProductMasters();
+          updateStatus('Product saved & synchronized with server!');
+        } else {
+          updateStatus('Product saved locally in offline database.');
+          await widget.controller.loadProducts();
+        }
+        return true;
+      },
+    );
+    if (!mounted) return;
+    if (ok == true) {
       setState(() => _saving = false);
       Navigator.pop(context, true);
       return;
@@ -5034,13 +5101,20 @@ class _StructuredProductFormPageState
     setState(() => _rows.add(copy));
   }
 
+  String _variantTitle(Map<String, dynamic> row, int index) {
+    final unit = _soldAsLabel(row);
+    final size = row['packSize']?.toString() ?? '';
+    final label = [size, unit].where((s) => s.isNotEmpty && s != 'Item').join(' ');
+    return label.isEmpty ? 'Variant ${index + 1}' : 'Variant ${index + 1} ($label)';
+  }
+
   Widget _variantCard(int i) {
     final row = _rows[i];
     return NubiVariantCard(
       key: ValueKey(identityHashCode(row)),
-      title: 'Variant ${i + 1}',
+      title: _variantTitle(row, i),
       onDuplicate: () => _duplicateVariant(row),
-      onRemove: row['variantId'] == null && _rows.length > 1
+      onRemove: _rows.length > 1
           ? () => setState(() => _rows.removeAt(i))
           : null,
       child: NubiFormColumn(

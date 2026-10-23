@@ -874,5 +874,109 @@ void main() {
         throwsA(isA<AppException>()),
       );
     });
+
+    test('Scenario 16: Opening Stock with selling price and MRP persists them to batch and product variant', () async {
+      const pId = 'PROD-OP-PRICING';
+      const vId = 'VAR-OP-PRICING';
+      await local.upsertRemote('products', [
+        {
+          'name': 'products/$pId',
+          'fields': FirestoreRestService.encodeFields({
+            'productId': pId,
+            'tenantId': tenantId,
+            'businessId': businessId,
+            'name': 'Sample Retail Item',
+            'status': 'ACTIVE',
+            'isActive': true,
+          }),
+        },
+      ]);
+      await local.upsertRemote('product_variants', [
+        {
+          'name': 'product_variants/$vId',
+          'fields': FirestoreRestService.encodeFields({
+            'variantId': vId,
+            'productId': pId,
+            'tenantId': tenantId,
+            'businessId': businessId,
+            'name': 'Sample Retail Item - Regular',
+            'sellingPrice': 0,
+            'purchaseRate': 0,
+            'mrp': 0,
+          }),
+        },
+      ]);
+
+      final audit = await inventoryRepository.addOpeningStock(
+        tenantId: tenantId,
+        businessId: businessId,
+        outletId: outlet1,
+        productId: pId,
+        variantId: vId,
+        quantity: 50,
+        reason: 'Initial retail stock registration',
+        userId: 'OWNER-PF-1',
+        token: ownerToken,
+        permissions: ['inventory.opening_stock'],
+        isOwner: true,
+        unitCostPaise: 30000,
+        sellingPricePaise: 35000,
+        mrpPaise: 40000,
+        unit: 'pcs',
+      );
+
+      expect(audit.newQuantity, 50);
+      expect(audit.changedQuantity, 50);
+
+      // Verify variant pricing updated
+      final variantRaw = await offline.getDocument(
+        FirebaseConstants.productVariants,
+        vId,
+      );
+      final variantData =
+          FirestoreRestService.decodeFields(variantRaw['fields']);
+      expect(variantData['sellingPrice'], 35000);
+      expect(variantData['mrp'], 40000);
+      expect(variantData['purchaseRate'], 30000);
+
+      // Verify batch pricing updated
+      expect(audit.batchId, isNotNull);
+      final batchRaw = await offline.getDocument(
+        FirebaseConstants.inventoryBatches,
+        audit.batchId!,
+      );
+      final batchData = FirestoreRestService.decodeFields(batchRaw['fields']);
+      expect(batchData['sellingPrice'], 35000);
+      expect(batchData['mrp'], 40000);
+      expect(batchData['purchaseRate'], 30000);
+    });
+
+    test('Scenario 17: Opening Stock with selling price exceeding MRP is strictly BLOCKED', () async {
+      expect(
+        () => inventoryRepository.addOpeningStock(
+          tenantId: tenantId,
+          businessId: businessId,
+          outletId: outlet1,
+          productId: 'PROD-OP-ERR',
+          variantId: 'VAR-OP-ERR',
+          quantity: 10,
+          reason: 'Price validation test',
+          userId: 'OWNER-PF-1',
+          token: ownerToken,
+          permissions: ['inventory.opening_stock'],
+          isOwner: true,
+          unitCostPaise: 30000,
+          sellingPricePaise: 50000,
+          mrpPaise: 40000,
+        ),
+        throwsA(
+          isA<AppException>().having(
+            (e) => e.message,
+            'message',
+            'Selling price cannot exceed MRP.',
+          ),
+        ),
+      );
+    });
   });
 }

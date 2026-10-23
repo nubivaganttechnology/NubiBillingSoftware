@@ -88,6 +88,16 @@ class OfflineFirestoreService
       );
     }
     _local = LocalDataSource(db);
+    // Purge unindexed queries with employeeId that cause Firestore HTTP 400 missing index errors
+    await _local!.db.delete(
+      'sync_queries',
+      where: "queryJson LIKE '%employeeId%'",
+    );
+    await _local!.db.update(
+      'sync_queries',
+      {'lastError': null},
+      where: "lastError LIKE '%requires an index%'",
+    );
     sync.attach(_local!, uid);
     if (kDebugMode) {
       debugPrint('[startup] Account database open; sync attached');
@@ -328,6 +338,27 @@ class OfflineFirestoreService
       where:
           "collectionName NOT IN ('user','roles','permissions','app_config')",
     );
+    // Purge any historical/invalid NOT_IN queries on financial_transactions
+    // that violate Firestore StructuredQuery order-by rules (HTTP 400).
+    await local.db.delete(
+      'sync_queries',
+      where: "collectionName = 'financial_transactions' AND queryJson LIKE '%NOT_IN%'",
+    );
+    await local.db.update(
+      'sync_queries',
+      {'lastError': null},
+      where: "collectionName = 'financial_transactions'",
+    );
+    // Purge unindexed queries with employeeId that cause Firestore HTTP 400 missing index errors
+    await local.db.delete(
+      'sync_queries',
+      where: "queryJson LIKE '%employeeId%'",
+    );
+    await local.db.update(
+      'sync_queries',
+      {'lastError': null},
+      where: "lastError LIKE '%requires an index%'",
+    );
     await _register(local, 'user', {'id': sync.accountUid ?? tenant});
     if (tenant == sync.accountUid) {
       for (final c in ['roles', 'permissions']) {
@@ -489,27 +520,8 @@ class OfflineFirestoreService
                 'customer_balances',
                 'purchases',
                 'stock_movements',
-                'staff_attendance',
-                'staff_attendance_events',
               ].contains(collection))
             FirestoreFilter('outletId', 'EQUAL', outlet),
-          if (salaryAccess &&
-              salaryEmployeeId != null &&
-              [
-                'employee_salary_profiles',
-                'employee_outlet_allocations',
-                'staff_khata_transactions',
-                'salary_periods',
-                'staff_attendance',
-                'staff_attendance_events',
-              ].contains(collection))
-            FirestoreFilter('employeeId', 'EQUAL', salaryEmployeeId),
-          if (collection == 'financial_transactions' && !salaryAccess) ...[
-            const FirestoreFilter('transactionType', 'NOT_IN', [
-              'SALARY_PAYMENT',
-              'STAFF_ADVANCE',
-            ]),
-          ],
         ]),
       });
     }

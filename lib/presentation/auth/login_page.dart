@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/config/environment_config.dart';
+import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
 
 class LoginPage extends StatefulWidget {
@@ -49,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _showRuntimeDiagnostics() async {
     final diagnostics = await widget.controller.runtimeDiagnostics();
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -69,11 +71,11 @@ class _LoginPageState extends State<LoginPage> {
               Navigator.pop(context);
             },
             icon: const Icon(Icons.sync),
-            label: const Text('Retry catalogue sync'),
+            label: Text(l10n?.retry ?? 'Retry catalogue sync'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n?.close ?? 'Close'),
           ),
         ],
       ),
@@ -149,139 +151,142 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _formContent(BuildContext c) => Form(
-    key: _form,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Icon(
-          Icons.storefront_rounded,
-          size: 42,
-          color: Color(0xFFC18B35),
-        ),
-        const SizedBox(height: 14),
-        Text(
-          'Welcome Back',
-          textAlign: TextAlign.center,
-          style: Theme.of(c).textTheme.headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Sign in to NubiBill ERP',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.black54),
-        ),
-        const SizedBox(height: 30),
-        TextFormField(
-          controller: _email,
-          enableInteractiveSelection: true,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          autofillHints: const [AutofillHints.username],
-          decoration: const InputDecoration(
-            labelText: 'Email address',
-            prefixIcon: Icon(Icons.mail_outline),
+  Widget _formContent(BuildContext c) {
+    final l10n = AppLocalizations.of(c);
+    return Form(
+      key: _form,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(
+            Icons.storefront_rounded,
+            size: 42,
+            color: Color(0xFFC18B35),
           ),
-          validator: _emailValidator,
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _password,
-          enableInteractiveSelection: true,
-          obscureText: !_visible,
-          textInputAction: TextInputAction.done,
-          autofillHints: const [AutofillHints.password],
-          onFieldSubmitted: (_) => _login(),
-          decoration: InputDecoration(
-            labelText: 'Password',
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
-              tooltip: _visible ? 'Hide password' : 'Show password',
-              onPressed: () => setState(() => _visible = !_visible),
-              icon: Icon(_visible ? Icons.visibility_off : Icons.visibility),
-            ),
+          const SizedBox(height: 14),
+          Text(
+            l10n?.signIn ?? 'Sign In',
+            textAlign: TextAlign.center,
+            style: Theme.of(c).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
-          validator: (v) => (v ?? '').isEmpty ? 'Enter your password' : null,
-        ),
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Checkbox(
-                  value: _remember,
-                  onChanged: (v) => setState(() => _remember = v ?? false),
-                ),
-                const Text('Remember me'),
-              ],
+          const SizedBox(height: 6),
+          const Text(
+            'Sign in to NubiBill ERP',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.black54),
+          ),
+          const SizedBox(height: 30),
+          TextFormField(
+            controller: _email,
+            enableInteractiveSelection: true,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.username],
+            decoration: InputDecoration(
+              labelText: l10n?.email ?? 'Email address',
+              prefixIcon: const Icon(Icons.mail_outline),
             ),
-            TextButton(
-              onPressed: () => showDialog<void>(
-                context: c,
-                builder: (context) => AlertDialog(
-                  title: const Text('Forgot password?'),
-                  content: const Text(
-                    'Please contact your administrator to reset your password.',
+            validator: _emailValidator,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _password,
+            enableInteractiveSelection: true,
+            obscureText: !_visible,
+            textInputAction: TextInputAction.done,
+            autofillHints: const [AutofillHints.password],
+            onFieldSubmitted: (_) => _login(),
+            decoration: InputDecoration(
+              labelText: l10n?.password ?? 'Password',
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                tooltip: _visible ? 'Hide password' : 'Show password',
+                onPressed: () => setState(() => _visible = !_visible),
+                icon: Icon(_visible ? Icons.visibility_off : Icons.visibility),
+              ),
+            ),
+            validator: (v) => (v ?? '').isEmpty ? 'Enter your password' : null,
+          ),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(
+                    value: _remember,
+                    onChanged: (v) => setState(() => _remember = v ?? false),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
+                  const Text('Remember me'),
+                ],
+              ),
+              TextButton(
+                onPressed: () => showDialog<void>(
+                  context: c,
+                  builder: (context) => AlertDialog(
+                    title: Text(l10n?.forgotPassword ?? 'Forgot Password?'),
+                    content: const Text(
+                      'Please contact your administrator to reset your password.',
                     ),
-                  ],
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(l10n?.close ?? 'Close'),
+                      ),
+                    ],
+                  ),
                 ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: Text(l10n?.forgotPassword ?? 'Forgot Password?'),
               ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+            ],
+          ),
+          if (widget.controller.error.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                widget.controller.error,
+                style: TextStyle(color: Theme.of(c).colorScheme.error),
+                textAlign: TextAlign.center,
               ),
-              child: const Text('Forgot password?'),
             ),
           ],
-        ),
-        if (widget.controller.error.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              widget.controller.error,
-              style: TextStyle(color: Theme.of(c).colorScheme.error),
-              textAlign: TextAlign.center,
-            ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: _submitted ? null : _login,
+            child: _submitted
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(l10n?.signIn ?? 'Login'),
           ),
-        ],
-        const SizedBox(height: 12),
-        FilledButton(
-          onPressed: _submitted ? null : _login,
-          child: _submitted
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Text('Login'),
-        ),
-        const SizedBox(height: 18),
-        Center(
-          child: Text(
-            'Version ${EnvironmentConfig.appVersion}',
-            style: const TextStyle(fontSize: 12, color: Colors.black38),
-          ),
-        ),
-        if (kDebugMode)
+          const SizedBox(height: 18),
           Center(
-            child: TextButton.icon(
-              onPressed: _showRuntimeDiagnostics,
-              icon: const Icon(Icons.info_outline, size: 16),
-              label: const Text('Runtime diagnostics'),
+            child: Text(
+              'Version ${EnvironmentConfig.appVersion}',
+              style: const TextStyle(fontSize: 12, color: Colors.black38),
             ),
           ),
-      ],
-    ),
-  );
+          if (kDebugMode)
+            Center(
+              child: TextButton.icon(
+                onPressed: _showRuntimeDiagnostics,
+                icon: const Icon(Icons.info_outline, size: 16),
+                label: const Text('Runtime diagnostics'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

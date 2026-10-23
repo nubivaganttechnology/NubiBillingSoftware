@@ -6,6 +6,7 @@ class CustomerLedgerEntryModel {
     required this.customerId,
     required this.outletId,
     this.invoiceId,
+    this.originalOutletId,
     required this.transactionType,
     required this.amountPaise,
     this.debitPaise = 0,
@@ -42,6 +43,7 @@ class CustomerLedgerEntryModel {
   final String customerId;
   final String outletId;
   final String? invoiceId;
+  final String? originalOutletId;
   final String transactionType;
   final int amountPaise;
   final int debitPaise;
@@ -79,6 +81,7 @@ class CustomerLedgerEntryModel {
       customerId: data['customerId'] as String? ?? '',
       outletId: data['outletId'] as String? ?? '',
       invoiceId: data['invoiceId'] as String?,
+      originalOutletId: data['originalOutletId'] as String?,
       transactionType: resolvedType,
       amountPaise: amount,
       debitPaise: (data['debitPaise'] as num?)?.toInt() ?? 0,
@@ -115,6 +118,7 @@ class CustomerLedgerEntryModel {
     'tenantId': tenantId,
     'customerId': customerId,
     'outletId': outletId,
+    if (originalOutletId != null) 'originalOutletId': originalOutletId,
     if (invoiceId != null) 'invoiceId': invoiceId,
     'transactionType': transactionType,
     'amountPaise': amountPaise,

@@ -151,6 +151,8 @@ class ProductValidator {
 
     // 3. Evaluate the exact selected subcategory for normal Product creation.
     if (isNew) {
+      final isCentralProduct = productFields['masterProductId'] != null &&
+          productFields['masterProductId'].toString().trim().isNotEmpty;
       final selectionResolver = CatalogueSelectionResolver(firestore);
       final eligibility = selectedSubcategory == null
           ? null
@@ -163,7 +165,19 @@ class ProductValidator {
               businessSubTypeId: businessSubTypeId,
               resolvedTemplate: resolvedTemplate,
             );
-      final eligible = eligibility?.eligible ?? false;
+      var eligible = eligibility?.eligible ?? false;
+
+      // Central master product adoption: the manufacturer product is already catalogued
+      // and verified. If its resolved template is ready, do not block adoption
+      // even if the subcategory was marked notTemplateSelectable for generic custom creation.
+      if (!eligible && isCentralProduct) {
+        if (resolvedTemplate.readiness == TemplateReadinessState.ready &&
+            resolvedTemplate.allAttributes.isNotEmpty &&
+            eligibility?.exclusionReason ==
+                SelectionExclusionReason.notTemplateSelectable) {
+          eligible = true;
+        }
+      }
 
       if (!eligible) {
         errors.add(

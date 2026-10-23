@@ -1,13 +1,41 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:testflutter/core/constants/firebase_constants.dart';
 import 'package:testflutter/core/errors/app_exception.dart';
+import 'package:testflutter/data/local/local_data_source.dart';
 import 'package:testflutter/data/repositories/staff_salary_repository.dart';
 import 'package:testflutter/data/services/firestore_data_service.dart';
 import 'package:testflutter/data/services/firestore_transaction_service.dart';
+import 'package:testflutter/data/services/offline_firestore_service.dart';
 
 class _UnusedFirestore implements FirestoreDataService {
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class _FakeOfflineWithServerTx implements OfflineFirestoreService {
+  _FakeOfflineWithServerTx(this._server);
+  final FirestoreTransactionService _server;
+
+  @override
+  FirestoreTransactionService get serverTransactions => _server;
+
+  @override
+  LocalDataSource? get localDataSource => null;
+
+  @override
+  Future<T> runAtomicOperation<T>(
+    Future<T> Function(FirestoreTransactionContext) action, {
+    required String idToken,
+    int maxAttempts = 3,
+  }) async {
+    throw const AppException(
+      'Financial transactions must be confirmed directly by the server and cannot run in offline mode.',
+      code: 'offline-financial-prohibited',
+    );
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _Transactions implements FirestoreTransactionService {
@@ -110,7 +138,7 @@ void main() {
           periodEnd: DateTime(2026, 2, 28),
           workUnitsMilli: 0,
         )['baseEarningsPaise'],
-        3100000,
+          3100000,
       );
     },
   );
@@ -567,6 +595,299 @@ void main() {
     expect(
       tx.docs['${FirebaseConstants.salaryPeriods}/PER-1']!['employeeAcknowledgmentName'],
       'Worker',
+    );
+  });
+
+  test('outlets using ownerUid fallback rather than tenantId are accepted across salary operations', () async {
+    final tx = _Transactions();
+    // Employee with ownerUid, businessIds, outletIds
+    tx.docs['${FirebaseConstants.employees}/EMP-MIRZA'] = {
+      'ownerUid': 'TENANT-123',
+      'businessIds': ['BIZ-1'],
+      'outletIds': ['OUT-MIRZA'],
+    };
+    // Outlet with ownerUid (NO tenantId field), businessId
+    tx.docs['${FirebaseConstants.outlets}/OUT-MIRZA'] = {
+      'ownerUid': 'TENANT-123',
+      'businessId': 'BIZ-1',
+    };
+
+    final repo = StaffSalaryRepository(_UnusedFirestore(), tx);
+
+    // 1. saveSalaryProfile with auto-allocation (no initial split provided)
+    final profileId = await repo.saveSalaryProfile(
+      tenantId: 'TENANT-123',
+      businessId: 'BIZ-1',
+      employeeId: 'EMP-MIRZA',
+      salaryType: 'MONTHLY',
+      baseRatePaise: 2500000,
+      paymentCycle: 'MONTHLY',
+      effectiveFrom: DateTime.utc(2026, 10, 1),
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+    expect(profileId, isNotEmpty);
+
+    // Auto-allocation should have created 100% split for OUT-MIRZA
+    final autoAllocations = tx.docs.values
+        .where((d) => d['employeeId'] == 'EMP-MIRZA' && d['allocationId'] != null)
+        .toList();
+    expect(autoAllocations, hasLength(1));
+    expect(autoAllocations.first['outletBasisPoints'], {'OUT-MIRZA': 10000});
+
+    // 2. saveOutletAllocation with explicit split
+    await repo.saveOutletAllocation(
+      tenantId: 'TENANT-123',
+      businessId: 'BIZ-1',
+      employeeId: 'EMP-MIRZA',
+      effectiveFrom: DateTime.utc(2026, 11, 1),
+      outletBasisPoints: {'OUT-MIRZA': 10000},
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+
+    // 3. approveSalaryPeriod
+    final periodId = await repo.approveSalaryPeriod(
+      tenantId: 'TENANT-123',
+      businessId: 'BIZ-1',
+      employeeId: 'EMP-MIRZA',
+      profileId: profileId,
+      periodStart: DateTime.utc(2026, 10, 1),
+      periodEnd: DateTime.utc(2026, 10, 31),
+      workUnitsMilli: 1000,
+      approvedBy: 'OWNER-1',
+      token: 'token',
+    );
+    expect(periodId, isNotEmpty);
+
+    // 4. recordSalaryPayment
+    await repo.recordSalaryPayment(
+      tenantId: 'TENANT-123',
+      businessId: 'BIZ-1',
+      outletId: 'OUT-MIRZA',
+      employeeId: 'EMP-MIRZA',
+      periodId: periodId,
+      amountPaise: 2500000,
+      date: DateTime.utc(2026, 11, 1),
+      paymentMode: 'CASH',
+      requestId: 'REQ-1',
+      paidBy: 'OWNER-1',
+      token: 'token',
+    );
+
+    expect(
+      tx.docs['${FirebaseConstants.salaryPeriods}/$periodId']!['status'],
+      'PAID',
+    );
+  });
+
+  test('advances set UPI_ADVANCE and BANK_ADVANCE khata transaction types according to paymentMode', () async {
+    final tx = _Transactions();
+    tx.docs['${FirebaseConstants.employees}/EMP-UPI'] = {
+      'ownerUid': 'TENANT-1',
+      'businessIds': ['BIZ-1'],
+      'outletIds': ['OUT-1'],
+    };
+    tx.docs['${FirebaseConstants.outlets}/OUT-1'] = {
+      'ownerUid': 'TENANT-1',
+      'businessId': 'BIZ-1',
+    };
+
+    final repo = StaffSalaryRepository(_UnusedFirestore(), tx);
+
+    await repo.recordAdvance(
+      tenantId: 'TENANT-1',
+      businessId: 'BIZ-1',
+      outletId: 'OUT-1',
+      employeeId: 'EMP-UPI',
+      amountPaise: 50000,
+      date: DateTime.utc(2026, 10, 15),
+      paymentMode: 'UPI',
+      requestId: 'REQ-UPI-1',
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+
+    final upiKhata = tx.docs.values.firstWhere(
+      (d) => d['employeeId'] == 'EMP-UPI' && d['amountPaise'] == 50000,
+    );
+    expect(upiKhata['transactionType'], 'UPI_ADVANCE');
+
+    await repo.recordAdvance(
+      tenantId: 'TENANT-1',
+      businessId: 'BIZ-1',
+      outletId: 'OUT-1',
+      employeeId: 'EMP-UPI',
+      amountPaise: 75000,
+      date: DateTime.utc(2026, 10, 16),
+      paymentMode: 'BANK_TRANSFER',
+      requestId: 'REQ-BANK-1',
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+
+    final bankKhata = tx.docs.values.firstWhere(
+      (d) => d['employeeId'] == 'EMP-UPI' && d['amountPaise'] == 75000,
+    );
+    expect(bankKhata['transactionType'], 'BANK_ADVANCE');
+  });
+
+  test('outlet allocations and salary profiles allow updating existing records and ignore 0% splits', () async {
+    final tx = _Transactions();
+    tx.docs['${FirebaseConstants.employees}/EMP-ALLOC'] = {
+      'ownerUid': 'TENANT-1',
+      'businessIds': ['BIZ-1'],
+      'outletIds': ['OUT-1', 'OUT-2'],
+    };
+    tx.docs['${FirebaseConstants.outlets}/OUT-1'] = {
+      'ownerUid': 'TENANT-1',
+      'businessId': 'BIZ-1',
+    };
+    tx.docs['${FirebaseConstants.outlets}/OUT-2'] = {
+      'ownerUid': 'TENANT-1',
+      'businessId': 'BIZ-1',
+    };
+
+    final repo = StaffSalaryRepository(_UnusedFirestore(), tx);
+
+    // Initial allocation with 100% to OUT-1 and 0% to OUT-2
+    await repo.saveOutletAllocation(
+      tenantId: 'TENANT-1',
+      businessId: 'BIZ-1',
+      employeeId: 'EMP-ALLOC',
+      effectiveFrom: DateTime.utc(2026, 10, 1),
+      outletBasisPoints: {'OUT-1': 10000, 'OUT-2': 0},
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+
+    final allocs = tx.docs.values
+        .where((d) => d['employeeId'] == 'EMP-ALLOC' && d['allocationId'] != null)
+        .toList();
+    expect(allocs, hasLength(1));
+    expect(allocs.first['outletBasisPoints'], {'OUT-1': 10000});
+
+    // Update same allocation with 60% OUT-1 and 40% OUT-2 without throwing "already exists"
+    await repo.saveOutletAllocation(
+      tenantId: 'TENANT-1',
+      businessId: 'BIZ-1',
+      employeeId: 'EMP-ALLOC',
+      effectiveFrom: DateTime.utc(2026, 10, 1),
+      outletBasisPoints: {'OUT-1': 6000, 'OUT-2': 4000},
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+
+    final updatedAllocs = tx.docs.values
+        .where((d) => d['employeeId'] == 'EMP-ALLOC' && d['allocationId'] != null)
+        .toList();
+    expect(updatedAllocs, hasLength(1));
+    expect(updatedAllocs.first['outletBasisPoints'], {'OUT-1': 6000, 'OUT-2': 4000});
+
+    // Initial profile
+    final profileId = await repo.saveSalaryProfile(
+      tenantId: 'TENANT-1',
+      businessId: 'BIZ-1',
+      employeeId: 'EMP-ALLOC',
+      salaryType: 'MONTHLY',
+      baseRatePaise: 3000000,
+      paymentCycle: 'MONTHLY',
+      effectiveFrom: DateTime.utc(2026, 10, 1),
+      initialOutletBasisPoints: {'OUT-1': 10000, 'OUT-2': 0},
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+    expect(profileId, isNotEmpty);
+
+    // Update profile rate without throwing "already exists"
+    await repo.saveSalaryProfile(
+      tenantId: 'TENANT-1',
+      businessId: 'BIZ-1',
+      employeeId: 'EMP-ALLOC',
+      salaryType: 'MONTHLY',
+      baseRatePaise: 3500000,
+      paymentCycle: 'MONTHLY',
+      effectiveFrom: DateTime.utc(2026, 10, 1),
+      createdBy: 'OWNER-1',
+      token: 'token',
+    );
+
+    final prof = tx.docs['${FirebaseConstants.employeeSalaryProfiles}/$profileId'];
+    expect(prof!['baseRatePaise'], 3500000);
+  });
+
+  test('financial salary operations route to serverTransactions and bypass offline outbox financial block', () async {
+    final serverTx = _Transactions();
+    serverTx.docs['${FirebaseConstants.employees}/EMP-FIN'] = {
+      'tenantId': 'TENANT-FIN',
+      'businessId': 'BIZ-FIN',
+      'businessIds': ['BIZ-FIN'],
+      'outletId': 'OUT-FIN',
+      'outletIds': ['OUT-FIN'],
+    };
+    serverTx.docs['${FirebaseConstants.outlets}/OUT-FIN'] = {
+      'tenantId': 'TENANT-FIN',
+      'businessId': 'BIZ-FIN',
+    };
+    serverTx.docs['${FirebaseConstants.salaryPeriods}/PER-FIN'] = {
+      'tenantId': 'TENANT-FIN',
+      'businessId': 'BIZ-FIN',
+      'employeeId': 'EMP-FIN',
+      'status': 'APPROVED',
+      'netEarnedPaise': 3000000,
+      'paidAmountPaise': 0,
+      'advanceAdjustedPaise': 0,
+      'staffPurchaseAdjustedPaise': 0,
+    };
+
+    final offlineWithBlock = _FakeOfflineWithServerTx(serverTx);
+    final repo = StaffSalaryRepository(offlineWithBlock, offlineWithBlock);
+
+    // 1. Advance: would throw offline-financial-prohibited if called via atomicWrites, but succeeds via serverTransactions
+    final advEventId = await repo.recordAdvance(
+      tenantId: 'TENANT-FIN',
+      businessId: 'BIZ-FIN',
+      outletId: 'OUT-FIN',
+      employeeId: 'EMP-FIN',
+      amountPaise: 500000,
+      date: DateTime.utc(2026, 10, 10),
+      paymentMode: 'CASH',
+      requestId: 'ADV-REQ-1',
+      createdBy: 'OWNER-FIN',
+      token: 'token',
+    );
+    expect(advEventId, 'SKH-ADV-ADV-REQ-1');
+    expect(
+      serverTx.docs['${FirebaseConstants.financialTransactions}/FIN-$advEventId']!['amount'],
+      500000,
+    );
+
+    // 2. Salary Payment: would throw offline-financial-prohibited if called via atomicWrites, but succeeds via serverTransactions
+    final payEventId = await repo.recordSalaryPayment(
+      tenantId: 'TENANT-FIN',
+      businessId: 'BIZ-FIN',
+      outletId: 'OUT-FIN',
+      employeeId: 'EMP-FIN',
+      periodId: 'PER-FIN',
+      amountPaise: 2500000,
+      date: DateTime.utc(2026, 10, 15),
+      paymentMode: 'UPI',
+      requestId: 'SAL-PAY-REQ-1',
+      paidBy: 'OWNER-FIN',
+      token: 'token',
+    );
+    expect(payEventId, 'SKH-PAY-SAL-PAY-REQ-1');
+    expect(
+      serverTx.docs['${FirebaseConstants.salaryPeriods}/PER-FIN']!['paidAmountPaise'],
+      2500000,
+    );
+    expect(
+      serverTx.docs['${FirebaseConstants.salaryPeriods}/PER-FIN']!['status'],
+      'PARTIALLY_PAID',
+    );
+    expect(
+      serverTx.docs['${FirebaseConstants.financialTransactions}/FIN-SAL-SAL-PAY-REQ-1']!['amount'],
+      2500000,
     );
   });
 }

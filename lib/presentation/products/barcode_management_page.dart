@@ -5,6 +5,7 @@ import '../../core/utils/stock_quantity_formatter.dart';
 import '../../data/models/product_model.dart';
 import '../../data/models/product_variant_model.dart';
 import '../../l10n/app_localizations.dart';
+import '../../data/repositories/product_repository.dart';
 import 'barcode_printing_page.dart';
 
 enum _BarcodeSection { printing, lookup }
@@ -17,6 +18,7 @@ class BarcodeManagementPage extends StatefulWidget {
     required this.businessName,
     this.loadReceivedVariantIds = _noneReceived,
     this.loadReceivedVariantPricing,
+    this.loadVariantBatches,
     this.availableQuantities = const {},
     this.initialProductId,
     this.initialVariantId,
@@ -27,6 +29,8 @@ class BarcodeManagementPage extends StatefulWidget {
   final Future<Set<String>> Function() loadReceivedVariantIds;
   final Future<Map<String, ({int mrp, int sellingPrice})>> Function()?
   loadReceivedVariantPricing;
+  final Future<List<VariantBatchPriceOption>> Function(String variantId)?
+  loadVariantBatches;
   final Map<String, int> availableQuantities;
 
   static Future<Set<String>> _noneReceived() async => const {};
@@ -317,6 +321,7 @@ class _BarcodeManagementPageState extends State<BarcodeManagementPage> {
               businessName: widget.businessName,
               loadReceivedVariantIds: widget.loadReceivedVariantIds,
               loadReceivedVariantPricing: widget.loadReceivedVariantPricing,
+              loadVariantBatches: widget.loadVariantBatches,
               availableQuantities: widget.availableQuantities,
               initialProductId: _selectedProductId ?? widget.initialProductId,
               initialVariantId: _selectedVariantId ?? widget.initialVariantId,

@@ -131,6 +131,8 @@ class InventoryRepository {
     int? unitCostPaise,
     String? unit,
     String? transactionId,
+    int? sellingPricePaise,
+    int? mrpPaise,
   }) async {
     final authorized = isOwner ||
         PermissionCatalog.allows('inventory.opening_stock', permissions);
@@ -150,6 +152,18 @@ class InventoryRepository {
     }
     if (unitCostPaise != null && unitCostPaise < 0) {
       throw const AppException('Unit purchase cost cannot be negative.');
+    }
+    if (sellingPricePaise != null && sellingPricePaise < 0) {
+      throw const AppException('Selling price cannot be negative.');
+    }
+    if (mrpPaise != null && mrpPaise < 0) {
+      throw const AppException('MRP cannot be negative.');
+    }
+    if (sellingPricePaise != null &&
+        mrpPaise != null &&
+        mrpPaise > 0 &&
+        sellingPricePaise > mrpPaise) {
+      throw const AppException('Selling price cannot exceed MRP.');
     }
 
     final alreadyInitialized = await hasOpeningStockBeenInitialized(
@@ -217,12 +231,53 @@ class InventoryRepository {
         'receivedQty': quantity,
         'availableQty': quantity,
         'unitCost': cost,
+        'purchaseRate': cost,
+        'mrp': mrpPaise ?? 0,
+        'sellingPrice': sellingPricePaise ?? 0,
         'receivedDate': now,
         'status': 'AVAILABLE',
         'isDeleted': false,
         'createdAt': now,
         'updatedAt': now,
       });
+
+      if ((sellingPricePaise != null && sellingPricePaise > 0) ||
+          (mrpPaise != null && mrpPaise > 0) ||
+          cost > 0) {
+        final variantDoc = await tx.get(
+          FirebaseConstants.productVariants,
+          variantId,
+        );
+        final updates = <String, dynamic>{
+          if (sellingPricePaise != null && sellingPricePaise > 0)
+            'sellingPrice': sellingPricePaise,
+          if (mrpPaise != null && mrpPaise > 0) 'mrp': mrpPaise,
+          if (cost > 0) 'purchaseRate': cost,
+          'updatedAt': now,
+          'updatedBy': userId,
+        };
+        if (variantDoc.exists) {
+          tx.update(
+            FirebaseConstants.productVariants,
+            variantId,
+            updates,
+            updateTime: variantDoc.updateTime,
+          );
+        } else {
+          final productDoc = await tx.get(
+            FirebaseConstants.products,
+            variantId,
+          );
+          if (productDoc.exists) {
+            tx.update(
+              FirebaseConstants.products,
+              variantId,
+              updates,
+              updateTime: productDoc.updateTime,
+            );
+          }
+        }
+      }
 
       final batchMovementId =
           'BM_OP_${now.millisecondsSinceEpoch}_${IdGenerator.create('M')}';

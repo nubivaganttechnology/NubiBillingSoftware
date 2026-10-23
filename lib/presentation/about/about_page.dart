@@ -36,10 +36,11 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('About NubiBill Business ERP'),
+        title: Text(l10n?.aboutAppTitle ?? 'About NubiBill Business ERP'),
         elevation: 0,
       ),
       body: Center(

@@ -281,6 +281,7 @@ class DashboardRepository {
 
       int activeCount = 0;
       int inactiveCount = 0;
+      final placedProductIds = <String>{};
       final placedVariantIds = <String>{};
 
       for (final doc in outletDocs) {
@@ -290,6 +291,8 @@ class DashboardRepository {
         final isActive = fields['isActive'] != false && status != 'inactive';
         if (isActive) {
           activeCount++;
+          final pid = fields['productId'] as String?;
+          if (pid != null && pid.isNotEmpty) placedProductIds.add(pid);
         } else {
           inactiveCount++;
         }
@@ -313,6 +316,8 @@ class DashboardRepository {
           final status = (fields['status'] as String? ?? '').toLowerCase();
           if (status == 'active') {
             activeCount++;
+          final pid = fields['productId'] as String?;
+          if (pid != null && pid.isNotEmpty) placedProductIds.add(pid);
           } else {
             inactiveCount++;
           }
@@ -369,6 +374,10 @@ class DashboardRepository {
         if (vid.isEmpty) continue;
         final vStatus = (v['status'] as String? ?? '').toUpperCase();
         if (vStatus == 'INACTIVE' || v['isActive'] == false) continue;
+        final pid = (v['productId'] as String?) ?? '';
+        if (placedProductIds.isNotEmpty && !placedProductIds.contains(pid)) {
+          continue;
+        }
         if (placedVariantIds.isNotEmpty && !placedVariantIds.contains(vid)) {
           continue;
         }

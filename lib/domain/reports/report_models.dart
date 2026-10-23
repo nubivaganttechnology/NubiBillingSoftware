@@ -196,6 +196,8 @@ class ReportsOverviewData {
     this.topCategories = const [],
     this.totalSkusCount = 0,
     this.overdueReceivablesPaise = 0,
+    this.grossProfitPaise = 0,
+    this.grossProfitMarginPercentage,
   });
 
   final int netSalesPaise;
@@ -215,6 +217,8 @@ class ReportsOverviewData {
   final List<ReportCategoryDistribution> topCategories;
   final int totalSkusCount;
   final int overdueReceivablesPaise;
+  final int grossProfitPaise;
+  final double? grossProfitMarginPercentage;
 
   static ReportsOverviewData empty() => ReportsOverviewData(
     netSalesPaise: 0,
@@ -236,6 +240,8 @@ class ReportsOverviewData {
     topCategories: const [],
     totalSkusCount: 0,
     overdueReceivablesPaise: 0,
+    grossProfitPaise: 0,
+    grossProfitMarginPercentage: null,
   );
 }
 

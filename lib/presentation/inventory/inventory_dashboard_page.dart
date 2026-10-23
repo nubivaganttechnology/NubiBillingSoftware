@@ -704,7 +704,7 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
       _KpiCard(
         title: l10n?.totalItems ?? 'Total Products / SKUs',
         value: totalCount.toString(),
-        subtitle: '$totalCount Active • $inactiveCount Inactive',
+        subtitle: '${totalCount - inactiveCount} Active • $inactiveCount Inactive',
         icon: Icons.inventory_2_rounded,
         accentColor: const Color(0xFF2563EB),
         isSelected: _status == 'ALL',
@@ -2758,8 +2758,9 @@ class _InventoryDashboardPageState extends State<InventoryDashboardPage> {
       return false;
     }
 
-    if (_status == 'INACTIVE' && row.product.isActive) return false;
-    if (_status != 'INACTIVE' && !row.product.isActive && _status != 'ALL') {
+    final isRowActive = row.product.isActive && row.variant.isActive;
+    if (_status == 'INACTIVE' && isRowActive) return false;
+    if (_status != 'INACTIVE' && !isRowActive && _status != 'ALL') {
       return false;
     }
     if (_status == 'OUT' && row.stock > 0) return false;
@@ -2832,7 +2833,7 @@ class _InventoryRow {
   final int stock;
 
   String get status {
-    if (!product.isActive) return 'INACTIVE';
+    if (!product.isActive || !variant.isActive) return 'INACTIVE';
     if (stock <= 0) return 'OUT';
     if (stock <= variant.reorderLevel) return 'LOW';
     return 'IN_STOCK';
@@ -3088,6 +3089,8 @@ class _OpeningStockDialog extends StatefulWidget {
 class _OpeningStockDialogState extends State<_OpeningStockDialog> {
   late final TextEditingController _quantity;
   late final TextEditingController _cost;
+  late final TextEditingController _sellingPrice;
+  late final TextEditingController _mrp;
   late final TextEditingController _reason;
   bool _saving = false;
 
@@ -3096,6 +3099,16 @@ class _OpeningStockDialogState extends State<_OpeningStockDialog> {
     super.initState();
     _quantity = TextEditingController();
     _cost = TextEditingController();
+    _sellingPrice = TextEditingController(
+      text: widget.row.variant.sellingPrice > 0
+          ? (widget.row.variant.sellingPrice / 100).toStringAsFixed(2)
+          : '',
+    );
+    _mrp = TextEditingController(
+      text: widget.row.variant.mrp > 0
+          ? (widget.row.variant.mrp / 100).toStringAsFixed(2)
+          : '',
+    );
     _reason = TextEditingController(text: 'Initial setup opening inventory');
   }
 
@@ -3103,6 +3116,8 @@ class _OpeningStockDialogState extends State<_OpeningStockDialog> {
   void dispose() {
     _quantity.dispose();
     _cost.dispose();
+    _sellingPrice.dispose();
+    _mrp.dispose();
     _reason.dispose();
     super.dispose();
   }
@@ -3112,6 +3127,8 @@ class _OpeningStockDialogState extends State<_OpeningStockDialog> {
     final l10n = AppLocalizations.of(context);
     final qty = _parseStockQuantity(_quantity.text);
     final unitCost = _parseRupeesToPaise(_cost.text);
+    final sellingPrice = _parseRupeesToPaise(_sellingPrice.text);
+    final mrp = _parseRupeesToPaise(_mrp.text);
 
     if (qty == null || qty <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -3129,6 +3146,16 @@ class _OpeningStockDialogState extends State<_OpeningStockDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Unit purchase cost is required for opening stock.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    if (sellingPrice != null && mrp != null && mrp > 0 && sellingPrice > mrp) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selling price cannot exceed MRP.'),
           backgroundColor: Color(0xFFDC2626),
         ),
       );
@@ -3153,7 +3180,10 @@ class _OpeningStockDialogState extends State<_OpeningStockDialog> {
         ),
         title: const Text('Confirm Opening Stock Registration'),
         content: Text(
-          'You are registering   at ₹ per unit (Total Valuation: ₹).\n\nOpening stock permanently establishes the starting physical inventory baseline and cannot be re-entered. Do you want to proceed?',
+          'You are registering ${_formatStock(qty)} ${widget.cleanUnit} at ₹${(unitCost / 100).toStringAsFixed(2)} per unit (Total Valuation: ₹${((qty * unitCost) / 100000.0).toStringAsFixed(2)}).'
+          '${sellingPrice != null && sellingPrice > 0 ? '\nSelling Price: ₹${(sellingPrice / 100).toStringAsFixed(2)}' : ''}'
+          '${mrp != null && mrp > 0 ? '\nMRP: ₹${(mrp / 100).toStringAsFixed(2)}' : ''}\n\n'
+          'Opening stock permanently establishes the starting physical inventory baseline and cannot be re-entered. Do you want to proceed?',
         ),
         actions: [
           TextButton(
@@ -3179,7 +3209,11 @@ class _OpeningStockDialogState extends State<_OpeningStockDialog> {
         reason: _reason.text.trim(),
         unitCostPaise: unitCost,
         unit: widget.cleanUnit,
+        sellingPricePaise: sellingPrice,
+        mrpPaise: mrp,
       );
+      await widget.controller.syncNowWithServer();
+      await widget.controller.loadProducts();
       if (!mounted) return;
       Navigator.of(context).pop(audit);
     } catch (e) {
@@ -3298,6 +3332,36 @@ class _OpeningStockDialogState extends State<_OpeningStockDialog> {
                   prefixText: '₹ ',
                 ),
                 onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _sellingPrice,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Selling Price (₹)',
+                        hintText: 'e.g. 200.00',
+                        prefixText: '₹ ',
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _mrp,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'MRP (₹)',
+                        hintText: 'e.g. 250.00',
+                        prefixText: '₹ ',
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 14),
               TextField(

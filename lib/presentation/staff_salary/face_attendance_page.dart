@@ -26,8 +26,19 @@ class _FaceAttendancePageState extends State<FaceAttendancePage> {
   OutletGeofence? _outletGeofence;
   EmployeeDeviceRegistration? _deviceRegistration;
   int _flaggedCount = 0;
-  bool get _android =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  bool get _isMobile =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+  bool get _android => _isMobile;
+  EmployeeModel? get _currentEmployee {
+    try {
+      return c.employee;
+    } catch (_) {
+      return null;
+    }
+  }
+
   EmployeeModel? get _employee {
     for (final employee in _staff) {
       if (employee.employeeId == _employeeId) return employee;
@@ -67,29 +78,40 @@ class _FaceAttendancePageState extends State<FaceAttendancePage> {
     final scope = c.appContext;
     final staff = await c.loadStaffKhataEmployees();
     if (!mounted || c.appContext != scope) return;
+    final effectiveStaff = <EmployeeModel>[...staff];
+    final loggedInEmp = _currentEmployee;
+    if (loggedInEmp != null &&
+        !effectiveStaff.any((e) => e.employeeId == loggedInEmp.employeeId)) {
+      effectiveStaff.add(loggedInEmp);
+    }
     setState(() {
-      _staff = staff;
-      if (!staff.any((e) => e.employeeId == _employeeId)) {
-        _employeeId = staff.firstOrNull?.employeeId;
+      _staff = effectiveStaff;
+      if (!effectiveStaff.any((e) => e.employeeId == _employeeId)) {
+        _employeeId = (scope?.accountType == 'employee' && scope?.employeeId != null)
+            ? scope!.employeeId
+            : effectiveStaff.firstOrNull?.employeeId;
       }
     });
-    if (_android &&
-        (c.canEnrollBiometricAttendance() ||
-            c.canRevokeBiometricAttendance())) {
-      final device = await c.faceVaultStore.deviceId();
-      if (!mounted || c.appContext != scope) return;
-      setState(() => _device = device);
+    if (_android) {
+      try {
+        final device = await c.faceVaultStore.deviceId();
+        if (mounted && c.appContext == scope) {
+          setState(() => _device = device);
+        }
+      } catch (_) {}
       await _refreshEnrollment();
     }
     if (scope != null && scope.outletId != null) {
-      final geo = await c.geofenceService.getOutletGeofence(scope.outletId!);
-      final flagged = await _loadFlaggedAttendanceCount();
-      if (mounted && c.appContext == scope) {
-        setState(() {
-          _outletGeofence = geo;
-          _flaggedCount = flagged;
-        });
-      }
+      try {
+        final geo = await c.geofenceService.getOutletGeofence(scope.outletId!);
+        final flagged = await _loadFlaggedAttendanceCount();
+        if (mounted && c.appContext == scope) {
+          setState(() {
+            _outletGeofence = geo;
+            _flaggedCount = flagged;
+          });
+        }
+      } catch (_) {}
     }
   });
 
@@ -129,19 +151,21 @@ class _FaceAttendancePageState extends State<FaceAttendancePage> {
         !_android) {
       return;
     }
-    final enrolled = await c.biometricStorage.hasEnrollment(
-      tenantId: scope.ownerUid,
-      businessId: scope.businessId!,
-      outletId: scope.outletId!,
-      employeeId: employee,
-    );
-    final reg = await c.deviceRegistrationService.getRegistration(employee);
-    if (mounted && c.appContext == scope && employee == _employeeId) {
-      setState(() {
-        _hasEnrollment = enrolled;
-        _deviceRegistration = reg;
-      });
-    }
+    try {
+      final enrolled = await c.biometricStorage.hasEnrollment(
+        tenantId: scope.ownerUid,
+        businessId: scope.businessId!,
+        outletId: scope.outletId!,
+        employeeId: employee,
+      );
+      final reg = await c.deviceRegistrationService.getRegistration(employee);
+      if (mounted && c.appContext == scope && employee == _employeeId) {
+        setState(() {
+          _hasEnrollment = enrolled;
+          _deviceRegistration = reg;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<bool> _confirm(String title, String text) async =>
@@ -492,6 +516,45 @@ class _FaceAttendancePageState extends State<FaceAttendancePage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (!_isMobile) ...[
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: Colors.amber.shade400),
+                ),
+                color: Colors.amber.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      Icon(Icons.phone_android, color: Colors.amber.shade900, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Mobile Only Feature / শুধুমাত্র মোবাইলে প্রযোজ্য',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber.shade900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Face biometric attendance and camera enrollment require a mobile device (Android / iOS). On desktop and web, please use manual Clock In / Clock Out from the Attendance dashboard.',
+                              style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
             // Header card
             Card(
               elevation: 0,
@@ -564,90 +627,6 @@ class _FaceAttendancePageState extends State<FaceAttendancePage> {
               ),
             ),
             const SizedBox(height: 14),
-            // MOBILE GEOFENCING & ANTI-FRAUD CARD
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(color: Colors.indigo.shade200),
-              ),
-              color: Colors.indigo.shade50.withValues(alpha: 0.5),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.location_on_outlined, color: Colors.indigo.shade800, size: 22),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Mobile GPS Geofence & Fraud Protection',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.indigo.shade900,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _outletGeofence != null
-                          ? 'Configured Geofence: ${_outletGeofence!.latitude.toStringAsFixed(5)}, ${_outletGeofence!.longitude.toStringAsFixed(5)} (Radius: ${_outletGeofence!.radiusMeters.toStringAsFixed(0)}m)'
-                          : 'Outlet Geofence: Not configured (Default 100m perimeter enforced on-demand)',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _employee != null
-                          ? (_deviceRegistration != null
-                              ? 'Device Binding: ${_deviceRegistration!.status} (${_deviceRegistration!.deviceModel})'
-                              : 'Device Binding: Not registered for ${_employee!.name} (Optional)')
-                          : 'Device Binding: Select an employee below',
-                      style: const TextStyle(fontSize: 12, color: Colors.black87),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: _busy ? null : _configureOutletGeofence,
-                          icon: const Icon(Icons.edit_location_alt, size: 18),
-                          label: const Text('Configure Geofence'),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: _busy || _employee == null ? null : _manageDeviceBinding,
-                          icon: const Icon(Icons.phone_android, size: 18),
-                          label: const Text('Device Binding'),
-                        ),
-                        FilledButton.tonalIcon(
-                          onPressed: _busy ? null : _showFlaggedAttendanceReview,
-                          icon: Icon(
-                            _flaggedCount > 0 ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-                            size: 18,
-                            color: _flaggedCount > 0 ? Colors.orange.shade800 : Colors.teal.shade800,
-                          ),
-                          label: Text(
-                            'Review Flagged ($_flaggedCount)',
-                            style: TextStyle(
-                              color: _flaggedCount > 0 ? Colors.orange.shade900 : Colors.teal.shade900,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-
-
-
-            if (_busy) const LinearProgressIndicator(),
             if (_message != null)
               Container(
                 padding: const EdgeInsets.all(10),
@@ -812,58 +791,145 @@ class _FaceAttendancePageState extends State<FaceAttendancePage> {
                 child: const Text('Withdraw former employee enrollment by ID'),
               ),
               const SizedBox(height: 16),
-              // LIVE RECOGNITION HERO SECTION
-              Card(
-                elevation: 1,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: Colors.teal.shade300),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.face_retouching_natural,
-                              color: Colors.teal.shade700, size: 26),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Live Face Recognition Demo',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal.shade900,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Performs real-time offline SFace recognition against locally enrolled staff '
-                        'for this outlet with on-demand GPS geofencing and randomized interactive liveness '
-                        'challenges (Blink, Turn Left/Right). Records verified or manager-flagged attendance.',
-                        style: TextStyle(fontSize: 13, color: Colors.black87),
-                      ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: enabled && !_busy ? _openLiveRecognition : null,
-                          icon: const Icon(Icons.videocam),
-                          label: const Text('Open Live Face Recognition'),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: Colors.teal.shade700,
+            const SizedBox(height: 16),
+            // LIVE RECOGNITION ATTENDANCE HERO CARD (VISIBLE TO ALL USERS & WORKERS)
+            Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: Colors.teal.shade300),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.face_retouching_natural,
+                            color: Colors.teal.shade700, size: 26),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Live Face Recognition Demo',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal.shade900,
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Performs real-time offline SFace recognition against locally enrolled staff '
+                      'for this outlet with on-demand GPS geofencing and randomized interactive liveness '
+                      'challenges (Blink, Turn Left/Right). Records verified or manager-flagged attendance.',
+                      style: TextStyle(fontSize: 13, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: enabled && !_busy ? _openLiveRecognition : null,
+                        icon: const Icon(Icons.videocam),
+                        label: const Text('Open Live Face Recognition'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: Colors.teal.shade700,
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              if (scope.accountType == 'owner') ...[
+            ),
+            const SizedBox(height: 14),
+            // MOBILE GEOFENCING & ANTI-FRAUD CARD
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: Colors.indigo.shade200),
+              ),
+              color: Colors.indigo.shade50.withValues(alpha: 0.5),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_outlined, color: Colors.indigo.shade800, size: 22),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Mobile GPS Geofence & Fraud Protection',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.indigo.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _outletGeofence != null
+                          ? 'Configured Geofence: ${_outletGeofence!.latitude.toStringAsFixed(5)}, ${_outletGeofence!.longitude.toStringAsFixed(5)} (Radius: ${_outletGeofence!.radiusMeters.toStringAsFixed(0)}m)'
+                          : 'Outlet Geofence: Not configured (Default 100m perimeter enforced on-demand)',
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _employee != null
+                          ? (_deviceRegistration != null
+                              ? 'Device Binding: ${_deviceRegistration!.status} (${_deviceRegistration!.deviceModel})'
+                              : 'Device Binding: Not registered for ${_employee!.name} (Optional)')
+                          : 'Device Binding: Select an employee below',
+                      style: const TextStyle(fontSize: 12, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _busy ? null : _configureOutletGeofence,
+                          icon: const Icon(Icons.edit_location_alt, size: 18),
+                          label: const Text('Configure Geofence'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _busy || _employee == null ? null : _manageDeviceBinding,
+                          icon: const Icon(Icons.phone_android, size: 18),
+                          label: const Text('Device Binding'),
+                        ),
+                        FilledButton.tonalIcon(
+                          onPressed: _busy ? null : _showFlaggedAttendanceReview,
+                          icon: Icon(
+                            _flaggedCount > 0 ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+                            size: 18,
+                            color: _flaggedCount > 0 ? Colors.orange.shade800 : Colors.teal.shade800,
+                          ),
+                          label: Text(
+                            'Review Flagged ($_flaggedCount)',
+                            style: TextStyle(
+                              color: _flaggedCount > 0 ? Colors.orange.shade900 : Colors.teal.shade900,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+
+
+            if (_busy) const LinearProgressIndicator(),
+            const SizedBox(height: 16),
+            if (scope.accountType == 'owner') ...[
                 const Divider(height: 24),
                 TextButton(
                   onPressed: _android && !_busy

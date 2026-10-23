@@ -3,13 +3,16 @@ import 'dart:typed_data';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/errors/app_exception.dart';
 import '../../data/models/purchase_bill_model.dart';
 import '../../data/services/purchase_document_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/custom_date_range_dialog.dart';
+import '../widgets/sync_task_dialog.dart';
 import 'purchase_entry_page.dart';
 import 'supplier_pages.dart' show showSupplierRefundEntry;
 import '../app_controller.dart';
+import '../products/barcode_printing_page.dart';
 
 const advancedCorrectionMessage =
     'This field affects inventory, valuation, supplier payable, tax, or payment history and requires the advanced correction workflow.';
@@ -617,7 +620,7 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
                   _PurchaseTile(
                     bill: bills[i],
                     busy: c.purchaseSaving,
-                    onApprove: () => _approve(context, bills[i]),
+                    onApprove: () => _approve(bills[i]),
                     onPay: () => _recordPayment(context, bills[i]),
                     onEditDraft: () => setState(() {
                       _editingDraft = bills[i];
@@ -626,6 +629,8 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
                     onCorrect: () => _correctPurchase(context, bills[i]),
                     onView: () => _viewPurchase(context, bills[i]),
                     onPrint: () => _printOrDownloadPurchase(context, bills[i]),
+                    onPrintBarcodes: () =>
+                        _printBarcodesForPurchase(context, bills[i]),
                     onPaymentHistory: () =>
                         _showPaymentHistory(context, bills[i]),
                   ),
@@ -746,13 +751,15 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
     });
   }
 
-  void _returnToPurchaseList() {
+  void _returnToPurchaseList() async {
     if (!mounted) return;
     setState(() {
       _creatingPurchase = false;
       _editingDraft = null;
     });
-    widget.controller.loadPurchases();
+    await widget.controller.loadPurchases();
+    await widget.controller.loadProducts();
+    if (mounted) setState(() {});
   }
 
   Future<void> _viewPurchase(
@@ -820,11 +827,77 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
           ),
         ),
         actions: [
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _printBarcodesForPurchase(context, bill);
+            },
+            icon: const Icon(Icons.qr_code_2, size: 18),
+            label: const Text('Print Barcodes'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _printBarcodesForPurchase(BuildContext context, PurchaseBillModel bill) {
+    final c = widget.controller;
+    final businessProducts = c.products;
+    final businessName = c.businesses
+            .where((b) => b.businessId == c.appContext?.businessId)
+            .firstOrNull
+            ?.businessName ??
+        '';
+
+    final copies = <String, int>{};
+    final mrpOverrides = <String, int>{};
+    final sellingOverrides = <String, int>{};
+    String? firstProductId;
+    String? firstVariantId;
+
+    for (final item in bill.items) {
+      final vid = item.variantId;
+      if (vid.isEmpty) continue;
+      firstVariantId ??= vid;
+      firstProductId ??= item.productId;
+      copies[vid] = item.quantity;
+      if (item.mrp != null && item.mrp! > 0) {
+        mrpOverrides[vid] = item.mrp!;
+      }
+      if (item.sellingPrice != null && item.sellingPrice! > 0) {
+        sellingOverrides[vid] = item.sellingPrice!;
+      }
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => Scaffold(
+          appBar: AppBar(
+            title: Text('Print Barcodes: ${bill.purchaseNumber}'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(ctx).pop(),
+            ),
+          ),
+          body: BarcodePrintingPage(
+            products: businessProducts,
+            businessName: businessName,
+            loadReceivedVariantIds: c.loadBarcodeReceivedVariantIds,
+            loadReceivedVariantPricing: c.loadBarcodeReceivedVariantPricing,
+            availableQuantities: c.productStock,
+            initialProductId: firstProductId,
+            initialVariantId: firstVariantId,
+            initialCopies: copies,
+            initialMrpOverrides: mrpOverrides,
+            initialSellingPriceOverrides: sellingOverrides,
+            showBackButton: true,
+            onClose: () => Navigator.of(ctx).pop(),
+          ),
+        ),
       ),
     );
   }
@@ -1709,31 +1782,73 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
         ?.copyWith(fontWeight: FontWeight.w700),
   );
 
-  Future<void> _approve(BuildContext context, PurchaseBillModel bill) async {
-    final yes = await showDialog<bool>(
+  Future<void> _approve(PurchaseBillModel bill) async {
+    final result = await showDialog<_ApprovePurchaseDialogResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Approve purchase?'),
-        content: Text(
-          'This will receive stock and post ₹${_money(bill.grandTotal)} to the supplier ledger.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Approve'),
-          ),
-        ],
-      ),
+      builder: (_) => _ApprovePurchaseDialog(bill: bill),
     );
-    if (yes == true &&
-        context.mounted &&
-        await widget.controller.approvePurchase(bill.purchaseBillId)) {
-      if (context.mounted) {
-        _toast(context, 'Purchase approved and stock received.');
+    if (result == null || !result.confirmed || !mounted) return;
+
+    try {
+      await showSyncTaskDialog<void>(
+        context: context,
+        title: 'Approving Purchase Bill',
+        task: (updateStatus) async {
+          updateStatus('Approving purchase on server...');
+          final approved =
+              await widget.controller.approvePurchase(bill.purchaseBillId);
+          if (!approved) {
+            throw AppException(
+              widget.controller.error.isNotEmpty
+                  ? widget.controller.error
+                  : 'Unable to approve purchase.',
+            );
+          }
+
+          if (result.recordPayment) {
+            updateStatus('Recording payment on server...');
+            final updatedBill = widget.controller.purchaseBills
+                    .where((b) => b.purchaseBillId == bill.purchaseBillId)
+                    .firstOrNull ??
+                bill;
+            final dueToPay = updatedBill.outstandingAmount > 0
+                ? updatedBill.outstandingAmount
+                : (bill.grandTotal - bill.paidAmount).clamp(0, bill.grandTotal);
+            final paid = await widget.controller.recordSupplierPayment(
+              bill: updatedBill,
+              amount: dueToPay > 0 ? dueToPay : bill.grandTotal,
+              paymentMode: result.paymentMode,
+              reference: result.reference.isNotEmpty
+                  ? result.reference
+                  : 'Paid on approval',
+            );
+            if (!paid) {
+              debugPrint('Payment recording notice: ${widget.controller.error}');
+            }
+          }
+
+          updateStatus('Uploading to server & syncing offline database...');
+          await widget.controller.syncNowWithServer();
+          await widget.controller.loadPurchases();
+          await widget.controller.loadProducts();
+
+          updateStatus('Purchase approved & synchronized successfully!');
+        },
+      );
+
+      if (mounted) {
+        if (result.recordPayment) {
+          _toast(
+            context,
+            'Purchase approved and ₹${_money(bill.grandTotal)} ${result.paymentMode} payment recorded.',
+          );
+        } else {
+          _toast(context, 'Purchase approved as credit.');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _toast(context, 'Error approving purchase: $e');
       }
     }
   }
@@ -1742,7 +1857,10 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
     BuildContext context,
     PurchaseBillModel bill,
   ) async {
-    final amount = TextEditingController(text: _money(bill.outstandingAmount));
+    final effectiveDue = bill.outstandingAmount > 0
+        ? bill.outstandingAmount
+        : (bill.grandTotal - bill.paidAmount).clamp(0, bill.grandTotal);
+    final amount = TextEditingController(text: _money(effectiveDue));
     final reference = TextEditingController();
     var mode = 'CASH';
     final result = await showDialog<(int, String, String)>(
@@ -1755,7 +1873,7 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Outstanding: ₹${_money(bill.outstandingAmount)}'),
+                Text('Outstanding: ₹${_money(effectiveDue)}'),
                 const SizedBox(height: 12),
                 TextField(
                   controller: amount,
@@ -1800,7 +1918,7 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
                 final cents = _parseMoney(amount.text);
                 if (cents != null &&
                     cents > 0 &&
-                    cents <= bill.outstandingAmount) {
+                    cents <= effectiveDue) {
                   Navigator.pop(context, (cents, mode, reference.text.trim()));
                 }
               },
@@ -1826,6 +1944,152 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
   void _toast(BuildContext context, String message) =>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
+}
+
+class _ApprovePurchaseDialogResult {
+  final bool confirmed;
+  final bool recordPayment;
+  final String paymentMode;
+  final String reference;
+
+  const _ApprovePurchaseDialogResult({
+    required this.confirmed,
+    required this.recordPayment,
+    required this.paymentMode,
+    required this.reference,
+  });
+}
+
+class _ApprovePurchaseDialog extends StatefulWidget {
+  final PurchaseBillModel bill;
+
+  const _ApprovePurchaseDialog({required this.bill});
+
+  @override
+  State<_ApprovePurchaseDialog> createState() => _ApprovePurchaseDialogState();
+}
+
+class _ApprovePurchaseDialogState extends State<_ApprovePurchaseDialog> {
+  String _mode = 'CASH';
+  bool _recordPayment = true;
+  late final TextEditingController _referenceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _referenceController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _referenceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bill = widget.bill;
+    final totalStr = (bill.grandTotal / 100).toStringAsFixed(2);
+    return AlertDialog(
+      title: const Text('Approve Purchase'),
+      content: SizedBox(
+        width: 400,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Invoice: ${bill.supplierInvoiceNumber.isEmpty ? bill.purchaseNumber ?? '' : bill.supplierInvoiceNumber}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            Text('Supplier: ${bill.supplierName ?? '—'}'),
+            const SizedBox(height: 8),
+            Text(
+              'Grand Total: ₹$totalStr',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF10263D),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text(
+                'Record Payment Now',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                _recordPayment
+                    ? 'Full payment of ₹$totalStr will be recorded'
+                    : 'Bill will remain Unpaid / Credit',
+              ),
+              value: _recordPayment,
+              onChanged: (v) => setState(() => _recordPayment = v ?? false),
+            ),
+            if (_recordPayment) ...[
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _mode,
+                decoration: const InputDecoration(
+                  labelText: 'Payment Mode',
+                  isDense: true,
+                ),
+                items: const [
+                  'CASH',
+                  'UPI',
+                  'BANK_TRANSFER',
+                  'CHEQUE',
+                  'CARD',
+                ]
+                    .map(
+                      (m) => DropdownMenuItem(
+                        value: m,
+                        child: Text(m.replaceAll('_', ' ')),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) => setState(() => _mode = v ?? 'CASH'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _referenceController,
+                decoration: const InputDecoration(
+                  labelText: 'Reference / Note (optional)',
+                  isDense: true,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF059669),
+          ),
+          onPressed: () => Navigator.of(context).pop(
+            _ApprovePurchaseDialogResult(
+              confirmed: true,
+              recordPayment: _recordPayment,
+              paymentMode: _mode,
+              reference: _referenceController.text.trim(),
+            ),
+          ),
+          icon: const Icon(Icons.check, size: 16),
+          label: Text(
+            _recordPayment ? 'Approve & Pay' : 'Approve as Unpaid',
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _PurchaseKpiCard extends StatelessWidget {
@@ -1922,13 +2186,14 @@ class _PurchaseTile extends StatelessWidget {
     required this.onCorrect,
     required this.onView,
     required this.onPrint,
+    required this.onPrintBarcodes,
     required this.onPaymentHistory,
   });
   final PurchaseBillModel bill;
   final bool busy;
   final VoidCallback onApprove, onPay;
   final VoidCallback onEditDraft, onCorrect, onView;
-  final VoidCallback onPrint, onPaymentHistory;
+  final VoidCallback onPrint, onPrintBarcodes, onPaymentHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -2284,15 +2549,22 @@ class _PurchaseTile extends StatelessWidget {
                         color: Color(0xFF0F172A),
                       ),
                     ),
-                    if (bill.outstandingAmount > 0)
-                      Text(
-                        'Due: ₹${_money(bill.outstandingAmount)}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFDC2626),
-                        ),
-                      ),
+                    () {
+                      final due = bill.outstandingAmount > 0
+                          ? bill.outstandingAmount
+                          : (bill.grandTotal - bill.paidAmount).clamp(0, bill.grandTotal);
+                      if (due > 0) {
+                        return Text(
+                          'Due: ₹${_money(due)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFDC2626),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }(),
                     if (bill.paidAmount > 0)
                       Text(
                         'Paid: ₹${_money(bill.paidAmount)}',
@@ -2330,7 +2602,9 @@ class _PurchaseTile extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
-                  if (isApproved && bill.outstandingAmount > 0)
+                  if (isApproved &&
+                      (bill.outstandingAmount > 0 ||
+                          (bill.grandTotal - bill.paidAmount) > 0))
                     FilledButton.icon(
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF132B45),
@@ -2388,6 +2662,8 @@ class _PurchaseTile extends StatelessWidget {
                           onCorrect();
                         case 'print':
                           onPrint();
+                        case 'print_barcodes':
+                          onPrintBarcodes();
                         case 'payments':
                           onPaymentHistory();
                       }
@@ -2404,6 +2680,20 @@ class _PurchaseTile extends StatelessWidget {
                             ),
                             SizedBox(width: 8),
                             Text('View Details'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'print_barcodes',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.qr_code_2,
+                              size: 18,
+                              color: Color(0xFF64748B),
+                            ),
+                            SizedBox(width: 8),
+                            Text('Print Barcodes'),
                           ],
                         ),
                       ),

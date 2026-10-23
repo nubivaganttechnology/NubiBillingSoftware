@@ -1,0 +1,11 @@
+# Treat font and image binaries as binary to prevent Git CRLF corruption
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

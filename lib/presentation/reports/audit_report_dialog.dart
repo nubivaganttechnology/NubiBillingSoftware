@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/reports/report_models.dart';
+import '../../l10n/app_localizations.dart';
 import 'report_export_service.dart';
 
 class AuditReportDialog extends StatefulWidget {
@@ -18,7 +19,15 @@ class _AuditReportDialogState extends State<AuditReportDialog> {
   Future<void> _export(Future<Object?> Function() action) async {
     setState(() => _exporting = true);
     try {
-      await action();
+      final res = await action();
+      if (mounted && res is String && res.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Exported successfully: $res'),
+            backgroundColor: const Color(0xFF16A34A),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -44,7 +53,7 @@ class _AuditReportDialogState extends State<AuditReportDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context)?.close ?? 'Close'),
           ),
         ],
       );

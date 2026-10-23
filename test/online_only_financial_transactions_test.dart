@@ -9,12 +9,14 @@ import 'package:testflutter/data/local/local_data_source.dart';
 import 'package:testflutter/data/local/local_database.dart';
 import 'package:testflutter/data/models/customer_model.dart';
 import 'package:testflutter/data/models/customer_payment_model.dart';
+import 'package:testflutter/data/models/invoice_model.dart';
 import 'package:testflutter/data/repositories/billing_repository.dart';
 import 'package:testflutter/data/repositories/customer_repository.dart';
 import 'package:testflutter/data/services/firestore_data_service.dart';
 import 'package:testflutter/data/services/firestore_rest_service.dart';
 import 'package:testflutter/data/services/firestore_transaction_service.dart';
 import 'package:testflutter/data/sync/sync_outbox_repository.dart';
+import 'package:testflutter/domain/billing/billing_models.dart';
 import 'package:testflutter/presentation/customers/customer_due_collection_dialog.dart';
 
 class _FakeServerFirestore implements FirestoreDataService, FirestoreTransactionService {
@@ -925,6 +927,75 @@ void main() {
       expect(PaymentSubmissionState.values.contains(PaymentSubmissionState.confirmed), isTrue);
       expect(PaymentSubmissionState.values.contains(PaymentSubmissionState.failed), isTrue);
       expect(PaymentSubmissionState.values.contains(PaymentSubmissionState.unknownRequiresStatusCheck), isTrue);
+    });
+
+    test('21. Full cash POS bill finalization with customer succeeds via serverTransactions', () async {
+      final server = _FakeServerFirestore(isReachable: true);
+      server.setDoc(FirebaseConstants.customers, 'CUS-ARNAW', {
+        'customerId': 'CUS-ARNAW',
+        'tenantId': tenantId,
+        'businessId': businessId,
+        'name': 'Arnaw',
+        'duePaise': 0,
+        'advancePaise': 0,
+      });
+      server.setDoc(FirebaseConstants.documentSequences, '${businessId}_2026-2027_SALES_INVOICE', {
+        'sequence': 10,
+      });
+      server.setDoc(FirebaseConstants.stockBalances, '${tenantId}_${outlet1}_VAR-TUB', {
+        'quantityOnHand': 16000,
+      });
+
+      final billingRepo = BillingRepository(server);
+      final result = await billingRepo.finalize(
+        FinalizeBillRequest(
+          requestId: 'REQ-12345',
+          tenantId: tenantId,
+          businessId: businessId,
+          outletId: outlet1,
+          businessShortCode: 'SUMENT',
+          cashierUid: actorUid,
+          createdAt: DateTime(2026, 10, 23),
+          lines: [
+            BillLineInput(
+              variantId: 'VAR-TUB',
+              sku: 'TUB-20L',
+              name: 'Plastic Tub - Round 20L',
+              quantity: 1,
+              unitPricePaise: 246000,
+              gstRateBps: 1800,
+              priceIncludesTax: true,
+              hsn: '392410',
+              unit: 'PCS',
+              trackStock: true,
+            ),
+          ],
+          taxMode: BillingTaxMode.gst,
+          taxStructure: TaxStructure.intraState,
+          customerId: 'CUS-ARNAW',
+          customerName: 'Arnaw',
+          customerPhone: '9876543210',
+          customerStateCode: '19',
+          customerGstin: null,
+          dueDate: null,
+          cashPaise: 290300,
+          upiPaise: 0,
+          advancePaise: 0,
+          duePaise: 0,
+        ),
+        token: token,
+      );
+
+      expect(result.invoiceId, equals('REQ_REQ-12345'));
+      expect(result.existing, isFalse);
+
+      // Verify payment was recorded on server
+      final payments = server._storage[FirebaseConstants.payments];
+      expect(payments != null && payments.isNotEmpty, isTrue);
+
+      // Verify customer ledger entry was recorded
+      final ledgerEntries = server._storage[FirebaseConstants.customerLedgerEntries];
+      expect(ledgerEntries != null && ledgerEntries.isNotEmpty, isTrue);
     });
   });
 }
