@@ -8,10 +8,28 @@ import '../services/firestore_data_service.dart';
 import '../services/firestore_rest_service.dart';
 import '../services/firestore_transaction_service.dart';
 
+import 'dart:convert';
+import '../local/local_data_source.dart';
+import '../models/purchase_bill_model.dart';
+import '../models/supplier_payment_receipt_model.dart';
+import '../models/supplier_ledger_entry_model.dart';
+import '../services/offline_firestore_service.dart';
+
 class SupplierRepository {
   SupplierRepository(this.firestore, this.transactions);
   final FirestoreDataService firestore;
   final FirestoreTransactionService transactions;
+
+  /// Authoritative server transaction runner for online-only financial operations.
+  FirestoreTransactionService get serverTransactions {
+    if (transactions is OfflineFirestoreService) {
+      return (transactions as OfflineFirestoreService).serverTransactions;
+    }
+    if (firestore is OfflineFirestoreService) {
+      return (firestore as OfflineFirestoreService).serverTransactions;
+    }
+    return transactions;
+  }
 
   Future<Map<String, dynamic>> getSupplierFinancialSnapshot({
     required String tenantId,
@@ -90,7 +108,7 @@ class SupplierRepository {
     final financialTransactionId = 'FIN-$refundId';
     final ledgerEntryId = 'SUPPLIER_REFUND_$refundId';
     late SupplierRefundModel result;
-    await transactions.runAtomicOperation((tx) async {
+    await serverTransactions.runAtomicOperation((tx) async {
       final existing = await tx.get(
         FirebaseConstants.supplierRefunds,
         refundId,
@@ -735,6 +753,528 @@ class SupplierRepository {
     ],
     idToken: token,
   );
+
+  /// Retrieves approved outstanding purchase bills for this supplier relation in chronological FIFO order.
+  Future<List<PurchaseBillModel>> getOutstandingPurchaseBills({
+    required String tenantId,
+    required String businessId,
+    required String supplierBusinessId,
+    required String token,
+  }) async {
+    final docs = await firestore.queryDocuments(
+      collection: FirebaseConstants.purchaseBills,
+      filters: [
+        FirestoreFilter('tenantId', 'EQUAL', tenantId),
+        FirestoreFilter('businessId', 'EQUAL', businessId),
+        FirestoreFilter('supplierBusinessId', 'EQUAL', supplierBusinessId),
+      ],
+      idToken: token,
+    );
+
+    final bills = docs
+        .map((doc) => PurchaseBillModel.fromData(
+              (doc['name'] as String? ?? '').split('/').last,
+              FirestoreRestService.decodeFields(doc['fields']),
+            ))
+        .where((b) {
+          if (b.status != 'APPROVED') return false;
+          final effDue = b.outstandingAmount > 0
+              ? b.outstandingAmount
+              : (b.grandTotal - b.paidAmount);
+          return effDue > 0;
+        })
+        .toList();
+
+    bills.sort((a, b) => a.invoiceDate.compareTo(b.invoiceDate));
+    return bills;
+  }
+
+  /// Settles supplier dues using a FIFO (first-in, first-out) multi-bill strategy,
+  /// updating approved bills in chronological order, recording payment and ledger entries,
+  /// adjusting totalPayable in supplierBalances, and returning full receipt metadata.
+  Future<SupplierPaymentReceiptModel> settleSupplierDues({
+    required String tenantId,
+    required String businessId,
+    required String outletId,
+    required String supplierId,
+    required String supplierBusinessId,
+    required int amountPaise,
+    required String paymentMode,
+    required String transactionReference,
+    DateTime? paymentDate,
+    required String userId,
+    required String token,
+    String? businessName,
+    String? outletName,
+  }) async {
+    if (amountPaise <= 0) {
+      throw const AppException('Enter a payment amount greater than zero.');
+    }
+    final validModes = {'CASH', 'UPI', 'BANK_TRANSFER', 'CHEQUE', 'CARD'};
+    if (!validModes.contains(paymentMode)) {
+      throw const AppException('Select a valid payment mode.');
+    }
+
+    final now = paymentDate ?? DateTime.now().toUtc();
+    final paymentId = IdGenerator.create('SPAY');
+    final ledgerId = 'SUPPLIER_PAYMENT_$paymentId';
+
+    late SupplierPaymentReceiptModel receipt;
+    final localBillsToUpdate = <Map<String, dynamic>>[];
+
+    await serverTransactions.runAtomicOperation((tx) async {
+      final relationDoc = await tx.get(
+        FirebaseConstants.supplierBusinesses,
+        supplierBusinessId,
+      );
+      if (!relationDoc.exists ||
+          relationDoc.fields['tenantId'] != tenantId ||
+          relationDoc.fields['businessId'] != businessId ||
+          relationDoc.fields['supplierId'] != supplierId ||
+          relationDoc.fields['status'] != 'ACTIVE') {
+        throw const AppException(
+          'This supplier is not active for the current business.',
+        );
+      }
+
+      final supplierDoc = await tx.get(
+        FirebaseConstants.suppliers,
+        supplierId,
+      );
+      final supplierFields =
+          supplierDoc.exists ? supplierDoc.fields : <String, dynamic>{};
+      final supplierName = supplierFields['name'] as String? ??
+          relationDoc.fields['supplierName'] as String? ??
+          'Supplier';
+      final supplierPhone = supplierFields['phone'] as String?;
+
+      final balanceDoc = await tx.get(
+        FirebaseConstants.supplierBalances,
+        supplierBusinessId,
+      );
+      final oldPayable =
+          (balanceDoc.fields['totalPayable'] as num?)?.toInt() ?? 0;
+      final oldAdvance =
+          (balanceDoc.fields['unallocatedAdvance'] as num?)?.toInt() ?? 0;
+
+      final billDocs = await tx.query(FirebaseConstants.purchaseBills, [
+        FirestoreFilter('tenantId', 'EQUAL', tenantId),
+        FirestoreFilter('businessId', 'EQUAL', businessId),
+        FirestoreFilter('supplierBusinessId', 'EQUAL', supplierBusinessId),
+      ]);
+
+      final outstandingBills = billDocs.where((doc) {
+        final status = doc.fields['status']?.toString() ?? '';
+        if (status != 'APPROVED') return false;
+        final grandTotal = (doc.fields['grandTotal'] as num?)?.toInt() ?? 0;
+        final paid = (doc.fields['paidAmount'] as num?)?.toInt() ?? 0;
+        final out = (doc.fields['outstandingAmount'] as num?)?.toInt() ??
+            (grandTotal - paid);
+        return out > 0;
+      }).toList();
+
+      outstandingBills.sort((a, b) {
+        final dateA = DateTime.tryParse(
+              a.fields['invoiceDate']?.toString() ??
+                  a.fields['createdAt']?.toString() ??
+                  '',
+            ) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = DateTime.tryParse(
+              b.fields['invoiceDate']?.toString() ??
+                  b.fields['createdAt']?.toString() ??
+                  '',
+            ) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final cmp = dateA.compareTo(dateB);
+        if (cmp != 0) return cmp;
+        final idA = a.id ?? '';
+        final idB = b.id ?? '';
+        return idA.compareTo(idB);
+      });
+
+      var remainingToAllocate = amountPaise;
+      final settledBills = <SupplierSettledBillInfo>[];
+
+      for (final bDoc in outstandingBills) {
+        if (remainingToAllocate <= 0) break;
+        final bId = bDoc.id ?? bDoc.fields['purchaseBillId']?.toString() ?? '';
+        if (bId.isEmpty) continue;
+        final grandTotal = (bDoc.fields['grandTotal'] as num?)?.toInt() ?? 0;
+        final currentPaid = (bDoc.fields['paidAmount'] as num?)?.toInt() ?? 0;
+        final effectiveDue = ((bDoc.fields['outstandingAmount'] as num?)?.toInt() ??
+                (grandTotal - currentPaid))
+            .clamp(0, grandTotal);
+        if (effectiveDue <= 0) continue;
+
+        final alloc =
+            remainingToAllocate > effectiveDue ? effectiveDue : remainingToAllocate;
+        remainingToAllocate -= alloc;
+        final newDue = effectiveDue - alloc;
+        final newPaid = currentPaid + alloc;
+        final newPaymentStatus = newDue == 0 ? 'PAID' : 'PARTIAL';
+        final version = (bDoc.fields['version'] as num?)?.toInt() ?? 1;
+
+        final updatedBillFields = {
+          'paidAmount': newPaid,
+          'outstandingAmount': newDue,
+          'paymentStatus': newPaymentStatus,
+          'updatedBy': userId,
+          'updatedAt': now,
+          'version': version + 1,
+        };
+        tx.update(
+          FirebaseConstants.purchaseBills,
+          bId,
+          updatedBillFields,
+          updateTime: bDoc.updateTime,
+        );
+
+        localBillsToUpdate.add({
+          'id': bId,
+          'fields': {
+            ...bDoc.fields,
+            ...updatedBillFields,
+          },
+        });
+
+        final allocId = '${paymentId}_$bId';
+        tx.create(FirebaseConstants.paymentAllocations, allocId, {
+          'allocationId': allocId,
+          'tenantId': tenantId,
+          'businessId': businessId,
+          'supplierBusinessId': supplierBusinessId,
+          'sourceType': 'PAYMENT',
+          'sourceId': paymentId,
+          'purchaseBillId': bId,
+          'allocatedAmount': alloc,
+          'createdBy': userId,
+          'createdAt': now,
+        });
+
+        final invNum = bDoc.fields['supplierInvoiceNumber'] as String? ??
+            bDoc.fields['purchaseNumber'] as String? ??
+            bId;
+        final invDateStr = bDoc.fields['invoiceDate']?.toString();
+        final invDate = invDateStr != null ? DateTime.tryParse(invDateStr) : null;
+
+        settledBills.add(SupplierSettledBillInfo(
+          billId: bId,
+          invoiceNumber: invNum,
+          invoiceDate: invDate,
+          billTotalPaise: grandTotal,
+          paidBeforePaise: currentPaid,
+          allocatedPaise: alloc,
+          remainingDuePaise: newDue,
+          isFullyPaid: newDue == 0,
+        ));
+      }
+
+      final totalAllocated = amountPaise - remainingToAllocate;
+      final newPayable =
+          (oldPayable - totalAllocated).clamp(0, double.infinity).toInt();
+      final newAdvance = oldAdvance + remainingToAllocate;
+
+      tx.create(FirebaseConstants.supplierPayments, paymentId, {
+        'paymentId': paymentId,
+        'tenantId': tenantId,
+        'businessId': businessId,
+        'outletId': outletId,
+        'supplierId': supplierId,
+        'supplierBusinessId': supplierBusinessId,
+        'paymentType': settledBills.isNotEmpty ? 'AGAINST_BILL' : 'ADVANCE',
+        'amount': amountPaise,
+        'allocatedAmount': totalAllocated,
+        'unallocatedAmount': remainingToAllocate,
+        'purchaseBillId':
+            settledBills.length == 1 ? settledBills.first.billId : null,
+        'paymentDate': now,
+        'paymentMode': paymentMode,
+        'transactionReference': transactionReference.trim(),
+        'status': 'POSTED',
+        'createdBy': userId,
+        'createdAt': now,
+        'updatedBy': userId,
+        'updatedAt': now,
+      });
+
+      final vchNumber = paymentId;
+      final refStr = transactionReference.trim();
+      tx.create(FirebaseConstants.supplierLedgerEntries, ledgerId, {
+        'ledgerEntryId': ledgerId,
+        'tenantId': tenantId,
+        'businessId': businessId,
+        'outletId': outletId,
+        'supplierId': supplierId,
+        'supplierBusinessId': supplierBusinessId,
+        'entryType': 'SUPPLIER_PAYMENT',
+        'referenceType': 'SUPPLIER_PAYMENT',
+        'referenceId': paymentId,
+        'voucherNumber': vchNumber,
+        'referenceNo': refStr,
+        'transactionReference': refStr,
+        'paymentMode': paymentMode,
+        'particulars': refStr.isNotEmpty
+            ? 'Due Payment ($paymentMode) Ref: $refStr'
+            : 'Due Payment ($paymentMode)',
+        'debit': amountPaise,
+        'credit': 0,
+        'isReversal': false,
+        'reversalOfId': null,
+        'transactionDate': now,
+        'createdBy': userId,
+        'createdAt': now,
+      });
+
+      final balanceFields = {
+        'tenantId': tenantId,
+        'businessId': businessId,
+        'supplierBusinessId': supplierBusinessId,
+        'totalPayable': newPayable,
+        'unallocatedAdvance': newAdvance,
+        'unallocatedReturnCredit':
+            (balanceDoc.fields['unallocatedReturnCredit'] as num?)?.toInt() ?? 0,
+        'unallocatedSupplierCredit':
+            (balanceDoc.fields['unallocatedSupplierCredit'] as num?)?.toInt() ?? 0,
+        'lastLedgerEntryId': ledgerId,
+        'updatedAt': now,
+      };
+
+      if (balanceDoc.exists) {
+        tx.update(
+          FirebaseConstants.supplierBalances,
+          supplierBusinessId,
+          balanceFields,
+          updateTime: balanceDoc.updateTime,
+        );
+      } else {
+        tx.create(
+          FirebaseConstants.supplierBalances,
+          supplierBusinessId,
+          balanceFields,
+        );
+      }
+
+      receipt = SupplierPaymentReceiptModel(
+        paymentId: paymentId,
+        voucherNumber: paymentId,
+        paymentDate: now,
+        supplierId: supplierId,
+        supplierName: supplierName,
+        supplierPhone: supplierPhone,
+        businessName: businessName ?? '',
+        outletName: outletName,
+        paymentMode: paymentMode,
+        referenceNo: transactionReference.trim().isEmpty
+            ? null
+            : transactionReference.trim(),
+        previousDuePaise: oldPayable,
+        amountPaidPaise: amountPaise,
+        remainingDuePaise: newPayable,
+        unallocatedAdvancePaise: remainingToAllocate,
+        settledBills: settledBills,
+      );
+    }, idToken: token);
+
+    // Sync offline cache if available
+    if (firestore is OfflineFirestoreService && localBillsToUpdate.isNotEmpty) {
+      final local = (firestore as OfflineFirestoreService).localDataSource;
+      if (local != null) {
+        try {
+          await local.db.transaction((localTx) async {
+            for (final item in localBillsToUpdate) {
+              final bId = item['id'] as String;
+              final bFields = item['fields'] as Map<String, dynamic>;
+              await LocalDataSource.put(
+                localTx,
+                FirebaseConstants.purchaseBills,
+                {
+                  'remoteId': bId,
+                  'payloadJson':
+                      jsonEncode(FirestoreRestService.encodeFields(bFields)),
+                  ...LocalDataSource.scopeColumns(bFields),
+                  'syncStatus': 'SYNCED',
+                  'localUpdatedAt': LocalDataSource.now(),
+                  'isDeleted': 0,
+                },
+              );
+            }
+          });
+        } catch (_) {}
+      }
+    }
+
+    return receipt;
+  }
+
+  /// Retrieves supplier ledger transactions chronologically with computed running balance.
+  /// Enriches transactions with actual invoice numbers, voucher numbers, payment modes,
+  /// and items summary from purchase bills and supplier payments.
+  Future<List<SupplierLedgerEntryModel>> getSupplierLedger({
+    required String tenantId,
+    required String businessId,
+    required String supplierId,
+    required String token,
+  }) async {
+    final ledgerDocsFuture = firestore.queryDocuments(
+      collection: FirebaseConstants.supplierLedgerEntries,
+      filters: [
+        FirestoreFilter('tenantId', 'EQUAL', tenantId),
+        FirestoreFilter('businessId', 'EQUAL', businessId),
+        FirestoreFilter('supplierId', 'EQUAL', supplierId),
+      ],
+      idToken: token,
+    );
+
+    final purchaseDocsFuture = firestore.queryDocuments(
+      collection: FirebaseConstants.purchaseBills,
+      filters: [
+        FirestoreFilter('tenantId', 'EQUAL', tenantId),
+        FirestoreFilter('businessId', 'EQUAL', businessId),
+        FirestoreFilter('supplierId', 'EQUAL', supplierId),
+      ],
+      idToken: token,
+    ).catchError((_) => <Map<String, dynamic>>[]);
+
+    final paymentDocsFuture = firestore.queryDocuments(
+      collection: FirebaseConstants.supplierPayments,
+      filters: [
+        FirestoreFilter('tenantId', 'EQUAL', tenantId),
+        FirestoreFilter('businessId', 'EQUAL', businessId),
+        FirestoreFilter('supplierId', 'EQUAL', supplierId),
+      ],
+      idToken: token,
+    ).catchError((_) => <Map<String, dynamic>>[]);
+
+    final results = await Future.wait([
+      ledgerDocsFuture,
+      purchaseDocsFuture,
+      paymentDocsFuture,
+    ]);
+
+    final ledgerDocs = results[0];
+    final purchaseDocs = results[1];
+    final paymentDocs = results[2];
+
+    // Build lookup maps for enrichment
+    final billMap = <String, Map<String, dynamic>>{};
+    for (final doc in purchaseDocs) {
+      final docId = (doc['name'] as String? ?? '').split('/').last;
+      final f = FirestoreRestService.decodeFields(doc['fields']);
+      billMap[docId] = f;
+      final pBillId = f['purchaseBillId'] as String?;
+      if (pBillId != null && pBillId.isNotEmpty) {
+        billMap[pBillId] = f;
+      }
+    }
+
+    final paymentMap = <String, Map<String, dynamic>>{};
+    for (final doc in paymentDocs) {
+      final docId = (doc['name'] as String? ?? '').split('/').last;
+      final f = FirestoreRestService.decodeFields(doc['fields']);
+      paymentMap[docId] = f;
+      final pmId = f['supplierPaymentId'] as String?;
+      if (pmId != null && pmId.isNotEmpty) {
+        paymentMap[pmId] = f;
+      }
+    }
+
+    final entries = ledgerDocs.map((doc) {
+      final id = (doc['name'] as String? ?? '').split('/').last;
+      final fields = FirestoreRestService.decodeFields(doc['fields']);
+
+      final refId = fields['referenceId'] as String? ?? '';
+      final entryType = fields['entryType'] as String? ?? '';
+
+      // Clean refId in case of prefixes
+      final cleanRefId = refId
+          .replaceFirst('PURCHASE_BILL_', '')
+          .replaceFirst('SUPPLIER_PAYMENT_', '')
+          .replaceFirst(RegExp(r'_\d+$'), '');
+
+      String? fallbackVch;
+      String? fallbackRef;
+      String? fallbackMode;
+      String? fallbackParticulars;
+      String? fallbackItems;
+
+      if (entryType == 'PURCHASE_BILL' || (fields['credit'] as num? ?? 0) > 0) {
+        final b = billMap[refId] ?? billMap[cleanRefId] ?? billMap[id];
+        if (b != null) {
+          final supInv = (b['supplierInvoiceNumber'] as String?)?.trim();
+          final pNum = (b['purchaseNumber'] as String?)?.trim();
+          fallbackVch = (supInv != null && supInv.isNotEmpty)
+              ? supInv
+              : ((pNum != null && pNum.isNotEmpty) ? pNum : (refId.isNotEmpty ? refId : id));
+
+          final items = (b['items'] as List?) ?? [];
+          final names = items.map((i) {
+            if (i is Map) {
+              return i['productName']?.toString().trim() ?? '';
+            }
+            return '';
+          }).where((s) => s.isNotEmpty).take(3).join(', ');
+
+          fallbackItems = names.isNotEmpty ? names : null;
+          fallbackParticulars = fallbackVch.isNotEmpty
+              ? 'Purchase Bill #$fallbackVch${names.isNotEmpty ? ' ($names)' : ''}'
+              : 'Purchase Bill';
+        } else if (refId.isNotEmpty) {
+          fallbackVch = refId;
+          fallbackParticulars = 'Purchase Bill #$refId';
+        }
+      } else if (entryType == 'SUPPLIER_PAYMENT' || (fields['debit'] as num? ?? 0) > 0) {
+        final pm = paymentMap[refId] ?? paymentMap[cleanRefId] ?? paymentMap[id];
+        if (pm != null) {
+          final vch = (pm['voucherNumber'] as String?)?.trim();
+          final ref = (pm['transactionReference'] as String?)?.trim();
+          fallbackVch = (vch != null && vch.isNotEmpty)
+              ? vch
+              : (refId.isNotEmpty ? refId : id);
+          fallbackRef = ref;
+          fallbackMode = pm['paymentMode'] as String?;
+
+          final modeStr = fallbackMode ?? 'PAYMENT';
+          if (ref != null && ref.isNotEmpty) {
+            fallbackParticulars = 'Payment ($modeStr) Ref: $ref';
+          } else {
+            fallbackParticulars = 'Supplier Payment ($modeStr)';
+          }
+        } else if (refId.isNotEmpty) {
+          fallbackVch = refId;
+          fallbackParticulars = 'Supplier Payment #$refId';
+        }
+      } else if (entryType == 'OPENING_BALANCE') {
+        fallbackParticulars = 'Opening Balance';
+        fallbackVch = 'OPENING';
+      }
+
+      return SupplierLedgerEntryModel.fromData(
+        id,
+        fields,
+        fallbackVoucherNumber: fallbackVch,
+        fallbackReferenceNo: fallbackRef,
+        fallbackPaymentMode: fallbackMode,
+        fallbackParticulars: fallbackParticulars,
+        fallbackItemsSummary: fallbackItems,
+      );
+    }).toList();
+
+    entries.sort((a, b) {
+      final cmp = a.transactionDate.compareTo(b.transactionDate);
+      if (cmp != 0) return cmp;
+      return a.createdAt.compareTo(b.createdAt);
+    });
+
+    var running = 0;
+    final computed = <SupplierLedgerEntryModel>[];
+    for (final e in entries) {
+      running += (e.creditPaise - e.debitPaise);
+      computed.add(e.copyWith(runningBalancePaise: running));
+    }
+    return computed;
+  }
+
 
   SupplierModel _supplier(Map<String, dynamic> document) =>
       SupplierModel.fromData(

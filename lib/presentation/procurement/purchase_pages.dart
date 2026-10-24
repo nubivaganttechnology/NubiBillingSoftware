@@ -9,7 +9,9 @@ import '../../data/services/purchase_document_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/custom_date_range_dialog.dart';
 import '../widgets/sync_task_dialog.dart';
+import 'widgets/supplier_payment_voucher_dialog.dart';
 import 'purchase_entry_page.dart';
+import 'supplier_ledger_dashboard_page.dart';
 import 'supplier_pages.dart' show showSupplierRefundEntry;
 import '../app_controller.dart';
 import '../products/barcode_printing_page.dart';
@@ -165,6 +167,36 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
                     tooltip: 'Refresh',
                     onPressed: c.loadPurchases,
                     icon: const Icon(Icons.refresh_rounded, size: 20),
+                  ),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF132B45),
+                      side: const BorderSide(color: Color(0xFF132B45)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SupplierLedgerDashboardPage(controller: c),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.menu_book_rounded, size: 18),
+                    label: Text(
+                      switch (c.currentLocale.languageCode) {
+                        'bn' => 'সাপ্লায়ার লেজার',
+                        'hi' => 'सप्लायर लेजर',
+                        _ => 'Supplier Ledger',
+                      },
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
@@ -1822,7 +1854,7 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
                   ? result.reference
                   : 'Paid on approval',
             );
-            if (!paid) {
+            if (paid == null) {
               debugPrint('Payment recording notice: ${widget.controller.error}');
             }
           }
@@ -1931,13 +1963,20 @@ class _PurchaseManagementPageState extends State<PurchaseManagementPage> {
     amount.dispose();
     reference.dispose();
     if (result == null || !context.mounted) return;
-    if (await widget.controller.recordSupplierPayment(
+    final receipt = await widget.controller.recordSupplierPayment(
       bill: bill,
       amount: result.$1,
       paymentMode: result.$2,
       reference: result.$3,
-    )) {
-      if (context.mounted) _toast(context, 'Supplier payment recorded.');
+    );
+    if (receipt != null) {
+      if (context.mounted) {
+        _toast(context, 'Supplier payment recorded.');
+        showDialog<void>(
+          context: context,
+          builder: (ctx) => SupplierPaymentVoucherDialog(receipt: receipt),
+        );
+      }
     }
   }
 

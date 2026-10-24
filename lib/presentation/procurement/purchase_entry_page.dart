@@ -3273,7 +3273,7 @@ class _PurchaseEntryPageState extends State<PurchaseEntryPage> {
                   ? _paymentReference.text.trim()
                   : 'Paid on invoice confirmation',
             );
-            if (!paid) {
+            if (paid == null) {
               debugPrint('Payment record notice: ${widget.controller.error}');
             }
           }

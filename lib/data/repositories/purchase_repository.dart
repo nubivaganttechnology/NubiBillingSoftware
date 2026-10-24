@@ -8,6 +8,7 @@ import '../models/product_variant_model.dart';
 import '../models/inventory_batch_movement_model.dart';
 import '../models/purchase_bill_model.dart';
 import '../models/purchase_correction_model.dart';
+import '../models/supplier_payment_receipt_model.dart';
 import '../services/firestore_data_service.dart';
 import '../services/firestore_rest_service.dart';
 import '../services/firestore_transaction_service.dart';
@@ -1077,6 +1078,16 @@ class PurchaseRepository {
       }
     }
 
+    final invoiceNo = bill.supplierInvoiceNumber.trim().isNotEmpty
+        ? bill.supplierInvoiceNumber.trim()
+        : (bill.purchaseNumber?.trim().isNotEmpty == true
+            ? bill.purchaseNumber!.trim()
+            : bill.purchaseBillId);
+    final itemsSummaryStr = bill.items
+        .map((i) => '${i.productName} (${i.quantity})')
+        .take(3)
+        .join(', ');
+
     final ledgerId = 'PURCHASE_BILL_${bill.purchaseBillId}_1';
     transaction.create(FirebaseConstants.supplierLedgerEntries, ledgerId, {
       'ledgerEntryId': ledgerId,
@@ -1088,6 +1099,10 @@ class PurchaseRepository {
       'entryType': 'PURCHASE_BILL',
       'referenceType': 'PURCHASE_BILL',
       'referenceId': bill.purchaseBillId,
+      'voucherNumber': invoiceNo,
+      'invoiceNumber': invoiceNo,
+      'particulars': 'Purchase Bill #$invoiceNo',
+      'itemsSummary': itemsSummaryStr,
       'debit': 0,
       'credit': bill.grandTotal,
       'isReversal': false,
@@ -2677,7 +2692,7 @@ class PurchaseRepository {
     return value.toStringAsFixed(value == value.roundToDouble() ? 0 : 3);
   }
 
-  Future<void> recordPayment({
+  Future<SupplierPaymentReceiptModel> recordPayment({
     required String tenantId,
     required String businessId,
     required String outletId,
@@ -2693,6 +2708,7 @@ class PurchaseRepository {
     if (amount <= 0)
       throw const AppException('Enter a payment greater than zero.');
     final paymentId = IdGenerator.create('SPAY');
+    late SupplierPaymentReceiptModel receipt;
     Map<String, dynamic>? localMergedBill;
     await serverTransactions.runAtomicOperation((transaction) async {
       final relationDoc = await transaction.get(
@@ -2808,6 +2824,7 @@ class PurchaseRepository {
         'updatedBy': userId,
         'updatedAt': now,
       });
+      final refStr = transactionReference.trim();
       transaction.create(FirebaseConstants.supplierLedgerEntries, ledgerId, {
         'ledgerEntryId': ledgerId,
         'tenantId': tenantId,
@@ -2818,6 +2835,13 @@ class PurchaseRepository {
         'entryType': 'SUPPLIER_PAYMENT',
         'referenceType': 'SUPPLIER_PAYMENT',
         'referenceId': paymentId,
+        'voucherNumber': paymentId,
+        'referenceNo': refStr,
+        'transactionReference': refStr,
+        'paymentMode': paymentMode,
+        'particulars': refStr.isNotEmpty
+            ? 'Payment ($paymentMode) Ref: $refStr'
+            : 'Payment ($paymentMode)',
         'debit': amount,
         'credit': 0,
         'isReversal': false,
@@ -2890,6 +2914,44 @@ class PurchaseRepository {
           balanceFields,
         );
       }
+      final newPayable = (bill == null ? oldPayable : oldPayable - amount)
+          .clamp(0, double.infinity)
+          .toInt();
+      receipt = SupplierPaymentReceiptModel(
+        paymentId: paymentId,
+        voucherNumber: paymentId,
+        paymentDate: now,
+        supplierId: supplierId,
+        supplierName: bill?.supplierName ??
+            relationDoc.fields['supplierName'] as String? ??
+            'Supplier',
+        businessName: '',
+        outletName: null,
+        paymentMode: paymentMode,
+        referenceNo: transactionReference.trim().isEmpty
+            ? null
+            : transactionReference.trim(),
+        previousDuePaise: oldPayable,
+        amountPaidPaise: amount,
+        remainingDuePaise: newPayable,
+        unallocatedAdvancePaise: bill == null ? amount : 0,
+        settledBills: bill != null
+            ? [
+                SupplierSettledBillInfo(
+                  billId: bill.purchaseBillId,
+                  invoiceNumber: bill.supplierInvoiceNumber.isNotEmpty
+                      ? bill.supplierInvoiceNumber
+                      : (bill.purchaseNumber ?? bill.purchaseBillId),
+                  invoiceDate: bill.invoiceDate,
+                  billTotalPaise: bill.grandTotal,
+                  paidBeforePaise: bill.paidAmount,
+                  allocatedPaise: amount,
+                  remainingDuePaise: newOutstanding,
+                  isFullyPaid: newOutstanding == 0,
+                ),
+              ]
+            : const [],
+      );
     }, idToken: token);
 
     if (localMergedBill != null &&
@@ -2917,6 +2979,7 @@ class PurchaseRepository {
         } catch (_) {}
       }
     }
+    return receipt;
   }
 
   static String stockBalanceId(

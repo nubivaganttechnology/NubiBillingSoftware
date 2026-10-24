@@ -40,6 +40,7 @@ import '../data/models/purchase_bill_model.dart';
 import '../data/models/purchase_correction_model.dart';
 import '../data/models/role_model.dart';
 import '../data/models/supplier_model.dart';
+import '../data/models/supplier_payment_receipt_model.dart';
 import '../data/models/sales_invoice_model.dart';
 import '../data/models/storage_location_model.dart';
 import '../data/models/user_model.dart';
@@ -3726,7 +3727,9 @@ class AppController extends ChangeNotifier {
         token: session.idToken,
       );
       lastCreatedPurchaseBill = bill;
+      await loadSuppliers();
       await loadPurchases();
+      notifyListeners();
       if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
@@ -3792,7 +3795,9 @@ class AppController extends ChangeNotifier {
         token: session.idToken,
       );
       lastCreatedPurchaseBill = billResult;
+      await loadSuppliers();
       await loadPurchases();
+      notifyListeners();
       if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
@@ -3839,7 +3844,9 @@ class AppController extends ChangeNotifier {
         lineMetadata: lineMetadata,
         token: session.idToken,
       );
+      await loadSuppliers();
       await loadPurchases();
+      notifyListeners();
       if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
@@ -3987,7 +3994,9 @@ class AppController extends ChangeNotifier {
         userId: context.uid,
         token: session.idToken,
       );
+      await loadSuppliers();
       await loadPurchases();
+      notifyListeners();
       if (canManageProducts()) await loadProducts();
       return true;
     } catch (e) {
@@ -4000,7 +4009,7 @@ class AppController extends ChangeNotifier {
     }
   }
 
-  Future<bool> recordSupplierPayment({
+  Future<SupplierPaymentReceiptModel?> recordSupplierPayment({
     required PurchaseBillModel bill,
     required int amount,
     required String paymentMode,
@@ -4009,13 +4018,13 @@ class AppController extends ChangeNotifier {
     final session = await _getUsableSession();
     final context = appContext;
     if (session == null || context?.outletId == null || !canManagePurchases()) {
-      return false;
+      return null;
     }
     purchaseSaving = true;
     error = '';
     notifyListeners();
     try {
-      await purchaseRepository.recordPayment(
+      final receipt = await purchaseRepository.recordPayment(
         tenantId: context!.ownerUid,
         businessId: bill.businessId,
         outletId: context.outletId!,
@@ -4028,17 +4037,129 @@ class AppController extends ChangeNotifier {
         userId: context.uid,
         token: session.idToken,
       );
+      final currentBiz =
+          businesses.where((b) => b.businessId == bill.businessId).firstOrNull;
+      final currentOutlet =
+          outlets.where((o) => o.outletId == context.outletId).firstOrNull;
+      await loadSuppliers();
       await loadPurchases();
+      notifyListeners();
       if (canManageProducts()) await loadProducts();
-      return true;
+      return SupplierPaymentReceiptModel(
+        paymentId: receipt.paymentId,
+        voucherNumber: receipt.voucherNumber,
+        paymentDate: receipt.paymentDate,
+        supplierId: receipt.supplierId,
+        supplierName: receipt.supplierName.isNotEmpty
+            ? receipt.supplierName
+            : (bill.supplierName ?? 'Supplier'),
+        supplierPhone: receipt.supplierPhone,
+        businessName: currentBiz?.businessName ?? receipt.businessName,
+        outletName: currentOutlet?.outletName ?? receipt.outletName,
+        paymentMode: receipt.paymentMode,
+        referenceNo: receipt.referenceNo,
+        previousDuePaise: receipt.previousDuePaise,
+        amountPaidPaise: receipt.amountPaidPaise,
+        remainingDuePaise: receipt.remainingDuePaise,
+        unallocatedAdvancePaise: receipt.unallocatedAdvancePaise,
+        settledBills: receipt.settledBills,
+      );
     } catch (e) {
       error = e is AppException
           ? e.message
           : 'Unable to record supplier payment.';
       notifyListeners();
-      return false;
+      return null;
     } finally {
       purchaseSaving = false;
+      notifyListeners();
+    }
+  }
+
+  /// Retrieves approved outstanding purchase bills for this supplier relation in FIFO order.
+  Future<List<PurchaseBillModel>> getSupplierOutstandingBills(
+    String supplierId,
+  ) async {
+    final session = await _getUsableSession();
+    final context = appContext;
+    if (session == null || context?.businessId == null) {
+      return [];
+    }
+    try {
+      final relation = await supplierRepository.getSupplierBusiness(
+        context!.ownerUid,
+        context.businessId!,
+        supplierId,
+        session.idToken,
+      );
+      return await supplierRepository.getOutstandingPurchaseBills(
+        tenantId: context.ownerUid,
+        businessId: context.businessId!,
+        supplierBusinessId: relation.supplierBusinessId,
+        token: session.idToken,
+      );
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Settles supplier dues using FIFO multi-bill strategy across approved bills.
+  Future<SupplierPaymentReceiptModel?> settleSupplierDues({
+    required String supplierId,
+    required int amountPaise,
+    required String paymentMode,
+    required String referenceNo,
+    DateTime? paymentDate,
+  }) async {
+    final session = await _getUsableSession();
+    final context = appContext;
+    if (session == null ||
+        context?.businessId == null ||
+        context?.outletId == null ||
+        !canManageSuppliers()) {
+      return null;
+    }
+    supplierSaving = true;
+    error = '';
+    notifyListeners();
+    try {
+      final relation = await supplierRepository.getSupplierBusiness(
+        context!.ownerUid,
+        context.businessId!,
+        supplierId,
+        session.idToken,
+      );
+      final currentBiz = businesses
+          .where((b) => b.businessId == context.businessId)
+          .firstOrNull;
+      final currentOutlet =
+          outlets.where((o) => o.outletId == context.outletId).firstOrNull;
+
+      final receipt = await supplierRepository.settleSupplierDues(
+        tenantId: context.ownerUid,
+        businessId: context.businessId!,
+        outletId: context.outletId!,
+        supplierId: supplierId,
+        supplierBusinessId: relation.supplierBusinessId,
+        amountPaise: amountPaise,
+        paymentMode: paymentMode,
+        transactionReference: referenceNo,
+        paymentDate: paymentDate,
+        userId: context.uid,
+        token: session.idToken,
+        businessName: currentBiz?.businessName ?? '',
+        outletName: currentOutlet?.outletName,
+      );
+      await loadSuppliers();
+      await loadPurchases();
+      notifyListeners();
+      return receipt;
+    } catch (e) {
+      error = e is AppException ? e.message : 'Unable to settle supplier dues.';
+      notifyListeners();
+      return null;
+    } finally {
+      supplierSaving = false;
       notifyListeners();
     }
   }

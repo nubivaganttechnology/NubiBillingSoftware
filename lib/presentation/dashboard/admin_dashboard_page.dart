@@ -10,6 +10,7 @@ import '../../domain/entities/dashboard_summary.dart';
 import '../employees/employee_pages.dart';
 import '../procurement/supplier_pages.dart';
 import '../procurement/purchase_pages.dart';
+import '../procurement/supplier_ledger_dashboard_page.dart';
 import '../billing/billing_page.dart';
 import '../sales/sales_entry_page.dart';
 import '../customers/customer_pages.dart';
@@ -79,6 +80,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           PermissionCatalog.modules.firstWhere((item) => item.id == 'barcode'),
         );
       }
+      if (!modules.any((item) => item.id == 'supplier_ledger')) {
+        final ledgerMod = PermissionCatalog.modules
+            .where((item) => item.id == 'supplier_ledger')
+            .firstOrNull;
+        if (ledgerMod != null) modules.add(ledgerMod);
+      }
     } else {
       if (controller.canViewStaffAttendance() &&
           !modules.any((item) => item.id == 'attendance')) {
@@ -96,6 +103,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             .firstOrNull;
         if (salaryModule != null) {
           modules.add(salaryModule);
+        }
+      }
+      if ((isOwner ||
+              PermissionCatalog.allows('suppliers', permissions) ||
+              PermissionCatalog.allows('purchase', permissions)) &&
+          !modules.any((item) => item.id == 'supplier_ledger')) {
+        final ledgerMod = PermissionCatalog.modules
+            .where((item) => item.id == 'supplier_ledger')
+            .firstOrNull;
+        if (ledgerMod != null) {
+          modules.add(ledgerMod);
         }
       }
     }
@@ -222,6 +240,11 @@ String _localizedModuleLabel(
     'barcode' => l10n.barcode,
     'customers' => l10n.customers,
     'suppliers' => l10n.suppliers,
+    'supplier_ledger' => switch (AppLocalizations.of(context)?.localeName) {
+      'bn' => 'সাপ্লায়ার লেজার (খাতা)',
+      'hi' => 'सप्लायर लेजर (खाता)',
+      _ => 'Supplier Ledger',
+    },
     'expenses' => l10n.expenses,
     'employees' => l10n.staffRoles,
     'settings' => l10n.settings,
@@ -619,76 +642,68 @@ class _Sidebar extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => showAboutNubiBillDialog(context, controller),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF22364E), Color(0xFF152435)],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFFF0C36D).withValues(alpha: 0.5),
-                          width: 1,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0xFF08121B),
-                            offset: Offset(0, 2),
-                            blurRadius: 0,
-                          ),
-                          BoxShadow(
-                            color: Color(0x33D97706),
-                            blurRadius: 6,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.auto_awesome,
-                            size: 13,
-                            color: Color(0xFFFBBF24),
-                          ),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              'NubiBill Business ERP v${EnvironmentConfig.appVersion}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Color(0xFFFDE68A),
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.2,
-                                shadows: [
-                                  Shadow(
-                                    color: Color(0x80F59E0B),
-                                    blurRadius: 6,
-                                    offset: Offset(0, 1),
-                                  ),
-                                ],
-                              ),
+            child: InkWell(
+              onTap: () => showAboutNubiBillDialog(context, controller),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF22364E), Color(0xFF152435)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFF0C36D).withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0xFF08121B),
+                      offset: Offset(0, 2),
+                      blurRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: Color(0x33D97706),
+                      blurRadius: 6,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      size: 13,
+                      color: Color(0xFFFBBF24),
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'NubiBill Business ERP v${EnvironmentConfig.appVersion}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFFFDE68A),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
+                          shadows: [
+                            Shadow(
+                              color: Color(0x80F59E0B),
+                              blurRadius: 6,
+                              offset: Offset(0, 1),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                _SidebarLanguageSelector(controller: controller),
-              ],
+              ),
             ),
           ),
         ],
@@ -1196,99 +1211,6 @@ Widget _buildLanguageDialogTile(
   );
 }
 
-class _SidebarLanguageSelector extends StatelessWidget {
-  const _SidebarLanguageSelector({required this.controller});
-  final AppController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final currentCode = controller.currentLocale.languageCode;
-    final currentLabel = switch (currentCode) {
-      'hi' => 'हिंदी',
-      'bn' => 'বাংলা',
-      _ => 'EN',
-    };
-
-    return PopupMenuButton<Locale>(
-      tooltip: 'Language / भाषा / ভাষা',
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      color: const Color(0xFF1E3A56),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF223E5B), Color(0xFF14273A)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.15),
-            width: 1,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0xFF091420),
-              offset: Offset(0, 2),
-              blurRadius: 0,
-            ),
-            BoxShadow(
-              color: Color(0x20000000),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.translate_rounded,
-              color: Color(0xFFF0C36D),
-              size: 13,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              currentLabel,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 2),
-            const Icon(Icons.arrow_drop_down, color: Colors.white70, size: 14),
-          ],
-        ),
-      ),
-      onSelected: (locale) => controller.setLocale(locale),
-      itemBuilder: (_) => [
-        _buildLanguagePopupItem(
-          const Locale('en'),
-          'English',
-          'English',
-          currentCode == 'en',
-          isDark: true,
-        ),
-        _buildLanguagePopupItem(
-          const Locale('hi'),
-          'हिंदी',
-          'Hindi',
-          currentCode == 'hi',
-          isDark: true,
-        ),
-        _buildLanguagePopupItem(
-          const Locale('bn'),
-          'বাংলা',
-          'Bengali',
-          currentCode == 'bn',
-          isDark: true,
-        ),
-      ],
-    );
-  }
-}
-
 class _TopBarLanguageSelector extends StatelessWidget {
   const _TopBarLanguageSelector({required this.controller});
   final AppController controller;
@@ -1543,6 +1465,9 @@ class _ModuleBody extends StatelessWidget {
     }
     if (module.id == 'suppliers') {
       return SupplierManagementPage(controller: controller);
+    }
+    if (module.id == 'supplier_ledger') {
+      return SupplierLedgerDashboardPage(controller: controller);
     }
     if (module.id == 'purchase') {
       return PurchaseManagementPage(controller: controller);
@@ -2369,6 +2294,18 @@ class _ExecutiveHeroBanner extends StatelessWidget {
                     label: 'Vendor Bills',
                     color: const Color(0xFF6366F1),
                     onTap: () => onOpenModule('purchase'),
+                  ),
+                if (canPurchases) const SizedBox(width: 8),
+                if (canPurchases)
+                  _HeroQuickDockPill(
+                    icon: Icons.menu_book_rounded,
+                    label: switch (l10n?.localeName) {
+                      'bn' => 'সাপ্লায়ার লেজার',
+                      'hi' => 'सप्लायर लेजर',
+                      _ => 'Supplier Ledger',
+                    },
+                    color: const Color(0xFF4338CA),
+                    onTap: () => onOpenModule('supplier_ledger'),
                   ),
                 if (canPurchases) const SizedBox(width: 8),
                 _HeroQuickDockPill(
@@ -4363,6 +4300,14 @@ class _ExecutiveQuickActions extends StatelessWidget {
               title: 'Vendor Inward',
               subtitle: 'Receive purchase bills & stock batches',
               onTap: () => onOpenModule('purchase'),
+            ),
+            const SizedBox(height: 8),
+            _ActionTile(
+              icon: Icons.menu_book_rounded,
+              color: const Color(0xFF4338CA),
+              title: 'Supplier Ledger',
+              subtitle: 'Statement, balance tracking & due settlement',
+              onTap: () => onOpenModule('supplier_ledger'),
             ),
             const SizedBox(height: 8),
             _ActionTile(

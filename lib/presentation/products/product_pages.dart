@@ -9,7 +9,9 @@ import '../../data/models/resolved_product_template.dart';
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart';
 import '../../data/models/product_model.dart';
+import '../../data/models/quantity_discount_slab.dart';
 import '../../data/models/product_master_value.dart';
 import '../../data/models/product_variant_model.dart';
 import '../../core/utils/stock_quantity_formatter.dart';
@@ -3088,6 +3090,7 @@ class _StructuredProductFormPageState
   ProductMasterValue? _brand, _category, _subcategory;
   final _productValues = <String, dynamic>{};
   final _rows = <Map<String, dynamic>>[{}];
+  final _productQuantitySlabs = <QuantityDiscountSlab>[];
   ResolvedProductTemplate? _resolvedTemplate;
   List<ProductAttribute> get _template =>
       _resolvedTemplate?.attributes ?? const [];
@@ -3208,6 +3211,8 @@ class _StructuredProductFormPageState
     }
     _productValues.addAll(p.attributeValues);
     _productValues.remove('hsnCode');
+    _productQuantitySlabs.clear();
+    _productQuantitySlabs.addAll(p.quantitySlabs);
     _rows.clear();
     for (final v in p.variants) {
       _rows.add({
@@ -4562,6 +4567,7 @@ class _StructuredProductFormPageState
       'defaultGstRateBps': (double.tryParse(_gst.text) ?? -1) * 100 ~/ 1,
       if (_editing) 'status': _productStatus,
       'description': _description.text.trim(),
+      'quantitySlabs': _productQuantitySlabs.map((s) => s.toMap()).toList(),
       'productImage': imageToSave,
       'imageUrl': imageToSave,
     };
@@ -5190,6 +5196,294 @@ class _StructuredProductFormPageState
     );
   }
 
+  Widget _quantitySlabsSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF93C5FD), width: 1.5),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.discount_outlined, size: 20, color: Colors.blue.shade700),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Automatically apply tiered discounts during billing when customers purchase bulk quantities (e.g. 50-100 pcs: 5%, 101-150 pcs: 8%).',
+                  style: TextStyle(fontSize: 13, color: Colors.black87),
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton.tonalIcon(
+                onPressed: () => _promptAddQuantitySlab(context),
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Tier Slab'),
+              ),
+            ],
+          ),
+          if (_productQuantitySlabs.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Container(
+                color: Colors.white,
+                child: Table(
+                  border: TableBorder.all(color: Colors.grey.shade200),
+                  columnWidths: const {
+                    0: FlexColumnWidth(2),
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(2.5),
+                    3: FlexColumnWidth(1),
+                  },
+                  children: [
+                    TableRow(
+                      decoration: BoxDecoration(color: Colors.grey.shade100),
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Text('Quantity Range', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Text('Discount Type', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Text('Discount Value', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Text('Action', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                    for (var i = 0; i < _productQuantitySlabs.length; i++)
+                      _buildSlabTableRow(i),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 12),
+            Text(
+              'No volume discount tiers added yet. Click "Add Tier Slab" to create one.',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  TableRow _buildSlabTableRow(int index) {
+    final slab = _productQuantitySlabs[index];
+    final rangeText = slab.maxQty != null
+        ? '${slab.minQty} - ${slab.maxQty} units'
+        : '${slab.minQty}+ units (and above)';
+    final typeText = slab.discountType == 'PERCENTAGE'
+        ? 'Percentage (%)'
+        : 'Flat (₹ per unit)';
+    final valueText = slab.discountType == 'PERCENTAGE'
+        ? '${slab.discountValue}%'
+        : '₹${slab.discountValue.toStringAsFixed(2)} / unit';
+
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Text(rangeText, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Text(typeText, style: const TextStyle(fontSize: 13)),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.green.shade200),
+            ),
+            child: Text(
+              valueText,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green.shade800),
+            ),
+          ),
+        ),
+        Center(
+          child: IconButton(
+            icon: const Icon(Icons.delete_outline, size: 18, color: Colors.redAccent),
+            tooltip: 'Remove Slab',
+            onPressed: () {
+              setState(() {
+                _productQuantitySlabs.removeAt(index);
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _promptAddQuantitySlab(BuildContext context) async {
+    final minController = TextEditingController(text: '50');
+    final maxController = TextEditingController(text: '100');
+    final valController = TextEditingController(text: '5');
+    var discountType = 'PERCENTAGE';
+    var isNoMaxLimit = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.add_shopping_cart, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Add Quantity Discount Tier'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: 380,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Define a quantity range and the discount to apply automatically:',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: minController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          decoration: const InputDecoration(
+                            labelText: 'Min Quantity *',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: maxController,
+                          enabled: !isNoMaxLimit,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          decoration: InputDecoration(
+                            labelText: isNoMaxLimit ? 'No Upper Limit' : 'Max Quantity',
+                            border: const OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isNoMaxLimit,
+                        onChanged: (val) {
+                          setDialogState(() {
+                            isNoMaxLimit = val ?? false;
+                            if (isNoMaxLimit) maxController.clear();
+                          });
+                        },
+                      ),
+                      const Text('No upper limit (e.g. 150+ units)', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: discountType,
+                    decoration: const InputDecoration(
+                      labelText: 'Discount Type',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'PERCENTAGE',
+                        child: Text('Percentage Discount (%)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'FLAT_PER_UNIT',
+                        child: Text('Flat Discount Per Unit (₹)'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => discountType = val);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: valController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: discountType == 'PERCENTAGE'
+                          ? 'Discount Percentage (e.g. 5 for 5%)'
+                          : 'Discount Rupees Per Unit (e.g. 10 for ₹10/unit)',
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      prefixText: discountType == 'FLAT_PER_UNIT' ? '₹ ' : null,
+                      suffixText: discountType == 'PERCENTAGE' ? '%' : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final min = int.tryParse(minController.text.trim());
+                final max = isNoMaxLimit ? null : int.tryParse(maxController.text.trim());
+                final value = double.tryParse(valController.text.trim());
+
+                if (min == null || min <= 0) return;
+                if (!isNoMaxLimit && (max == null || max < min)) return;
+                if (value == null || value <= 0) return;
+
+                setState(() {
+                  _productQuantitySlabs.add(
+                    QuantityDiscountSlab(
+                      minQty: min,
+                      maxQty: max,
+                      discountType: discountType,
+                      discountValue: value,
+                    ),
+                  );
+                  _productQuantitySlabs.sort((a, b) => a.minQty.compareTo(b.minQty));
+                });
+                Navigator.pop(dialogCtx);
+              },
+              child: const Text('Add Slab'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _saveButton() => FilledButton.icon(
     style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
     onPressed:
@@ -5326,6 +5620,10 @@ class _StructuredProductFormPageState
                         !_templateLoading &&
                         _hasUsableTemplate) ...[
                       _section('Product Specifications', _detailsFields()),
+                      _section(
+                        'Quantity-Based Volume Discounts (Optional)',
+                        _quantitySlabsSection(),
+                      ),
                       _section(
                         'Sellable Variants / SKUs',
                         NubiFormColumn(

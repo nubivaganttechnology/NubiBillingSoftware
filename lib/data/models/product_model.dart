@@ -1,4 +1,5 @@
 import 'product_variant_model.dart';
+import 'quantity_discount_slab.dart';
 import '../services/historical_catalogue_resolver.dart';
 
 class ProductModel {
@@ -22,6 +23,7 @@ class ProductModel {
     this.hsnCode,
     this.defaultGstRateBps = 0,
     this.variants = const [],
+    this.quantitySlabs = const [],
     this.productCode,
     this.usageIds = const [],
     this.surfaceIds = const [],
@@ -61,6 +63,7 @@ class ProductModel {
   final int defaultGstRateBps;
   final DateTime? createdAt, updatedAt;
   final List<ProductVariantModel> variants;
+  final List<QuantityDiscountSlab> quantitySlabs;
 
   final String syncStatus;
   final HistoricalCatalogueResolution? historicalCatalogueResolution;
@@ -90,6 +93,7 @@ class ProductModel {
     String? hsnCodeId,
     int? defaultGstRateBps,
     List<ProductVariantModel>? variants,
+    List<QuantityDiscountSlab>? quantitySlabs,
     String? productCode,
     List<String>? usageIds,
     List<String>? surfaceIds,
@@ -122,6 +126,7 @@ class ProductModel {
     hsnCode: hsnCode ?? this.hsnCode,
     defaultGstRateBps: defaultGstRateBps ?? this.defaultGstRateBps,
     variants: variants ?? this.variants,
+    quantitySlabs: quantitySlabs ?? this.quantitySlabs,
     productCode: productCode ?? this.productCode,
     usageIds: usageIds ?? this.usageIds,
     surfaceIds: surfaceIds ?? this.surfaceIds,
@@ -171,6 +176,11 @@ class ProductModel {
     catalogueFingerprint: data['catalogueFingerprint'] as String?,
     masterProductId: data['masterProductId'] as String?,
     defaultGstRateBps: (data['defaultGstRateBps'] as num?)?.toInt() ?? 0,
+    quantitySlabs: (data['quantitySlabs'] as List?)
+        ?.whereType<Map>()
+        .map((e) => QuantityDiscountSlab.fromData(Map<String, dynamic>.from(e)))
+        .toList() ??
+        const [],
     syncStatus: data['syncStatus'] as String? ?? 'SYNCED',
   );
 
@@ -204,5 +214,7 @@ class ProductModel {
       'catalogueFingerprint': catalogueFingerprint,
     if (masterProductId != null) 'masterProductId': masterProductId,
     'defaultGstRateBps': defaultGstRateBps,
+    if (quantitySlabs.isNotEmpty)
+      'quantitySlabs': quantitySlabs.map((s) => s.toMap()).toList(),
   };
 }

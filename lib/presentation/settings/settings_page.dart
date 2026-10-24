@@ -53,8 +53,13 @@ class _SettingsPageState extends State<SettingsPage>
   @override
   void initState() {
     super.initState();
+    widget.controller.addListener(_onControllerChanged);
     _tabController = TabController(length: 5, vsync: this);
     _loadSettings();
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -68,6 +73,7 @@ class _SettingsPageState extends State<SettingsPage>
 
   @override
   void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
     _tabController.dispose();
     _invoicePrefixCtrl.dispose();
     _invoiceTermsCtrl.dispose();
@@ -395,13 +401,14 @@ class _SettingsPageState extends State<SettingsPage>
       padding: const EdgeInsets.all(24),
       children: [
         _SectionCard(
-          title: l10n?.languageAndAppearance ?? 'Language & Appearance',
-          subtitle: l10n?.selectLanguage ?? 'Select Language',
+          title: l10n?.languageAndAppearance ?? 'Language & Regional',
+          subtitle: l10n?.selectLanguage ?? 'Select preferred language for bills, reports and interface',
           child: Wrap(
             spacing: 12,
             runSpacing: 8,
             children: [
               ChoiceChip(
+                avatar: const Icon(Icons.language_rounded, size: 16),
                 label: const Text('🇬🇧 English'),
                 selected: controller.currentLocale.languageCode == 'en',
                 onSelected: (val) {
@@ -409,17 +416,19 @@ class _SettingsPageState extends State<SettingsPage>
                 },
               ),
               ChoiceChip(
-                label: const Text('🇮🇳 हिंदी (Hindi)'),
-                selected: controller.currentLocale.languageCode == 'hi',
-                onSelected: (val) {
-                  if (val) controller.setLocale(const Locale('hi'));
-                },
-              ),
-              ChoiceChip(
+                avatar: const Icon(Icons.language_rounded, size: 16),
                 label: const Text('🇮🇳 বাংলা (Bengali)'),
                 selected: controller.currentLocale.languageCode == 'bn',
                 onSelected: (val) {
                   if (val) controller.setLocale(const Locale('bn'));
+                },
+              ),
+              ChoiceChip(
+                avatar: const Icon(Icons.language_rounded, size: 16),
+                label: const Text('🇮🇳 हिंदी (Hindi)'),
+                selected: controller.currentLocale.languageCode == 'hi',
+                onSelected: (val) {
+                  if (val) controller.setLocale(const Locale('hi'));
                 },
               ),
             ],

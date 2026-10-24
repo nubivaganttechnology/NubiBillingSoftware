@@ -86,6 +86,12 @@ class PermissionCatalog {
       Icons.local_shipping_outlined,
       'suppliers',
     ),
+    AdminModule(
+      'supplier_ledger',
+      'Supplier Ledger',
+      Icons.menu_book_outlined,
+      'suppliers',
+    ),
     AdminModule('expenses', 'Expenses', Icons.payments_outlined, 'expenses'),
     AdminModule(
       'attendance',
@@ -143,6 +149,10 @@ class PermissionCatalog {
               (module.id == 'barcode' &&
                   (allows('products', permissions) ||
                       allows('product.read', permissions))) ||
+              (module.id == 'supplier_ledger' &&
+                  (allows('suppliers', permissions) ||
+                      allows('purchase', permissions) ||
+                      allows('supplier_ledger', permissions))) ||
               (module.id == 'godowns' && allows('godown.view', permissions)),
         )
         .toList();

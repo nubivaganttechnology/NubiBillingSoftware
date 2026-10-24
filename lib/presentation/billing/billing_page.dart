@@ -8,6 +8,8 @@ import '../../data/models/business_settings_model.dart';
 import '../../data/models/customer_model.dart';
 import '../../data/models/invoice_model.dart';
 import '../../data/models/product_variant_model.dart';
+import '../../data/models/product_model.dart';
+import '../../data/models/quantity_discount_slab.dart';
 import '../../data/repositories/product_repository.dart'
     show VariantBatchPriceOption;
 import '../../data/services/invoice_print_service.dart';
@@ -1305,6 +1307,42 @@ class _BillingPageState extends State<BillingPage> {
                                     color: Colors.grey.shade600,
                                   ),
                                 ),
+                              if (_getActiveSlabForLine(_lines[index]) != null) ...[
+                                const SizedBox(height: 3),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: Colors.green.shade300,
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.local_offer_outlined,
+                                        size: 11,
+                                        color: Colors.green.shade800,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Bulk Tier (${_getActiveSlabForLine(_lines[index])!.minQty}${_getActiveSlabForLine(_lines[index])!.maxQty != null ? '-${_getActiveSlabForLine(_lines[index])!.maxQty}' : '+'}: ${_getActiveSlabForLine(_lines[index])!.discountType == 'PERCENTAGE' ? '${_getActiveSlabForLine(_lines[index])!.discountValue}%' : '₹${_getActiveSlabForLine(_lines[index])!.discountValue}/unit'} off)',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.green.shade900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -3203,7 +3241,17 @@ class _BillingPageState extends State<BillingPage> {
           quantity: existing.quantity + quantity,
           unitPricePaise: effectiveSelling,
           gstRateBps: lineGstRateBps,
-          discountPaise: existing.discountPaise + discount,
+          discountPaise: _computeSlabDiscountPaise(
+            variantId: existing.variantId,
+            quantity: existing.quantity + quantity,
+            unitPricePaise: effectiveSelling,
+          ) > 0
+              ? _computeSlabDiscountPaise(
+                  variantId: existing.variantId,
+                  quantity: existing.quantity + quantity,
+                  unitPricePaise: effectiveSelling,
+                )
+              : (existing.discountPaise + discount),
           unit: existing.unit,
           conversionFactor: existing.conversionFactor,
           trackStock: existing.trackStock,
@@ -3220,7 +3268,17 @@ class _BillingPageState extends State<BillingPage> {
             quantity: quantity,
             unitPricePaise: effectiveSelling,
             gstRateBps: lineGstRateBps,
-            discountPaise: discount,
+            discountPaise: _computeSlabDiscountPaise(
+              variantId: variant.variantId,
+              quantity: quantity,
+              unitPricePaise: effectiveSelling,
+            ) > 0
+                ? _computeSlabDiscountPaise(
+                    variantId: variant.variantId,
+                    quantity: quantity,
+                    unitPricePaise: effectiveSelling,
+                  )
+                : discount,
             unit: variant.commercialUnitName ?? variant.baseUnitId,
             conversionFactor: variant.baseQuantityPerCommercialUnit.toInt(),
             trackStock: variant.trackStock,
@@ -3384,7 +3442,21 @@ class _BillingPageState extends State<BillingPage> {
               ? existing.unitPricePaise
               : price,
           gstRateBps: _gst ? existing.gstRateBps : 0,
-          discountPaise: existing.discountPaise,
+          discountPaise: _computeSlabDiscountPaise(
+            variantId: existing.variantId,
+            quantity: existing.quantity + quantity,
+            unitPricePaise: existing.unitPricePaise > 0
+                ? existing.unitPricePaise
+                : price,
+          ) > 0
+              ? _computeSlabDiscountPaise(
+                  variantId: existing.variantId,
+                  quantity: existing.quantity + quantity,
+                  unitPricePaise: existing.unitPricePaise > 0
+                      ? existing.unitPricePaise
+                      : price,
+                )
+              : existing.discountPaise,
           unit: existing.unit,
           conversionFactor: existing.conversionFactor,
           trackStock: existing.trackStock,
@@ -3401,7 +3473,11 @@ class _BillingPageState extends State<BillingPage> {
             quantity: quantity,
             unitPricePaise: price,
             gstRateBps: targetGstBps,
-            discountPaise: 0,
+            discountPaise: _computeSlabDiscountPaise(
+              variantId: variant.variantId,
+              quantity: quantity,
+              unitPricePaise: price,
+            ),
             unit: variant.commercialUnitName ?? variant.baseUnitId,
             conversionFactor: variant.baseQuantityPerCommercialUnit.toInt(),
             trackStock: variant.trackStock,
@@ -3466,7 +3542,23 @@ class _BillingPageState extends State<BillingPage> {
         unitPricePaise: line.unitPricePaise,
         gstRateBps: line.gstRateBps,
         priceIncludesTax: line.priceIncludesTax,
-        discountPaise: line.discountPaise,
+        discountPaise: () {
+          final newSlabDiscount = _computeSlabDiscountPaise(
+            variantId: line.variantId,
+            quantity: newQty,
+            unitPricePaise: line.unitPricePaise,
+          );
+          final oldSlabDiscount = _computeSlabDiscountPaise(
+            variantId: line.variantId,
+            quantity: line.quantity,
+            unitPricePaise: line.unitPricePaise,
+          );
+          if (newSlabDiscount > 0) return newSlabDiscount;
+          if (oldSlabDiscount > 0 && line.discountPaise == oldSlabDiscount) {
+            return 0;
+          }
+          return line.discountPaise;
+        }(),
         unit: line.unit,
         conversionFactor: line.conversionFactor,
         trackStock: line.trackStock,
@@ -3676,6 +3768,58 @@ class _BillingPageState extends State<BillingPage> {
       }
     }
     return '';
+  }
+
+  ProductModel? _findProductForVariant(String variantId) {
+    for (final product in controller.products) {
+      for (final variant in product.variants) {
+        if (variant.variantId == variantId) {
+          return product;
+        }
+      }
+    }
+    return null;
+  }
+
+  List<QuantityDiscountSlab> _getSlabsForVariant(String variantId) {
+    final variant = _findVariantById(variantId);
+    if (variant != null && variant.quantitySlabs.isNotEmpty) {
+      return variant.quantitySlabs;
+    }
+    final product = _findProductForVariant(variantId);
+    if (product != null && product.quantitySlabs.isNotEmpty) {
+      return product.quantitySlabs;
+    }
+    return const [];
+  }
+
+  QuantityDiscountSlab? _getActiveSlabForLine(BillLineInput line) {
+    final slabs = _getSlabsForVariant(line.variantId);
+    for (final slab in slabs) {
+      if (slab.matches(line.quantity)) {
+        return slab;
+      }
+    }
+    return null;
+  }
+
+  int _computeSlabDiscountPaise({
+    required String variantId,
+    required int quantity,
+    required int unitPricePaise,
+  }) {
+    if (quantity <= 0 || unitPricePaise <= 0) return 0;
+    final slabs = _getSlabsForVariant(variantId);
+    if (slabs.isEmpty) return 0;
+    for (final slab in slabs) {
+      if (slab.matches(quantity)) {
+        return slab.calculateDiscountPaise(
+          quantity: quantity,
+          unitPricePaise: unitPricePaise,
+        );
+      }
+    }
+    return 0;
   }
 
   ProductVariantModel? _findVariantById(String variantId) {

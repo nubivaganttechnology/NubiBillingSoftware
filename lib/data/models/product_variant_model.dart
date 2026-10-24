@@ -1,3 +1,5 @@
+import 'quantity_discount_slab.dart';
+
 class ProductVariantModel {
   const ProductVariantModel({
     required this.variantId,
@@ -14,6 +16,7 @@ class ProductVariantModel {
     this.baseQuantityPerCommercialUnit = 1,
     this.trackStock = true,
     this.priceIncludesTax = false,
+    this.quantitySlabs = const [],
     this.reorderLevel = 0,
     this.productId,
     this.productName,
@@ -43,6 +46,7 @@ class ProductVariantModel {
   final num baseQuantityPerCommercialUnit;
   final bool trackStock;
   final bool priceIncludesTax;
+  final List<QuantityDiscountSlab> quantitySlabs;
   final int reorderLevel;
   num toBaseQuantity(num commercialQuantity) =>
       commercialQuantity * baseQuantityPerCommercialUnit;
@@ -119,6 +123,11 @@ class ProductVariantModel {
     finishId: data['finishId'] as String?,
     colourFamilyId: data['colourFamilyId'] as String?,
     baseTypeId: data['baseTypeId'] as String?,
+    quantitySlabs: (data['quantitySlabs'] as List?)
+        ?.whereType<Map>()
+        .map((e) => QuantityDiscountSlab.fromData(Map<String, dynamic>.from(e)))
+        .toList() ??
+        const [],
   );
 
   ProductVariantModel copyWith({
@@ -156,6 +165,7 @@ class ProductVariantModel {
     String? finishId,
     String? colourFamilyId,
     String? baseTypeId,
+    List<QuantityDiscountSlab>? quantitySlabs,
   }) => ProductVariantModel(
     tenantId: tenantId ?? this.tenantId,
     gstOverride: gstOverride ?? this.gstOverride,
@@ -192,5 +202,6 @@ class ProductVariantModel {
     finishId: finishId ?? this.finishId,
     colourFamilyId: colourFamilyId ?? this.colourFamilyId,
     baseTypeId: baseTypeId ?? this.baseTypeId,
+    quantitySlabs: quantitySlabs ?? this.quantitySlabs,
   );
 }

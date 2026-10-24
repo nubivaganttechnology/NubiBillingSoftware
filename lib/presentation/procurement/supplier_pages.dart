@@ -4,16 +4,25 @@ import 'package:flutter/services.dart';
 import '../../core/utils/id_generator.dart';
 import '../../core/utils/validators.dart';
 import '../../data/models/supplier_model.dart';
+import '../../data/models/supplier_payment_receipt_model.dart';
 import '../../data/models/supplier_refund_model.dart';
 import '../../l10n/app_localizations.dart';
 import '../app_controller.dart';
+import 'supplier_ledger_dashboard_page.dart';
+import 'widgets/supplier_due_payment_dialog.dart';
+import 'widgets/supplier_payment_voucher_dialog.dart';
 
 enum _SupplierFilter { all, active, inactive }
 
 enum _SupplierSort { nameAsc, nameDesc }
 
 class SupplierManagementPage extends StatefulWidget {
-  const SupplierManagementPage({super.key, required this.controller});
+  const SupplierManagementPage({
+    super.key,
+    required this.controller,
+    this.onOpenLedger,
+  });
+  final void Function(String supplierId)? onOpenLedger;
   final AppController controller;
 
   @override
@@ -235,6 +244,8 @@ class _SupplierManagementPageState extends State<SupplierManagementPage> {
                     onToggleStatus: () =>
                         _toggleSupplierStatus(context, supplier),
                     onAdvance: () => _showSupplierAdvance(context, supplier),
+                    onLedger: () => _openSupplierLedger(context, supplier),
+                    onPayDue: () => _paySupplierDue(context, supplier),
                     busy: controller.supplierSaving,
                   ),
                   const SizedBox(height: 12),
@@ -356,6 +367,39 @@ class _SupplierManagementPageState extends State<SupplierManagementPage> {
                   ? null
                   : widget.controller.loadSuppliers,
               icon: const Icon(Icons.refresh_rounded),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SupplierLedgerDashboardPage(
+                      controller: widget.controller,
+                    ),
+                  ),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF4338CA),
+                side: const BorderSide(color: Color(0xFF818CF8)),
+                backgroundColor: const Color(0xFFEEF2FF),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              icon: const Icon(Icons.menu_book_rounded, size: 18),
+              label: Text(
+                switch (widget.controller.currentLocale.languageCode) {
+                  'bn' => 'লেজার ও স্টেটমেন্ট',
+                  'hi' => 'लेजर और स्टेटमेंट',
+                  _ => 'Ledger & Statement',
+                },
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             if (unlinked.isNotEmpty)
               OutlinedButton.icon(
@@ -844,6 +888,55 @@ class _SupplierManagementPageState extends State<SupplierManagementPage> {
       context: context,
       builder: (_) => _SupplierFormDialog(controller: widget.controller),
     );
+  }
+
+  void _openSupplierLedger(BuildContext context, SupplierModel supplier) {
+    if (widget.onOpenLedger != null) {
+      widget.onOpenLedger!(supplier.supplierId);
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SupplierLedgerDashboardPage(
+            controller: widget.controller,
+            initialSupplierId: supplier.supplierId,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _paySupplierDue(BuildContext context, SupplierModel supplier) async {
+    final dueBills = widget.controller.purchaseBills
+        .where((b) => b.supplierId == supplier.supplierId && b.status == 'APPROVED');
+    final currentPayable = dueBills.fold<int>(
+      0,
+      (sum, b) =>
+          sum +
+          (b.outstandingAmount > 0
+              ? b.outstandingAmount
+              : (b.grandTotal - b.paidAmount).clamp(0, b.grandTotal)),
+    );
+
+    final receipt = await showDialog<SupplierPaymentReceiptModel>(
+      context: context,
+      builder: (ctx) => SupplierDuePaymentDialog(
+        supplierId: supplier.supplierId,
+        supplierName: supplier.name,
+        currentPayablePaise: currentPayable,
+        controller: widget.controller,
+      ),
+    );
+    if (receipt != null && mounted) {
+      await widget.controller.loadSuppliers();
+      setState(() {});
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (_) => SupplierPaymentVoucherDialog(receipt: receipt),
+        );
+      }
+    }
   }
 
   Future<void> _editSupplier(
@@ -1386,10 +1479,12 @@ class _SupplierCard extends StatelessWidget {
     required this.onEdit,
     required this.onToggleStatus,
     required this.onAdvance,
+    required this.onLedger,
+    required this.onPayDue,
     required this.busy,
   });
   final SupplierModel supplier;
-  final VoidCallback onEdit, onToggleStatus, onAdvance;
+  final VoidCallback onEdit, onToggleStatus, onAdvance, onLedger, onPayDue;
   final bool busy;
 
   @override
@@ -1398,6 +1493,16 @@ class _SupplierCard extends StatelessWidget {
     final compact = MediaQuery.sizeOf(context).width < 600;
     final initials = _getInitials(supplier.name);
     final avatarColor = _getColorForName(supplier.name);
+    final langCode = Localizations.maybeLocaleOf(context)?.languageCode ?? 'en';
+    final isBn = langCode == 'bn';
+    final isHi = langCode == 'hi';
+
+    final payDueLabel = isBn ? 'বকেয়া পরিশোধ' : (isHi ? 'बकाया भुगतान' : 'Pay Due');
+    final ledgerLabel = isBn ? 'লেজার' : (isHi ? 'लेजर' : 'Ledger');
+    final advanceLabel = isBn ? 'অগ্রিম' : (isHi ? 'अग्रिम' : 'Advance');
+    final editLabel = isBn ? 'সংশোধন' : (isHi ? 'संशोधन' : 'Edit supplier');
+    final deactivateLabel = isBn ? 'নিষ্ক্রিয় করুন' : (isHi ? 'निष्क्रिय करें' : 'Deactivate supplier');
+    final activateLabel = isBn ? 'সক্রিয় করুন' : (isHi ? 'सक्रिय करें' : 'Activate supplier');
 
     return Card(
       elevation: 0,
@@ -1461,7 +1566,9 @@ class _SupplierCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              supplier.isActive ? 'Active' : 'Inactive',
+                              supplier.isActive
+                                  ? (isBn ? 'সক্রিয়' : (isHi ? 'सक्रिय' : 'Active'))
+                                  : (isBn ? 'নিষ্ক্রিয়' : (isHi ? 'निष्क्रिय' : 'Inactive')),
                               style: TextStyle(
                                 color: supplier.isActive
                                     ? const Color(0xFF047857)
@@ -1608,6 +1715,12 @@ class _SupplierCard extends StatelessWidget {
                     tooltip: 'Supplier actions',
                     onSelected: (action) {
                       switch (action) {
+                        case 'pay_due':
+                          onPayDue();
+                          break;
+                        case 'ledger':
+                          onLedger();
+                          break;
                         case 'advance':
                           onAdvance();
                           break;
@@ -1620,21 +1733,27 @@ class _SupplierCard extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'advance',
-                        child: Text('Supplier advance'),
+                      PopupMenuItem(
+                        value: 'pay_due',
+                        child: Text(payDueLabel),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
+                        value: 'ledger',
+                        child: Text(isBn ? 'খতিয়ান ও লেজার' : (isHi ? 'खाता और लेजर' : 'Supplier ledger')),
+                      ),
+                      PopupMenuItem(
+                        value: 'advance',
+                        child: Text(isBn ? 'অগ্রিম জমা' : (isHi ? 'अग्रिम जमा' : 'Supplier advance')),
+                      ),
+                      PopupMenuItem(
                         value: 'edit',
-                        child: Text('Edit supplier'),
+                        child: Text(editLabel),
                       ),
                       PopupMenuItem(
                         value: 'status',
                         enabled: !busy,
                         child: Text(
-                          supplier.isActive
-                              ? 'Deactivate supplier'
-                              : 'Activate supplier',
+                          supplier.isActive ? deactivateLabel : activateLabel,
                         ),
                       ),
                     ],
@@ -1643,6 +1762,42 @@ class _SupplierCard extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      FilledButton.icon(
+                        onPressed: onPayDue,
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          backgroundColor: const Color(0xFF16A34A),
+                          foregroundColor: Colors.white,
+                        ),
+                        icon: const Icon(
+                          Icons.payment_rounded,
+                          size: 16,
+                        ),
+                        label: Text(payDueLabel),
+                      ),
+                      const SizedBox(width: 6),
+                      FilledButton.tonalIcon(
+                        onPressed: onLedger,
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          backgroundColor: const Color(0xFFEEF2FF),
+                          foregroundColor: const Color(0xFF4338CA),
+                        ),
+                        icon: const Icon(
+                          Icons.menu_book_rounded,
+                          size: 16,
+                        ),
+                        label: Text(ledgerLabel),
+                      ),
+                      const SizedBox(width: 6),
                       FilledButton.tonalIcon(
                         onPressed: onAdvance,
                         style: FilledButton.styleFrom(
@@ -1656,20 +1811,18 @@ class _SupplierCard extends StatelessWidget {
                           Icons.account_balance_wallet_outlined,
                           size: 16,
                         ),
-                        label: const Text('Advance'),
+                        label: Text(advanceLabel),
                       ),
                       const SizedBox(width: 6),
                       IconButton.outlined(
-                        tooltip: 'Edit supplier',
+                        tooltip: editLabel,
                         onPressed: onEdit,
                         visualDensity: VisualDensity.compact,
                         icon: const Icon(Icons.edit_outlined, size: 16),
                       ),
                       const SizedBox(width: 6),
                       IconButton.outlined(
-                        tooltip: supplier.isActive
-                            ? 'Deactivate supplier'
-                            : 'Activate supplier',
+                        tooltip: supplier.isActive ? deactivateLabel : activateLabel,
                         onPressed: busy ? null : onToggleStatus,
                         visualDensity: VisualDensity.compact,
                         color: supplier.isActive

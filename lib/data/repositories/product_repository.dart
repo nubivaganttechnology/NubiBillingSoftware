@@ -14,6 +14,7 @@ import '../../core/errors/app_exception.dart';
 import '../../core/utils/id_generator.dart';
 import '../models/outlet_product_model.dart';
 import '../models/product_model.dart';
+import '../models/quantity_discount_slab.dart';
 import '../models/product_master_value.dart';
 import '../models/central_product_master.dart';
 import '../models/product_variant_model.dart';
@@ -986,6 +987,11 @@ class ProductRepository {
         dilutionTypeId: data['dilutionTypeId'] as String?,
         productImage: ProductModel.parseProductImage(data),
         catalogueFingerprint: data['catalogueFingerprint'] as String?,
+        quantitySlabs: (data['quantitySlabs'] as List?)
+            ?.whereType<Map>()
+            .map((e) => QuantityDiscountSlab.fromData(Map<String, dynamic>.from(e)))
+            .toList() ??
+            const [],
         syncStatus: doc['localSyncStatus'] as String? ?? 'SYNCED',
       );
     }
@@ -1071,6 +1077,7 @@ class ProductRepository {
           createdAt: entry.value.createdAt,
           updatedAt: entry.value.updatedAt,
           variants: variants[entry.key] ?? const [],
+          quantitySlabs: entry.value.quantitySlabs,
           productCode: entry.value.productCode,
           usageIds: entry.value.usageIds,
           surfaceIds: entry.value.surfaceIds,
@@ -1731,6 +1738,7 @@ class ProductRepository {
           'hsnCode',
           'defaultGstRateBps',
           'description',
+          'quantitySlabs',
         }.contains(k),
       );
     variants = [
@@ -1756,6 +1764,7 @@ class ProductRepository {
               'purchaseRate',
               'mrp',
               'defaultGstRateBps',
+              'quantitySlabs',
             }.contains(k),
           ),
     ];
@@ -2704,6 +2713,7 @@ class ProductRepository {
             'productImage',
             'imageUrl',
             'description',
+          'quantitySlabs',
             'hsnCode',
             'defaultGstRateBps',
             'status',
@@ -2822,6 +2832,7 @@ class ProductRepository {
                 'purchaseRate',
                 'mrp',
                 'defaultGstRateBps',
+              'quantitySlabs',
               }.contains(k),
             );
           tx.create(FirebaseConstants.productVariants, id, {
@@ -2896,6 +2907,7 @@ class ProductRepository {
               'purchaseRate',
               'mrp',
               'defaultGstRateBps',
+              'quantitySlabs',
             }.contains(k),
           );
         if (fields.containsKey('sku')) {
